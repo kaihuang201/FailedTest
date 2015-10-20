@@ -63,6 +63,7 @@ public final class RegressionReportNotifier extends Notifier {
     private final boolean failedTestExtra1Option1;
     private final boolean failedTestExtra1Option2;
     private final String failedTestExtra2;
+    private final String failedTestExtra3;
     private MailSender mailSender = new RegressionReportNotifier.MailSender() {
         @Override
         public void send(MimeMessage message) throws MessagingException {
@@ -71,12 +72,13 @@ public final class RegressionReportNotifier extends Notifier {
     };
 
     @DataBoundConstructor
-    public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean failedTestExtra1Option1, boolean failedTestExtra1Option2, String failedTestExtra2) {
+    public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean failedTestExtra1Option1, boolean failedTestExtra1Option2, String failedTestExtra2, String failedTestExtra3) {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
         this.failedTestExtra1Option1 = failedTestExtra1Option1;
         this.failedTestExtra1Option2 = failedTestExtra1Option2;
         this.failedTestExtra2 = failedTestExtra2;
+        this.failedTestExtra3 = failedTestExtra3;
     }
 
     @VisibleForTesting
@@ -109,6 +111,9 @@ public final class RegressionReportNotifier extends Notifier {
         return failedTestExtra2;
     }
 
+    public String getFailedTestExtra3() {
+        return failedTestExtra3;
+    }
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
             BuildListener listener) throws InterruptedException {
@@ -131,6 +136,8 @@ public final class RegressionReportNotifier extends Notifier {
         System.out.println("FailedTest Extra Settings 1 value: " + extraSettings1String);
         logger.println("FailedTest Extra Settings 2 value: " + failedTestExtra2);
         System.out.println("FailedTest Extra Settings 2 value: " + failedTestExtra2);
+        logger.println("FailedTest Extra Settings 3 value: " + failedTestExtra3);
+        System.out.println("FailedTest Extra Settings 3 value: " + failedTestExtra3);
         
         if (build.getResult() == Result.SUCCESS) {
             logger.println("regression reporter doesn't run because build is success.");
