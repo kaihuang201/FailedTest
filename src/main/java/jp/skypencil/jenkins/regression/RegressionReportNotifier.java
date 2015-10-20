@@ -288,7 +288,7 @@ public final class RegressionReportNotifier extends Notifier {
     }
     
     @Extension
-    public static final class TestResultsAnalyzerExtension extends TransientProjectActionFactory{
+    public static final class RegressionReportExtension extends TransientProjectActionFactory{
 
     	@Override
     	public Collection<? extends Action> createFor(@SuppressWarnings("rawtypes") AbstractProject target) {
