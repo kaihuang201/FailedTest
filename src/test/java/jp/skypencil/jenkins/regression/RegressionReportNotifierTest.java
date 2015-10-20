@@ -54,7 +54,7 @@ public class RegressionReportNotifierTest {
             IOException {
         doReturn(null).when(build).getAction(AbstractTestResultAction.class);
         RegressionReportNotifier notifier = new RegressionReportNotifier("",
-                false);
+                false,false, false, "");
 
         assertThat(notifier.perform(build, launcher, listener), is(true));
     }
@@ -64,7 +64,7 @@ public class RegressionReportNotifierTest {
         makeRegression();
 
         RegressionReportNotifier notifier = new RegressionReportNotifier(
-                "author@mail.com", false);
+                "author@mail.com", false, false, false, "");
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -82,7 +82,7 @@ public class RegressionReportNotifierTest {
         makeRegression();
 
         RegressionReportNotifier notifier = new RegressionReportNotifier(
-                "author@mail.com", true);
+                "author@mail.com", true, false, false, "");
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 

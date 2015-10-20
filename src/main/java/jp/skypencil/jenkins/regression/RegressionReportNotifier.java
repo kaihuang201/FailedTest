@@ -56,6 +56,9 @@ public final class RegressionReportNotifier extends Notifier {
     private static final int MAX_RESULTS_PER_MAIL = 20;
     private final String recipients;
     private final boolean sendToCulprits;
+    private final boolean failedTestExtra1Option1;
+    private final boolean failedTestExtra1Option2;
+    private final String failedTestExtra2;
     private MailSender mailSender = new RegressionReportNotifier.MailSender() {
         @Override
         public void send(MimeMessage message) throws MessagingException {
@@ -64,9 +67,12 @@ public final class RegressionReportNotifier extends Notifier {
     };
 
     @DataBoundConstructor
-    public RegressionReportNotifier(String recipients, boolean sendToCulprits) {
+    public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean failedTestExtra1Option1, boolean failedTestExtra1Option2, String failedTestExtra2) {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
+        this.failedTestExtra1Option1 = failedTestExtra1Option1;
+        this.failedTestExtra1Option2 = failedTestExtra1Option2;
+        this.failedTestExtra2 = failedTestExtra2;
     }
 
     @VisibleForTesting
@@ -87,11 +93,41 @@ public final class RegressionReportNotifier extends Notifier {
         return sendToCulprits;
     }
 
+    public boolean getFailedTestExtra1Option1() {
+        return failedTestExtra1Option1;
+    }
+
+    public boolean getFailedTestExtra1Option2() {
+        return failedTestExtra1Option2;
+    }
+    
+    public String getFailedTestExtra2() {
+        return failedTestExtra2;
+    }
+
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
             BuildListener listener) throws InterruptedException {
         PrintStream logger = listener.getLogger();
 
+        String extraSettings1String;
+        if (failedTestExtra1Option1) {
+        	extraSettings1String = "Selection 1 checked, ";
+        }
+        else {
+        	extraSettings1String = "Selection 1 unchecked, ";
+        }
+        if (failedTestExtra1Option2) {
+        	extraSettings1String = extraSettings1String + "Selection 2 checked";
+        }
+        else {
+        	extraSettings1String = extraSettings1String + "Selection 2 unchecked";
+        }
+        logger.println("FailedTest Extra Settings 1 value: " + extraSettings1String);
+        System.out.println("FailedTest Extra Settings 1 value: " + extraSettings1String);
+        logger.println("FailedTest Extra Settings 2 value: " + failedTestExtra2);
+        System.out.println("FailedTest Extra Settings 2 value: " + failedTestExtra2);
+        
         if (build.getResult() == Result.SUCCESS) {
             logger.println("regression reporter doesn't run because build is success.");
             return true;
