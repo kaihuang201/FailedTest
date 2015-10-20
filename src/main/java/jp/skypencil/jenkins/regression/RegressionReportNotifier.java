@@ -1,6 +1,5 @@
 package jp.skypencil.jenkins.regression;
 
-
 import static java.lang.System.out;
 import static com.google.common.collect.Iterables.transform;
 import hudson.Extension;
