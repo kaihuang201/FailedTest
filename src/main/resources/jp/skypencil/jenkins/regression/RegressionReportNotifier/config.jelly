@@ -10,6 +10,9 @@
     <f:checkbox field="failedTestExtra1Option2" title="${%FailedTestExtra1Title2}" />
   </f:entry>
   <f:entry field="failedTestExtra2" title="${%FailedTestExtra2}">
-    <f:textbox />
+    <f:textbox default="We understand how gui works!:D"/>
+  </f:entry>
+  <f:entry field="failedTestExtra3" title="${%FailedTestExtra3}">
+    <f:textbox default="This will all show up in the console log:)"/>
   </f:entry>
 </j:jelly>
