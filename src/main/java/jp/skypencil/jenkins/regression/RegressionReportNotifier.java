@@ -1,5 +1,6 @@
 package jp.skypencil.jenkins.regression;
 
+import static java.lang.System.out;
 import static com.google.common.collect.Iterables.transform;
 import hudson.Extension;
 import hudson.Launcher;
@@ -115,6 +116,8 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         logger.println("regression reporter ends.");
+	logger.println("We understand this code");
+	System.out.println("We understand this code");
         return true;
     }
 
