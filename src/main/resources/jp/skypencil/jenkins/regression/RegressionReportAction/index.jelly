@@ -1,0 +1,9 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+  <l:layout title="Failed Test New Page">
+    <st:include it="${it.project}" page="sidepanel.jelly" />
+    <st:bind var="remoteAction" value="${it}"/> 
+    <l:main-panel>
+		<div>We successfully added a new page!</div>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>
