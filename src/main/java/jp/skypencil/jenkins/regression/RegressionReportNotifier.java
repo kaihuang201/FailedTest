@@ -258,45 +258,18 @@ public final class RegressionReportNotifier extends Notifier {
         
         //If user has checked the attachment box the build logs will be attached to email
 	if (attachLogs){
-            //compare(build);
-            System.out.println("Logs are attached to email");
-	    BodyPart emailAttachment = new MimeBodyPart();
-	    Multipart multipart = new MimeMultipart();
-                
-	    //adding email body text
-	    BodyPart bodyText = new MimeBodyPart();
-	    bodyText.setText(builder.toString());
-	    multipart.addBodyPart(bodyText);
-                
-	    //adding email attachment
-	    int len = build.getLogFile().getPath().length();
-	    String file = build.getLogFile().getPath();
-	    String fileName = "log";
-	    File buildLog = build.getLogFile();
-	    if(buildLog == null){
-                System.out.println("Logs is Null");
-	    }
-	    DataSource source = new FileDataSource(file);
-	    emailAttachment.setDataHandler(new DataHandler(source));
-	    emailAttachment.setFileName(fileName);
-	    multipart.addBodyPart(emailAttachment);
-
-	    //setting message properties to multipart
-	    message.setContent(multipart);  
-	    message.setFrom(adminAddress);
-	    message.setSentDate(new Date());
-
-	    //equavalent to Transport.send()
-	    mailSender.send(message);
+	    attachBlog(build, listener, builder, message);
         }
-        else{
+	else{
 	    message.setContent("", "text/plain");
-            message.setFrom(adminAddress);
-            message.setText(builder.toString());
-            message.setSentDate(new Date());
+	    message.setText(builder.toString());
+	}
+	
+	message.setFrom(adminAddress);
+        message.setSentDate(new Date());
 
-            mailSender.send(message);
-        }
+        mailSender.send(message);
+     
     }
 
     private Set<Address> loadAddrOfCulprits(AbstractBuild<?, ?> build,
@@ -348,6 +321,29 @@ public final class RegressionReportNotifier extends Notifier {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
+    }
+
+    private void attachBlog(AbstractBuild<?, ?> build, BuildListener listener, StringBuilder builder, MimeMessage message) throws MessagingException {
+	
+	PrintStream logger = listener.getLogger();
+	BodyPart emailAttachment = new MimeBodyPart();
+	Multipart multipart = new MimeMultipart();
+                
+	//adding email body text
+	BodyPart bodyText = new MimeBodyPart();
+	bodyText.setText(builder.toString());
+	multipart.addBodyPart(bodyText);
+                
+	//adding email attachment
+	String file = build.getLogFile().getPath();
+	String fileName = "log";
+	DataSource source = new FileDataSource(file);
+	emailAttachment.setDataHandler(new DataHandler(source));
+	emailAttachment.setFileName(fileName);
+	multipart.addBodyPart(emailAttachment);
+	logger.println("logs are attached to the email: " + file);
+	//setting message properties to multipart
+	message.setContent(multipart);  
     }
 
     @Extension
