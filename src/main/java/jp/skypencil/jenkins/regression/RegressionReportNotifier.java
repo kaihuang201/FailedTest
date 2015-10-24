@@ -90,7 +90,7 @@ public final class RegressionReportNotifier extends Notifier {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
             BuildListener listener) throws InterruptedException {
         PrintStream logger = listener.getLogger();
-
+        logger.println("within the perform method");
         if (build.getResult() == Result.SUCCESS) {
             logger.println("regression reporter doesn't run because build is success.");
             return true;
@@ -105,6 +105,7 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         logger.println("regression reporter starts now...");
+        logger.println("how's it going");
         List<CaseResult> regressionedTests = listRegressions(testResultAction);
 
         writeToConsole(regressionedTests, listener);
