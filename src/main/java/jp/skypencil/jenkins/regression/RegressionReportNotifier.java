@@ -270,7 +270,7 @@ public final class RegressionReportNotifier extends Notifier {
                 
 	    //adding email attachment
 	    int len = build.getLogFile().getPath().length();
-	    String file = build.getLogFile().getPath().substring(0, (len-3));
+	    String file = build.getLogFile().getPath();
 	    String fileName = "log";
 	    File buildLog = build.getLogFile();
 	    if(buildLog == null){
