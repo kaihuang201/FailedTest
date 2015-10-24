@@ -19,20 +19,32 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
@@ -56,6 +68,7 @@ public final class RegressionReportNotifier extends Notifier {
     private static final int MAX_RESULTS_PER_MAIL = 20;
     private final String recipients;
     private final boolean sendToCulprits;
+    private final boolean attachLogs;
     private final boolean failedTestExtra1Option1;
     private final boolean failedTestExtra1Option2;
     private final String failedTestExtra2;
@@ -68,13 +81,14 @@ public final class RegressionReportNotifier extends Notifier {
     };
 
     @DataBoundConstructor
-    public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean failedTestExtra1Option1, boolean failedTestExtra1Option2, String failedTestExtra2, String failedTestExtra3) {
+    public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean attachLogs, boolean failedTestExtra1Option1, boolean failedTestExtra1Option2, String failedTestExtra2, String failedTestExtra3) {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
         this.failedTestExtra1Option1 = failedTestExtra1Option1;
         this.failedTestExtra1Option2 = failedTestExtra1Option2;
         this.failedTestExtra2 = failedTestExtra2;
         this.failedTestExtra3 = failedTestExtra3;
+        this.attachLogs = attachLogs;
     }
 
     @VisibleForTesting
@@ -110,6 +124,9 @@ public final class RegressionReportNotifier extends Notifier {
     public String getFailedTestExtra3() {
         return failedTestExtra3;
     }
+    public boolean getAttachLogs(){
+    	return attachLogs;
+    }
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
             BuildListener listener) throws InterruptedException {
@@ -134,6 +151,7 @@ public final class RegressionReportNotifier extends Notifier {
         System.out.println("FailedTest Extra Settings 2 value: " + failedTestExtra2);
         logger.println("FailedTest Extra Settings 3 value: " + failedTestExtra3);
         System.out.println("FailedTest Extra Settings 3 value: " + failedTestExtra3);
+        
         
         if (build.getResult() == Result.SUCCESS) {
             logger.println("regression reporter doesn't run because build is success.");
@@ -233,15 +251,52 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         MimeMessage message = new MimeMessage(session);
+                
         message.setSubject(Messages.RegressionReportNotifier_MailSubject());
         message.setRecipients(RecipientType.TO,
                 recipentList.toArray(new Address[recipentList.size()]));
-        message.setContent("", "text/plain");
-        message.setFrom(adminAddress);
-        message.setText(builder.toString());
-        message.setSentDate(new Date());
+        
+        //If user has checked the attachment box the build logs will be attached to email
+	if (attachLogs){
+            //compare(build);
+            System.out.println("Logs are attached to email");
+	    BodyPart emailAttachment = new MimeBodyPart();
+	    Multipart multipart = new MimeMultipart();
+                
+	    //adding email body text
+	    BodyPart bodyText = new MimeBodyPart();
+	    bodyText.setText(builder.toString());
+	    multipart.addBodyPart(bodyText);
+                
+	    //adding email attachment
+	    int len = build.getLogFile().getPath().length();
+	    String file = build.getLogFile().getPath().substring(0, (len-3));
+	    String fileName = "log";
+	    File buildLog = build.getLogFile();
+	    if(buildLog == null){
+                System.out.println("Logs is Null");
+	    }
+	    DataSource source = new FileDataSource(file);
+	    emailAttachment.setDataHandler(new DataHandler(source));
+	    emailAttachment.setFileName(fileName);
+	    multipart.addBodyPart(emailAttachment);
 
-        mailSender.send(message);
+	    //setting message properties to multipart
+	    message.setContent(multipart);  
+	    message.setFrom(adminAddress);
+	    message.setSentDate(new Date());
+
+	    //equavalent to Transport.send()
+	    mailSender.send(message);
+        }
+        else{
+	    message.setContent("", "text/plain");
+            message.setFrom(adminAddress);
+            message.setText(builder.toString());
+            message.setSentDate(new Date());
+
+            mailSender.send(message);
+        }
     }
 
     private Set<Address> loadAddrOfCulprits(AbstractBuild<?, ?> build,
@@ -266,6 +321,33 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         return list;
+    }
+
+    private void compare(AbstractBuild<?, ?> build){
+	String line = null;
+	FileReader fileReader;
+	BufferedReader bufferedReader;
+	try {
+	    fileReader = new FileReader(build.getLogFile());
+	    bufferedReader = new BufferedReader(fileReader);
+	    try {
+		while((line = bufferedReader.readLine()) != null) {
+		    if(line.startsWith("Results :")){
+			System.out.println(line);
+			for(int i = 0; i < 5; i++){
+			    System.out.println(bufferedReader.readLine());
+			}
+		    }
+		    bufferedReader.close();
+		}
+	    } catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+	} catch (FileNotFoundException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
     }
 
     @Extension
