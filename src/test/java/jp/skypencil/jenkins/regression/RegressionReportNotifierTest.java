@@ -53,8 +53,7 @@ public class RegressionReportNotifierTest {
     public void testCompileErrorOccured() throws InterruptedException,
             IOException {
         doReturn(null).when(build).getAction(AbstractTestResultAction.class);
-        RegressionReportNotifier notifier = new RegressionReportNotifier("",
-                false, false, false, false, "", "");
+        RegressionReportNotifier notifier = new RegressionReportNotifier("", false, false);
 
         assertThat(notifier.perform(build, launcher, listener), is(true));
     }
@@ -63,37 +62,54 @@ public class RegressionReportNotifierTest {
     public void testSend() throws InterruptedException, MessagingException {
         makeRegression();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier(
-                "author@mail.com", false, false, false, false, "", "");
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
         assertThat(notifier.perform(build, launcher, listener), is(true));
         assertThat(mailSender.getSentMessage(), is(notNullValue()));
-        Address[] to = mailSender.getSentMessage().getRecipients(
-                RecipientType.TO);
+        Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
         assertThat(to.length, is(1));
         assertThat(to[0].toString(), is(equalTo("author@mail.com")));
     }
 
     @Test
-    public void testSendToCulprits() throws InterruptedException,
-            MessagingException {
+    public void testSendToCulprits() throws InterruptedException, MessagingException {
         makeRegression();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier(
-                "author@mail.com", true, false, false, false, "", "");
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
         assertThat(notifier.perform(build, launcher, listener), is(true));
         assertThat(mailSender.getSentMessage(), is(notNullValue()));
-        Address[] to = mailSender.getSentMessage().getRecipients(
-                RecipientType.TO);
+        Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
         assertThat(to.length, is(2));
         assertThat(to[0].toString(), is(equalTo("author@mail.com")));
         assertThat(to[1].toString(), is(equalTo("culprit@mail.com")));
     }
+
+    @Test
+    public void testAttachLogFile() throws InterruptedException, MessagingException {
+        /*
+        makeNewlyPassing();
+
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
+        MockedMailSender mailSender = new MockedMailSender();
+        notifier.setMailSender(mailSender);
+
+        assertThat(notifier.perform(build, launcher, listener), is(true));
+        assertThat(mailSender.getSentMessage(), is(notNullValue()));
+        Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
+        assertThat(to.length, is(1));
+        assertThat(to[0].toString(), is(equalTo("author@mail.com")));
+
+        assertThat(notifier.getAttachLogs(), is(true));
+        //assertThat(mailSender.getSentMessage().getContentType(), is())
+        */
+
+    }
+
 
     private void makeRegression() {
         AbstractTestResultAction<?> result = mock(AbstractTestResultAction.class);
@@ -101,13 +117,26 @@ public class RegressionReportNotifierTest {
         doReturn(Result.FAILURE).when(build).getResult();
         User culprit = mock(User.class);
         doReturn("culprit").when(culprit).getId();
-        doReturn(new ChangeLogSetMock(build).withChangeBy(culprit)).when(build)
-                .getChangeSet();
+        doReturn(new ChangeLogSetMock(build).withChangeBy(culprit)).when(build).getChangeSet();
 
         CaseResult failedTest = mock(CaseResult.class);
         doReturn(Status.REGRESSION).when(failedTest).getStatus();
         List<CaseResult> failedTests = Lists.newArrayList(failedTest);
         doReturn(failedTests).when(result).getFailedTests();
+    }
+
+    private void makeNewlyPassing() {
+        AbstractTestResultAction<?> result = mock(AbstractTestResultAction.class);
+        doReturn(result).when(build).getAction(AbstractTestResultAction.class);
+        doReturn(Result.SUCCESS).when(build).getResult();
+        User culprit = mock(User.class);
+        doReturn("culprit").when(culprit).getId();
+        doReturn(new ChangeLogSetMock(build).withChangeBy(culprit)).when(build).getChangeSet();
+
+        CaseResult passedTest = mock(CaseResult.class);
+        doReturn(Status.PASSED).when(passedTest).getStatus();
+        List<CaseResult> passedTests = Lists.newArrayList(passedTest);
+        doReturn(passedTests).when(result).getFailedTests();
     }
 
     private static final class MockedMailSender implements
