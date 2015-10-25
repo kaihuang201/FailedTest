@@ -115,6 +115,7 @@ public final class RegressionReportNotifier extends Notifier {
             e.printStackTrace(listener.error("failed to send mails."));
         }
 
+        logger.println("checking from perform method");
         logger.println("regression reporter ends.");
         return true;
     }
