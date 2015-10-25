@@ -17,7 +17,10 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.TestResult;
+import hudson.tasks.test.AggregatedTestResultAction;
+import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -152,12 +156,6 @@ public final class RegressionReportNotifier extends Notifier {
         logger.println("FailedTest Extra Settings 3 value: " + failedTestExtra3);
         System.out.println("FailedTest Extra Settings 3 value: " + failedTestExtra3);
         
-        
-        if (build.getResult() == Result.SUCCESS) {
-            logger.println("regression reporter doesn't run because build is success.");
-            return true;
-        }
-
         AbstractTestResultAction<?> testResultAction = build
                 .getAction(AbstractTestResultAction.class);
         if (testResultAction == null) {
@@ -166,6 +164,26 @@ public final class RegressionReportNotifier extends Notifier {
             return true;
         }
 
+        
+		List<CaseResult> invRegressionedTests = listPassed(testResultAction, logger);
+        if(invRegressionedTests.isEmpty()) logger.println("passed is empty:(");
+		writeToConsolePassed(invRegressionedTests, listener);
+        
+        if (build.getResult() == Result.SUCCESS) {
+            logger.println("regression reporter doesn't run because build is success.");
+            return true;
+        }
+
+//move up
+/*
+        AbstractTestResultAction<?> testResultAction = build
+                .getAction(AbstractTestResultAction.class);
+        if (testResultAction == null) {
+            // maybe compile error occurred
+            logger.println("regression reporter doesn't run because test doesn\'t run.");
+            return true;
+        }
+*/
         logger.println("regression reporter starts now...");
         List<CaseResult> regressionedTests = listRegressions(testResultAction);
 
@@ -177,8 +195,11 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         logger.println("regression reporter ends.");
-	logger.println("We understand this code");
-	System.out.println("We understand this code");
+    	
+        /*spike*/
+        //logger.println("We understand this code");
+    	//System.out.println("We understand this code");
+
         return true;
     }
 
@@ -189,6 +210,29 @@ public final class RegressionReportNotifier extends Notifier {
         List<CaseResult> regressionedTests =
                 Lists.newArrayList(Iterables.transform(filtered, new TestResultToCaseResult()));
         return regressionedTests;
+	}
+
+    /*TODO*/
+	private List<CaseResult> listPassed(AbstractTestResultAction<?> testResultAction, PrintStream logger) {
+		TestResultAction action = null;
+		List<CaseResult> invRegressionedTests = new ArrayList<CaseResult>();
+        if(testResultAction.getPreviousResult() != null) {
+			List<? extends TestResult> prevFailedTests = testResultAction.getPreviousResult().getFailedTests();
+			//logger.println(prevFailedTests.size()); 
+            //logger.println(prevFailedTests.get(0).getFullName());
+            List<? extends TestResult> currFailedTests = testResultAction.getFailedTests();
+            //logger.println(currFailedTests.size()); 
+            //logger.println(currFailedTests.get(0).getFullName());
+            for(TestResult r : prevFailedTests) {
+                if(currFailedTests.contains(r)) logger.println("still failing!");
+                else invRegressionedTests.add((CaseResult)r);
+            }
+		}
+        else {
+            logger.println("testResultAction.getPreviousResult is null");
+        }
+        return invRegressionedTests;
+
     }
 
     private void writeToConsole(List<CaseResult> regressions,
@@ -205,6 +249,22 @@ public final class RegressionReportNotifier extends Notifier {
                     result.getFullName(), result.getErrorDetails());
         }
     }
+
+    /*TODO*/
+    private void writeToConsolePassed(List<CaseResult> regressions,
+            BuildListener listener) {
+        if (regressions.isEmpty()) {
+            return;
+        }
+
+        PrintStream oStream = listener.getLogger();
+        // TODO link to test result page
+        for (CaseResult result : regressions) {
+            // listener.hyperlink(url, text)
+            oStream.printf("[NEWLYPASSED]%s - description: %s%n",
+                    result.getFullName(), result.getErrorDetails());
+        }
+	}
 
     private void mailReport(List<CaseResult> regressions, String recipients,
             BuildListener listener, AbstractBuild<?, ?> build)
@@ -257,19 +317,19 @@ public final class RegressionReportNotifier extends Notifier {
                 recipentList.toArray(new Address[recipentList.size()]));
         
         //If user has checked the attachment box the build logs will be attached to email
-	if (attachLogs){
-	    attachBlog(build, listener, builder, message);
+    	if (attachLogs){
+    	    attachLogFile(build, message, builder.toString(), listener.getLogger());
         }
-	else{
-	    message.setContent("", "text/plain");
-	    message.setText(builder.toString());
-	}
-	
-	message.setFrom(adminAddress);
+    	else{
+    	    message.setContent("", "text/plain");
+    	    message.setText(builder.toString());
+    	}
+    	
+    	message.setFrom(adminAddress);
         message.setSentDate(new Date());
 
         mailSender.send(message);
-     
+         
     }
 
     private Set<Address> loadAddrOfCulprits(AbstractBuild<?, ?> build,
@@ -296,54 +356,54 @@ public final class RegressionReportNotifier extends Notifier {
         return list;
     }
 
+    /*TODO*/
     private void compare(AbstractBuild<?, ?> build){
-	String line = null;
-	FileReader fileReader;
-	BufferedReader bufferedReader;
-	try {
-	    fileReader = new FileReader(build.getLogFile());
-	    bufferedReader = new BufferedReader(fileReader);
-	    try {
-		while((line = bufferedReader.readLine()) != null) {
-		    if(line.startsWith("Results :")){
-			System.out.println(line);
-			for(int i = 0; i < 5; i++){
-			    System.out.println(bufferedReader.readLine());
-			}
-		    }
-		    bufferedReader.close();
-		}
-	    } catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    }
-	} catch (FileNotFoundException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
+    	String line = null;
+    	FileReader fileReader;
+    	BufferedReader bufferedReader;
+    	try {
+    	    fileReader = new FileReader(build.getLogFile());
+    	    bufferedReader = new BufferedReader(fileReader);
+    	    try {
+    		while((line = bufferedReader.readLine()) != null) {
+    		    if(line.startsWith("Results :")){
+    			System.out.println(line);
+    			for(int i = 0; i < 5; i++){
+    			    System.out.println(bufferedReader.readLine());
+    			}
+    		    }
+    		    bufferedReader.close();
+    		}
+    	    } catch (IOException e) {
+    		// TODO Auto-generated catch block
+    		e.printStackTrace();
+    	    }
+    	} catch (FileNotFoundException e) {
+    	    // TODO Auto-generated catch block
+    	    e.printStackTrace();
+    	}
     }
 
-    private void attachBlog(AbstractBuild<?, ?> build, BuildListener listener, StringBuilder builder, MimeMessage message) throws MessagingException {
+    private void attachLogFile(AbstractBuild<?, ?> build, MimeMessage message, String content, PrintStream logger) throws MessagingException {
 	
-	PrintStream logger = listener.getLogger();
-	BodyPart emailAttachment = new MimeBodyPart();
-	Multipart multipart = new MimeMultipart();
-                
-	//adding email body text
-	BodyPart bodyText = new MimeBodyPart();
-	bodyText.setText(builder.toString());
-	multipart.addBodyPart(bodyText);
-                
-	//adding email attachment
-	String file = build.getLogFile().getPath();
-	String fileName = "log";
-	DataSource source = new FileDataSource(file);
-	emailAttachment.setDataHandler(new DataHandler(source));
-	emailAttachment.setFileName(fileName);
-	multipart.addBodyPart(emailAttachment);
-	logger.println("logs are attached to the email: " + file);
-	//setting message properties to multipart
-	message.setContent(multipart);  
+    	BodyPart emailAttachment = new MimeBodyPart();
+    	Multipart multipart = new MimeMultipart();
+                    
+    	//adding email body text
+    	BodyPart bodyText = new MimeBodyPart();
+    	bodyText.setText(content);
+    	multipart.addBodyPart(bodyText);
+                    
+    	//adding email attachment
+    	String file = build.getLogFile().getPath();
+    	String fileName = "log";
+    	DataSource source = new FileDataSource(file);
+    	emailAttachment.setDataHandler(new DataHandler(source));
+    	emailAttachment.setFileName(fileName);
+    	multipart.addBodyPart(emailAttachment);
+    	logger.println("logs are attached to the email: " + file);
+    	//setting message properties to multipart
+    	message.setContent(multipart);  
     }
 
     @Extension
