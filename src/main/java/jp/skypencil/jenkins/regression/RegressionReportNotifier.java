@@ -189,7 +189,7 @@ public final class RegressionReportNotifier extends Notifier {
 
         writeToConsole(regressionedTests, listener);
         try {
-            mailReport(regressionedTests, recipients, listener, build);
+            mailReport(regressionedTests, invRegressionedTests, recipients, listener, build);
         } catch (MessagingException e) {
             e.printStackTrace(listener.error("failed to send mails."));
         }
@@ -216,21 +216,21 @@ public final class RegressionReportNotifier extends Notifier {
 	private List<CaseResult> listPassed(AbstractTestResultAction<?> testResultAction, PrintStream logger) {
 		TestResultAction action = null;
 		List<CaseResult> invRegressionedTests = new ArrayList<CaseResult>();
-        if(testResultAction.getPreviousResult() != null) {
-			List<? extends TestResult> prevFailedTests = testResultAction.getPreviousResult().getFailedTests();
-			//logger.println(prevFailedTests.size()); 
-            //logger.println(prevFailedTests.get(0).getFullName());
-            List<? extends TestResult> currFailedTests = testResultAction.getFailedTests();
-            //logger.println(currFailedTests.size()); 
-            //logger.println(currFailedTests.get(0).getFullName());
-            for(TestResult r : prevFailedTests) {
-                if(currFailedTests.contains(r)) logger.println("still failing!");
-                else invRegressionedTests.add((CaseResult)r);
-            }
+		if(testResultAction.getPreviousResult() != null) {
+		    List<? extends TestResult> prevFailedTests = testResultAction.getPreviousResult().getFailedTests();
+		    //logger.println(prevFailedTests.size()); 
+		    //logger.println(prevFailedTests.get(0).getFullName());
+		    List<? extends TestResult> currFailedTests = testResultAction.getFailedTests();
+		    //logger.println(currFailedTests.size()); 
+		    //logger.println(currFailedTests.get(0).getFullName());
+		    for(TestResult r : prevFailedTests) {
+			if(currFailedTests.contains(r)) logger.println("still failing!");
+			else invRegressionedTests.add((CaseResult)r);
+		    }
 		}
-        else {
-            logger.println("testResultAction.getPreviousResult is null");
-        }
+		else {
+		    logger.println("testResultAction.getPreviousResult is null");
+		}
         return invRegressionedTests;
 
     }
@@ -266,10 +266,10 @@ public final class RegressionReportNotifier extends Notifier {
         }
 	}
 
-    private void mailReport(List<CaseResult> regressions, String recipients,
+    private void mailReport(List<CaseResult> regressions, List<CaseResult> newlyPassed, String recipients,
             BuildListener listener, AbstractBuild<?, ?> build)
             throws MessagingException {
-        if (regressions.isEmpty()) {
+        if (regressions.isEmpty() && newlyPassed.isEmpty()) {
             return;
         }
 
@@ -305,6 +305,23 @@ public final class RegressionReportNotifier extends Notifier {
             builder.append("  ...");
             builder.append("\n");
         }
+
+	//here
+	builder.append(newlyPassed.size() + " newly passed tests found.");
+        builder.append("\n");
+        for (int i = 0, max = Math
+		 .min(newlyPassed.size(), MAX_RESULTS_PER_MAIL); i < max; ++i) { 
+            CaseResult result = newlyPassed.get(i);
+            builder.append("  ");
+            builder.append(result.getFullName());
+            builder.append("\n");
+        }
+
+	if (newlyPassed.size() > MAX_RESULTS_PER_MAIL) {
+	    builder.append("  ...");
+	    builder.append("\n");
+	}
+
         List<Address> recipentList = parse(recipients, listener);
         if (sendToCulprits) {
             recipentList.addAll(loadAddrOfCulprits(build, listener));
