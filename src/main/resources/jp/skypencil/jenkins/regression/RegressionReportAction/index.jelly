@@ -3,7 +3,31 @@
     <st:include it="${it.project}" page="sidepanel.jelly" />
     <st:bind var="remoteAction" value="${it}"/> 
     <l:main-panel>
-		<div>We successfully added a new page!</div>
+	    <div id="content">
+	    	<table>
+	    		<thead>
+	    			<tr>
+		    			<th>Build Number</th>
+	    				<th>Timestamp</th>
+	    			</tr>
+	    		</thead>
+	    		<tbody>
+					<j:forEach var="b" items="${it.builds}">
+						<tr>
+							<td onclick="getBuildDetails(this);">${b["buildNumber"]}</td>
+							<td>${b["timestamp"]}</td>
+						</tr>	
+					</j:forEach>
+				</tbody>
+			</table>
+		</div>
+		
+		<script>
+			getBuildDetails = function(element) {
+				var buildNumber = element.innerText
+				alert(buildNumber);
+			}
+		</script>
     </l:main-panel>
   </l:layout>
 </j:jelly>
