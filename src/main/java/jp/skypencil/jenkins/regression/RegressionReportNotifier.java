@@ -109,8 +109,7 @@ public final class RegressionReportNotifier extends Notifier {
     	return attachLogs;
     }
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
-            BuildListener listener) throws InterruptedException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException {
         PrintStream logger = listener.getLogger();
         
         AbstractTestResultAction<?> testResultAction = build.getAction(AbstractTestResultAction.class);

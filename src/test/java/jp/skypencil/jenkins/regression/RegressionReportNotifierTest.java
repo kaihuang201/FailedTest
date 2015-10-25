@@ -91,14 +91,21 @@ public class RegressionReportNotifierTest {
 
     @Test
     public void testAttachLogFile() throws InterruptedException, MessagingException {
-        /*
-        makeNewlyPassing();
+        
+        makeRegression();
 
         RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
-        assertThat(notifier.perform(build, launcher, listener), is(true));
+        assertThat(notifier, is(notNullValue()));
+        assertThat(build, is(notNullValue()));
+        assertThat(build.getLogFile(), is(notNullValue()));
+        assertThat(build.getLogFile().getPath(), is(notNullValue()));
+        assertThat(build, is(notNullValue()));
+        assertThat(launcher, is(notNullValue()));
+        assertThat(listener, is(notNullValue()));
+        assertThat(notifier.perform(build, launcher, listener), is(true)); //build.getLogFile() returns null??
         assertThat(mailSender.getSentMessage(), is(notNullValue()));
         Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
         assertThat(to.length, is(1));
@@ -106,7 +113,7 @@ public class RegressionReportNotifierTest {
 
         assertThat(notifier.getAttachLogs(), is(true));
         //assertThat(mailSender.getSentMessage().getContentType(), is())
-        */
+        
 
     }
 
