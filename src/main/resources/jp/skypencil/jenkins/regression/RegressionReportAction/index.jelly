@@ -2,32 +2,29 @@
   <l:layout title="Failed Test">
     <st:include it="${it.project}" page="sidepanel.jelly" />
     <st:bind var="remoteAction" value="${it}"/> 
-    <l:main-panel>
-	    <div id="content">
-	    	<table>
-	    		<thead>
-	    			<tr>
-		    			<th>Build Number</th>
-	    				<th>Timestamp</th>
-	    			</tr>
-	    		</thead>
-	    		<tbody>
+	<l:header>
+		<script type="text/javascript" src="${resURL}/plugin/regression-report-plugin/js/jquery-1.11.3.min.js"></script>
+		<script>jQuery.noConflict();</script>
+	</l:header>
+	<l:main-panel>
+		<div id="content">
+			<table class="pane sortable bigtable" id="buildTable">
+				<thead>
+					<tr>
+						<td class="pane-header">Build Number</td>
+						<td class="pane-header">Timestamp</td>
+					</tr>
+				</thead>
+				<tbody>
 					<j:forEach var="b" items="${it.builds}">
 						<tr>
-							<td onclick="getBuildDetails(this);">${b["buildNumber"]}</td>
-							<td>${b["timestamp"]}</td>
-						</tr>	
+							<td class="pane" data="${b.number}">${b.number}</td>
+							<td class="pane" data="${b.timestampString}">${b.readableTimestamp}</td>
+						</tr>
 					</j:forEach>
 				</tbody>
 			</table>
 		</div>
-		
-		<script>
-			getBuildDetails = function(element) {
-				var buildNumber = element.innerText
-				alert(buildNumber);
-			}
-		</script>
-    </l:main-panel>
+	</l:main-panel>
   </l:layout>
 </j:jelly>
