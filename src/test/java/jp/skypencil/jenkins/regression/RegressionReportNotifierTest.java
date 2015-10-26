@@ -32,6 +32,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.collect.Lists;
 
+import hudson.FilePath;
+import java.io.File;
+import java.net.URL;
+import java.io.IOException;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CaseResult.class)
 public class RegressionReportNotifierTest {
@@ -90,22 +95,25 @@ public class RegressionReportNotifierTest {
     }
 
     @Test
-    public void testAttachLogFile() throws InterruptedException, MessagingException {
+    public void testAttachLogFile() throws InterruptedException, MessagingException, IOException {
         
         makeRegression();
+        doReturn(this.getClass().getResource("")).when(build).getWorkspace();
+
+        URL url = this.getClass().getResource("log"); //"file:/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/"
+        final File attachment = new File(url.getFile());
+        assertThat(attachment.toString(), is(equalTo("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/log")));
+
+        assertThat(build.getWorkspace(), is(notNullValue()));
+        //im thinking that setting the workspace directory to where our fake log file is, will let getLogFile() find our file
+       
 
         RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
-        assertThat(notifier, is(notNullValue()));
-        assertThat(build, is(notNullValue()));
-        assertThat(build.getLogFile(), is(notNullValue()));
-        assertThat(build.getLogFile().getPath(), is(notNullValue()));
-        assertThat(build, is(notNullValue()));
-        assertThat(launcher, is(notNullValue()));
-        assertThat(listener, is(notNullValue()));
-        assertThat(notifier.perform(build, launcher, listener), is(true)); //build.getLogFile() returns null??
+        assertThat(build.getLogFile(), is(notNullValue())); //we need a log file:(
+        assertThat(notifier.perform(build, launcher, listener), is(true)); 
         assertThat(mailSender.getSentMessage(), is(notNullValue()));
         Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
         assertThat(to.length, is(1));
