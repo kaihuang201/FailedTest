@@ -8,6 +8,7 @@
 	</l:header>
 	<l:main-panel>
 		<div id="content">
+		${it.tests}
 			<table class="pane sortable bigtable" id="buildTable">
 				<thead>
 					<tr>
