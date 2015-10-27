@@ -7,25 +7,15 @@
 		<script>jQuery.noConflict();</script>
 	</l:header>
 	<l:main-panel>
-		<div id="content">
-		${it.tests}
-			<table class="pane sortable bigtable" id="buildTable">
-				<thead>
-					<tr>
-						<td class="pane-header">Build Number</td>
-						<td class="pane-header">Timestamp</td>
-					</tr>
-				</thead>
-				<tbody>
-					<j:forEach var="b" items="${it.builds}">
-						<tr>
-							<td class="pane" data="${b.number}">${b.number}</td>
-							<td class="pane" data="${b.timestampString}">${b.readableTimestamp}</td>
-						</tr>
-					</j:forEach>
-				</tbody>
-			</table>
-		</div>
+		<j:set var="displayType" value="${it.getUrlParam('displayType')}"/>
+		<j:choose>
+			<j:when test="${displayType == 'buildDetails'}">
+				<st:include page="build-details.jelly" />
+			</j:when>
+			<j:otherwise>
+				<st:include page="build-list.jelly" />
+			</j:otherwise>
+		</j:choose>
 	</l:main-panel>
   </l:layout>
 </j:jelly>

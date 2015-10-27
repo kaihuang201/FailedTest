@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.Stapler;
 
 import hudson.ExtensionPoint;
 import hudson.model.AbstractProject;
@@ -68,6 +69,14 @@ public class RegressionReportAction extends Actionable implements Action {
     	return this.project;
     }
 
+	public String getUrl() {
+		return this.project.getUrl() + this.getUrlName();
+	}
+	
+	public String getUrlParam(String parameterName) {
+		return Stapler.getCurrentRequest().getParameter(parameterName);
+	}
+
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public List<Build> getBuilds() {
 		List<Build> builds = new ArrayList<Build>();
@@ -81,16 +90,24 @@ public class RegressionReportAction extends Actionable implements Action {
 		
 		return builds;
 	}
-
-	public List<Test> getTests(int buildNumber) {
+	
+	public Build getBuildInfo(String number) {
+		int buildNumber = Integer.parseInt(number);
+		Run run = project.getBuildByNumber(buildNumber);
+		return new Build(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
+	}
+	
+	public List<Test> getTests(String number) {
+		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
 		List<AbstractTestResultAction> testActions = run.getActions(hudson.tasks.test.AbstractTestResultAction.class);
 		for (hudson.tasks.test.AbstractTestResultAction testAction : testActions) {
-			System.out.println(testAction.getDisplayName());
 			/*TestResult testResult = (TestResult) testAction.getResult();
+			System.out.println(testResult.getDisplayName());
 			Collection<PackageResult> packageResults = testResult.getChildren();
-			for (PackageResult packageResult : packageResults) { // packageresult
-				resultInfo.addPackage(buildNumber, packageResult);						
+			for (PackageResult packageResult : packageResults) {
+				System.out.println(packageResult.getDisplayName());
+				resultInfo.addPackage(buildNumber, packageResult);					
 			}*/
 		}
 		return new ArrayList<Test>();
