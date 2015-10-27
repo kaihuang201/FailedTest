@@ -224,6 +224,13 @@ public final class RegressionReportNotifier extends Notifier {
         return list;
     }
 
+    /** @asad
+        Method added to be invoked in first jelly file
+    **/
+    public String getInsideJelly() {
+      return new String("Hello, World");
+    }
+
     @Extension
     public static final class DescriptorImpl extends
             BuildStepDescriptor<Publisher> {
