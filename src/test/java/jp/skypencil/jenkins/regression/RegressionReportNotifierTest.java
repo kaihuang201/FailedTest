@@ -3,6 +3,7 @@ package jp.skypencil.jenkins.regression;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -36,6 +37,16 @@ import hudson.FilePath;
 import java.io.File;
 import java.net.URL;
 import java.io.IOException;
+
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.Part;
+
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
+
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CaseResult.class)
@@ -94,36 +105,60 @@ public class RegressionReportNotifierTest {
         assertThat(to[1].toString(), is(equalTo("culprit@mail.com")));
     }
 
+    //@Test
+    public void testListPassed() {
+        makeNewlyPassing();
+        //...
+    }
+
     @Test
     public void testAttachLogFile() throws InterruptedException, MessagingException, IOException {
         
         makeRegression();
-        doReturn(this.getClass().getResource("")).when(build).getWorkspace();
 
-        URL url = this.getClass().getResource("log"); //"file:/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/"
-        final File attachment = new File(url.getFile());
-        assertThat(attachment.toString(), is(equalTo("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/log")));
+        // doReturn(this.getClass().getResource("")).when(build).getWorkspace();
+        // doReturn(new FilePath(new File("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/log"))).when(build).getWorkspace();
+        //assertThat(build.getWorkspace(), is(notNullValue()));
 
-        assertThat(build.getWorkspace(), is(notNullValue()));
-        //im thinking that setting the workspace directory to where our fake log file is, will let getLogFile() find our file
-       
+        // URL url = this.getClass().getResource("log"); //"file:/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/"
+        // final File attachment = new File(url.getFile());
+        // assertThat(attachment.toString(), is(equalTo("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/log")));
+
+        
+        //doReturn(new File("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression")).when(project).getBuildDir();
+        //assertThat(project.getBuildDir().getPath(), is(equalTo("")));
+        
+        //doReturn(new File("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression")).when(build).getRootDir();
+        //assertThat(build.getRootDir().getPath(), is(equalTo("")));
+        Writer writer = null;
+        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("log"), "utf-8"));
+        writer.write("testtttt");
+        writer.close();
+
+        doReturn(new File("log")).when(build).getLogFile();
 
         RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
-        assertThat(build.getLogFile(), is(notNullValue())); //we need a log file:(
+        assertThat(build.getLogFile(), is(notNullValue()));
         assertThat(notifier.perform(build, launcher, listener), is(true)); 
         assertThat(mailSender.getSentMessage(), is(notNullValue()));
-        Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
-        assertThat(to.length, is(1));
-        assertThat(to[0].toString(), is(equalTo("author@mail.com")));
 
         assertThat(notifier.getAttachLogs(), is(true));
-        //assertThat(mailSender.getSentMessage().getContentType(), is())
+        assertThat(mailSender.getSentMessage().getContent() instanceof Multipart, is(true));
         
-
+        Multipart multipartContent = (Multipart) mailSender.getSentMessage().getContent();
+        assertThat(multipartContent.getCount(), is(2));
+        assertThat(((MimeBodyPart)multipartContent.getBodyPart(1)).getDisposition(), is(equalTo(Part.ATTACHMENT)));
+        assertThat(((MimeBodyPart)multipartContent.getBodyPart(0)).getDisposition(), is(nullValue()));
+        
+        //assertThat(mailSender.getSentMessage().getContentType(), is(equalTo("")));
+        //assertThat(mailSender.getSentMessage().isMimeType("multipart/*"), is(true));
+        
     }
+
+
 
 
     private void makeRegression() {
@@ -156,7 +191,7 @@ public class RegressionReportNotifierTest {
 
     private static final class MockedMailSender implements
             RegressionReportNotifier.MailSender {
-        private MimeMessage sentMessage;
+        private MimeMessage sentMessage = null;
 
         @Override
         public void send(MimeMessage message) throws MessagingException {
