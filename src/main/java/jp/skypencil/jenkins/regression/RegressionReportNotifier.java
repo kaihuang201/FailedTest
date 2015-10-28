@@ -149,6 +149,7 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         logger.println("regression/newly-passing reporter ends.");
+        logger.println(TestResultsAnalyzerAction.mySimpleFunc());
 
         return true;
     }

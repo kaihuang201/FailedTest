@@ -111,54 +111,6 @@ public class RegressionReportNotifierTest {
         //...
     }
 
-    @Test
-    public void testAttachLogFile() throws InterruptedException, MessagingException, IOException {
-        
-        makeRegression();
-
-        // doReturn(this.getClass().getResource("")).when(build).getWorkspace();
-        // doReturn(new FilePath(new File("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/log"))).when(build).getWorkspace();
-        //assertThat(build.getWorkspace(), is(notNullValue()));
-
-        // URL url = this.getClass().getResource("log"); //"file:/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/"
-        // final File attachment = new File(url.getFile());
-        // assertThat(attachment.toString(), is(equalTo("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression/log")));
-
-        
-        //doReturn(new File("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression")).when(project).getBuildDir();
-        //assertThat(project.getBuildDir().getPath(), is(equalTo("")));
-        
-        //doReturn(new File("/home/yjong2/cs427/project/FailedTest/target/test-classes/jp/skypencil/jenkins/regression")).when(build).getRootDir();
-        //assertThat(build.getRootDir().getPath(), is(equalTo("")));
-        Writer writer = null;
-        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("log"), "utf-8"));
-        writer.write("testtttt");
-        writer.close();
-
-        doReturn(new File("log")).when(build).getLogFile();
-
-        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
-        MockedMailSender mailSender = new MockedMailSender();
-        notifier.setMailSender(mailSender);
-
-        assertThat(build.getLogFile(), is(notNullValue()));
-        assertThat(notifier.perform(build, launcher, listener), is(true)); 
-        assertThat(mailSender.getSentMessage(), is(notNullValue()));
-
-        assertThat(notifier.getAttachLogs(), is(true));
-        assertThat(mailSender.getSentMessage().getContent() instanceof Multipart, is(true));
-        
-        Multipart multipartContent = (Multipart) mailSender.getSentMessage().getContent();
-        assertThat(multipartContent.getCount(), is(2));
-        assertThat(((MimeBodyPart)multipartContent.getBodyPart(1)).getDisposition(), is(equalTo(Part.ATTACHMENT)));
-        assertThat(((MimeBodyPart)multipartContent.getBodyPart(0)).getDisposition(), is(nullValue()));
-        
-        //assertThat(mailSender.getSentMessage().getContentType(), is(equalTo("")));
-        //assertThat(mailSender.getSentMessage().isMimeType("multipart/*"), is(true));
-        
-    }
-
-
 
 
     private void makeRegression() {
