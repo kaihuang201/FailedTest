@@ -7,8 +7,10 @@ import hudson.Launcher;
 import hudson.Util;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.model.TransientProjectActionFactory;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.User;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -28,6 +30,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
@@ -360,5 +364,24 @@ public final class RegressionReportNotifier extends Notifier {
         public String getDisplayName() {
             return Messages.RegressionReportNotifier_DisplayName();
         }
+    }
+    
+    @Extension
+    public static final class RegressionReportExtension extends TransientProjectActionFactory{
+
+    	@Override
+    	public Collection<? extends Action> createFor(@SuppressWarnings("rawtypes") AbstractProject target) {
+    		
+    		final List<RegressionReportAction> projectActions = target
+                    .getActions(RegressionReportAction.class);
+            final ArrayList<Action> actions = new ArrayList<Action>();
+            if (projectActions.isEmpty()) {
+                final RegressionReportAction newAction = new RegressionReportAction(target);
+                actions.add(newAction);
+                return actions;
+            } else {
+                return projectActions;
+            }
+    	}
     }
 }
