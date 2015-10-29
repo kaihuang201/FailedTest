@@ -24,6 +24,9 @@ import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.Part;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,14 +37,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.common.collect.Lists;
 
 import hudson.FilePath;
-import java.io.File;
 import java.net.URL;
-import java.io.IOException;
-
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.Part;
-
+import java.io.File;
 import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
@@ -110,6 +107,35 @@ public class RegressionReportNotifierTest {
         makeNewlyPassing();
         //...
     }
+
+    @Test
+    public void testAttachLogFile() throws InterruptedException, MessagingException, IOException {
+        makeRegression();
+        
+        Writer writer = null;
+        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("log"), "utf-8"));
+        writer.write("testtttt");
+        writer.close();
+
+        doReturn(new File("log")).when(build).getLogFile();
+
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
+        MockedMailSender mailSender = new MockedMailSender();
+        notifier.setMailSender(mailSender);
+
+        assertThat(build.getLogFile(), is(notNullValue()));
+        assertThat(notifier.perform(build, launcher, listener), is(true)); 
+        assertThat(mailSender.getSentMessage(), is(notNullValue()));
+
+        assertThat(notifier.getAttachLogs(), is(true));
+        assertThat(mailSender.getSentMessage().getContent() instanceof Multipart, is(true));
+        
+        Multipart multipartContent = (Multipart) mailSender.getSentMessage().getContent();
+        assertThat(multipartContent.getCount(), is(2));
+        assertThat(((MimeBodyPart)multipartContent.getBodyPart(1)).getDisposition(), is(equalTo(Part.ATTACHMENT)));
+        assertThat(((MimeBodyPart)multipartContent.getBodyPart(0)).getDisposition(), is(nullValue()));
+    }
+
 
 
 

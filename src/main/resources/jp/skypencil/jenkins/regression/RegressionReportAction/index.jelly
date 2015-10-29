@@ -1,0 +1,21 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+  <l:layout title="Failed Test">
+    <st:include it="${it.project}" page="sidepanel.jelly" />
+    <st:bind var="remoteAction" value="${it}"/> 
+	<l:header>
+		<script type="text/javascript" src="${resURL}/plugin/regression-report-plugin/js/jquery-1.11.3.min.js"></script>
+		<script>jQuery.noConflict();</script>
+	</l:header>
+	<l:main-panel>
+		<j:set var="displayType" value="${it.getUrlParam('displayType')}"/>
+		<j:choose>
+			<j:when test="${displayType == 'buildDetails'}">
+				<st:include page="build-details.jelly" />
+			</j:when>
+			<j:otherwise>
+				<st:include page="build-list.jelly" />
+			</j:otherwise>
+		</j:choose>
+	</l:main-panel>
+  </l:layout>
+</j:jelly>

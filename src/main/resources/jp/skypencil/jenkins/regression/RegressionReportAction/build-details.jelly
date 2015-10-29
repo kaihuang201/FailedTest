@@ -1,0 +1,26 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	<j:set var="buildNumber" value="${it.getUrlParam('buildNumber')}"/>
+	<j:set var="build" value="${it.getBuildInfo(buildNumber)}"/>
+
+	<h1>Build Details</h1>
+	<p>Build Number: ${build.number}</p>
+	<p>Timestamp: ${build.readableTimestamp}</p>
+
+	<h2>Tests</h2>
+	<table class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Status</td>
+			</tr>
+		</thead>
+		<tbody>
+			<j:forEach var="test" items="${it.getTests(buildNumber)}">
+				<tr>
+					<td class="pane" data="${test.name}">${test.name}</td>
+					<td class="pane" data="${test.status}">${test.status}</td>
+				</tr>
+			</j:forEach>
+		</tbody>
+	</table>
+</j:jelly>
