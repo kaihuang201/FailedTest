@@ -1,12 +1,15 @@
 package jp.skypencil.jenkins.regression;
 
 import static java.lang.System.out;
+
 import static com.google.common.collect.Iterables.transform;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.BuildListener;
+import hudson.model.Project;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.User;
@@ -17,18 +20,17 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.junit.TestResultAction;
-import hudson.tasks.test.TestResult;
 import hudson.tasks.test.AggregatedTestResultAction;
-import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
+import hudson.tasks.junit.TestResultAction;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+//import hudson.tasks.junit.TestResult;
+import hudson.tasks.test.TestResult;
+
+import hudson.util.RunList;
+
 import java.io.PrintStream;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -59,6 +61,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import jp.skypencil.jenkins.regression.TestResultsAnalyzerAction;
 
 /**
  * @version 1.0
@@ -137,7 +141,6 @@ public final class RegressionReportNotifier extends Notifier {
             return true;
         }
 */
-
         logger.println("regression reporter starts now...");
         List<CaseResult> regressionedTests = listRegressions(testResultAction);
         writeToConsole(regressionedTests, listener);
@@ -149,11 +152,89 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         logger.println("regression/newly-passing reporter ends.");
-        logger.println(TestResultsAnalyzerAction.mySimpleFunc());
-
+        logger.println("The number of test results we got back are " + getSimpleFunc(build));
         return true;
     }
 
+//	@SuppressWarnings("unchecked")
+//	public ArrayList<hudson.tasks.junit.TestResult> getSimpleFunc(AbstractBuild<?, ?> build){
+//		ArrayList<hudson.tasks.junit.TestResult> myArrayList = new ArrayList<hudson.tasks.junit.TestResult>();
+//		AbstractProject project = build.getProject();
+//		if (project == null) {
+//			return myArrayList;
+//		}
+//		else {
+//			RunList<Run> runs = project.getBuilds();
+//			Iterator<Run> runIterator = runs.iterator();
+//			while (runIterator.hasNext()) {
+//				Run run = runIterator.next();
+//				List<hudson.tasks.junit.TestResultAction> testActions = run.getActions(hudson.tasks.junit.TestResultAction.class);
+//				for (TestResultAction testAction : testActions) {
+//					hudson.tasks.junit.TestResult testResult = testAction.getResult();
+//					myArrayList.add(testResult);
+//				}
+//			}
+//			return myArrayList;
+//		}
+//	}
+	
+	@SuppressWarnings("unchecked")
+	public int getSimpleFunc(AbstractBuild<?, ?> build){
+		ArrayList<TestResult> myArrayList = new ArrayList<TestResult>();
+		AbstractProject project = build.getProject();
+		if (project == null) {
+			return 9;
+		}
+		else {
+			RunList<Run> runs = project.getBuilds();
+			String lastBuild = project.getBuilds().getFirstBuild().getDisplayName();
+			Iterator<Run> runIterator = runs.iterator();
+			//int size = runs.size();
+			ArrayList<String> buildNames = new ArrayList<String>();
+			while (runIterator.hasNext()) {
+				Run run = runIterator.next();
+				buildNames.add(run.getDisplayName());
+				List<hudson.tasks.junit.TestResultAction> testActions = run.getActions(hudson.tasks.junit.TestResultAction.class);
+				if(testActions.isEmpty()){
+					return 1010101;
+				}
+				for (TestResultAction testAction : testActions) {
+					System.out.println("type of testAction: " + testAction.getResult().getClass());
+					Class<? extends Object> x = testAction.getResult().getClass();
+					TestResult testResult = testAction.getResult();
+					myArrayList.add(testResult);
+				}
+			}
+			return myArrayList.size();
+		}
+	}
+//	
+//	@SuppressWarnings("unchecked")
+//	public int getSimpleFunc(){
+//		ArrayList<hudson.tasks.junit.TestResult> myArrayList = new ArrayList<hudson.tasks.junit.TestResult>();
+//		AbstractProject project = TestResultsAnalyzerAction.getProject();
+//		if (project == null) {
+//			return 9;
+//		}
+//		else {
+//			RunList<Run> runs = project.getBuilds();
+//			int size = runs.size();
+//			Iterator<Run> runIterator = runs.iterator();
+//			Run run = runIterator.next();
+//			while (runIterator.hasNext()) {
+//				List<AggregatedTestResultAction> testActions = run.getActions(hudson.tasks.test.AggregatedTestResultAction.class);
+//				if(testActions.isEmpty()){
+//					return 88680;
+//				}
+//				for (hudson.tasks.test.AbstractTestResultAction testAction : testActions) {
+//					hudson.tasks.junit.TestResult testResult = (hudson.tasks.junit.TestResult) testAction.getResult();
+//					myArrayList.add(testResult);
+//				}
+//			}
+//			return myArrayList.size();
+//		}
+//	}
+    
     private List<CaseResult> listRegressions(
             AbstractTestResultAction<?> testResultAction) {
         List<? extends TestResult> failedTest = testResultAction.getFailedTests();

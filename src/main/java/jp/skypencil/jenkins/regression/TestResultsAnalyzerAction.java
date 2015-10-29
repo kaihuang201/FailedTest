@@ -26,13 +26,15 @@ import hudson.util.RunList;
 
 public class TestResultsAnalyzerAction extends Actionable implements Action{
 @SuppressWarnings("rawtypes") AbstractProject project;
-	private List<Integer> builds = new ArrayList<Integer>() ;
+	private List<Integer> builds = new ArrayList<Integer>();
 	
 	ResultInfo resultInfo;
-	
+	TestResult myTestResults;
+	static AbstractProject proj;
 	
 	public TestResultsAnalyzerAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
+		proj = project;
 	}
 	
 
@@ -82,8 +84,8 @@ public class TestResultsAnalyzerAction extends Actionable implements Action{
     }
     
     @SuppressWarnings("rawtypes")
-	public AbstractProject getProject(){
-    	return this.project;
+	public static AbstractProject getProject(){
+    	return proj;
     }
     
    
@@ -155,9 +157,19 @@ public class TestResultsAnalyzerAction extends Actionable implements Action{
 		}
 	}
 	
-	public static int mySimpleFunc(){
-		return 11;
-	}
+//	public static ArrayList<TestResult> getSimpleFunc(@SuppressWarnings("rawtypes") AbstractProject target){
+//		ArrayList<TestResult> myArrayList = new ArrayList<TestResult>();
+//		RunList<Run> runs = target.getBuilds();
+//		Iterator<Run> runIterator = runs.iterator();
+//		Run run = runIterator.next();
+//		TestResult testResult = null;
+//		List<AbstractTestResultAction> testActions = run.getActions(hudson.tasks.test.AbstractTestResultAction.class);
+//		for (hudson.tasks.test.AbstractTestResultAction testAction : testActions) {
+//			testResult = (TestResult) testAction.getResult();
+//			myArrayList.add(testResult);
+//			}
+//		return myArrayList;
+//	}
 	
     @JavaScriptMethod
     public JSONObject getTreeResult(String noOfBuildsNeeded) {
