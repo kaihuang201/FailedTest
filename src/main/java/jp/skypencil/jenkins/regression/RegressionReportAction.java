@@ -78,26 +78,28 @@ public class RegressionReportAction extends Actionable implements Action {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public List<Build> getBuilds() {
-		List<Build> builds = new ArrayList<Build>();
+	public List<BuildInfo> getBuilds() {
+		List<BuildInfo> builds = new ArrayList<BuildInfo>();
 		RunList<Run> runs = project.getBuilds();
 		Iterator<Run> runIterator = runs.iterator();
 		while (runIterator.hasNext()) {
 			Run run = runIterator.next();
-			Build build = new Build(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
+			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
 			builds.add(build);
 		}
 		
 		return builds;
 	}
 	
-	public Build getBuildInfo(String number) {
+	@SuppressWarnings("rawtypes")
+	public BuildInfo getBuildInfo(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
-		return new Build(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
 	}
 	
-	public List<Test> getTests(String number) {
+	@SuppressWarnings("rawtypes")
+	public List<TestInfo> getTests(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
 		List<AbstractTestResultAction> testActions = run.getActions(hudson.tasks.test.AbstractTestResultAction.class);
@@ -110,16 +112,16 @@ public class RegressionReportAction extends Actionable implements Action {
 				resultInfo.addPackage(buildNumber, packageResult);					
 			}*/
 		}
-		return new ArrayList<Test>();
+		return new ArrayList<TestInfo>();
 	}
 	
-	public static class Build implements ExtensionPoint {
+	public static class BuildInfo implements ExtensionPoint {
 		private int number;
 		private Calendar timestamp;
 		private String timestampString;
 
 		@DataBoundConstructor
-		public Build(int number, Calendar timestamp, String timestampString) {
+		public BuildInfo(int number, Calendar timestamp, String timestampString) {
 			this.number = number;
 			this.timestamp = timestamp;
 			this.timestampString = timestampString;
@@ -139,12 +141,12 @@ public class RegressionReportAction extends Actionable implements Action {
 		}
 	}
 	
-	public static class Test implements ExtensionPoint {
+	public static class TestInfo implements ExtensionPoint {
 		private String name;
 		private String status;
 		
 		@DataBoundConstructor
-		public Test(String name, String status) {
+		public TestInfo(String name, String status) {
 			this.name = name;
 			this.status = status;
 		}
