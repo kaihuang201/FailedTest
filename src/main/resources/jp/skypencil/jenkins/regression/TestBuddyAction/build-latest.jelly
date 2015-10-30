@@ -5,6 +5,7 @@
 				<td class="pane-header">Test Name</td>
 				<td class="pane-header">Time</td>
 				<td class="pane-header">Status</td>
+				<td class="pane-header">Package</td>
 			</tr>
 		</thead>
 		<tbody>
