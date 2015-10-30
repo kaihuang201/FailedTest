@@ -115,6 +115,13 @@ public class RegressionReportAction extends Actionable implements Action {
 		return new ArrayList<TestInfo>();
 	}
 	
+	public List<TestInfo> getListNewPassFail() {
+		
+		
+		return new ArrayList<TestInfo>();
+	}
+	
+	
 	public static class BuildInfo implements ExtensionPoint {
 		private int number;
 		private Calendar timestamp;
@@ -159,4 +166,5 @@ public class RegressionReportAction extends Actionable implements Action {
 			return status;
 		}
 	}
+	
 }

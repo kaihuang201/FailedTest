@@ -12,8 +12,11 @@
 			<j:when test="${displayType == 'buildDetails'}">
 				<st:include page="build-details.jelly" />
 			</j:when>
-			<j:otherwise>
+			<j:when test="${displayType == 'buildList'}">
 				<st:include page="build-list.jelly" />
+			</j:when>
+			<j:otherwise>
+				<st:include page="build-latest.jelly" />
 			</j:otherwise>
 		</j:choose>
 	</l:main-panel>
