@@ -1,13 +1,22 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
-  <l:layout title="Failed Test">
+  <l:layout title="Test Buddy">
     <st:include it="${it.project}" page="sidepanel.jelly" />
     <st:bind var="remoteAction" value="${it}"/> 
 	<l:header>
-		<script type="text/javascript" src="${resURL}/plugin/regression-report-plugin/js/jquery-1.11.3.min.js"></script>
+		<link href="${resURL}/plugin/test-buddy-plugin/css/test-buddy.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="${resURL}/plugin/test-buddy-plugin/js/jquery-1.11.3.min.js"></script>
 		<script>jQuery.noConflict();</script>
 	</l:header>
 	<l:main-panel>
 		<j:set var="displayType" value="${it.getUrlParam('displayType')}"/>
+		<div class="tb-navbar">
+			<div class="tb-nav first">
+				<a href="${rootURL}/${it.url}" class="task-link">Latest Build</a>
+			</div>
+			<div class="tb-nav">
+				<a href="${rootURL}/${it.url}?displayType=buildList" class="task-link">All Builds</a>
+			</div>
+		</div>
 		<j:choose>
 			<j:when test="${displayType == 'buildDetails'}">
 				<st:include page="build-details.jelly" />

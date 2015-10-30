@@ -555,16 +555,16 @@ public final class RegressionReportNotifier extends Notifier {
     }
     
     @Extension
-    public static final class RegressionReportExtension extends TransientProjectActionFactory{
+    public static final class TestBuddyExtension extends TransientProjectActionFactory{
 
     	@Override
     	public Collection<? extends Action> createFor(@SuppressWarnings("rawtypes") AbstractProject target) {
     		
-    		final List<RegressionReportAction> projectActions = target
-                    .getActions(RegressionReportAction.class);
+    		final List<TestBuddyAction> projectActions = target
+                    .getActions(TestBuddyAction.class);
             final ArrayList<Action> actions = new ArrayList<Action>();
             if (projectActions.isEmpty()) {
-                final RegressionReportAction newAction = new RegressionReportAction(target);
+                final TestBuddyAction newAction = new TestBuddyAction(target);
                 actions.add(newAction);
                 return actions;
             } else {

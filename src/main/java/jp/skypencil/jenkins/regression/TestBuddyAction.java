@@ -23,11 +23,11 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.util.RunList;
 
-public class RegressionReportAction extends Actionable implements Action {
+public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
 	
-	public RegressionReportAction(@SuppressWarnings("rawtypes") AbstractProject project){
+	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
 	}
 
@@ -37,7 +37,7 @@ public class RegressionReportAction extends Actionable implements Action {
      * @return the name as String
      */
     public final String getDisplayName() {
-        return "FailedTest";
+        return "Test Buddy";
     }
 
     /**
@@ -55,7 +55,7 @@ public class RegressionReportAction extends Actionable implements Action {
      * @return the url as String
      */
     public String getUrlName() {
-        return "failedTest";
+        return "test_buddy";
     }
 
     /**
@@ -64,7 +64,7 @@ public class RegressionReportAction extends Actionable implements Action {
      * @return the url as String
      */
 	public String getSearchUrl() {
-		return "failedTest";
+		return "test_buddy";
 	}
 
     @SuppressWarnings("rawtypes")
@@ -106,31 +106,44 @@ public class RegressionReportAction extends Actionable implements Action {
 		List<TestInfo> ret = new ArrayList<TestInfo>();
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
-		List<AggregatedTestResultAction> testActions = run.getActions(hudson.tasks.test.AggregatedTestResultAction.class);
-		for (hudson.tasks.test.AggregatedTestResultAction testAction : testActions) {
-			List<AggregatedTestResultAction.ChildReport> child_reports = testAction.getChildReports();
-			for(AggregatedTestResultAction.ChildReport child_report: child_reports){
-				TestResult testResult = (TestResult) child_report.result;
-				Collection<PackageResult> packageResults = testResult.getChildren();
-				for (PackageResult packageResult : packageResults) {
-					Collection<ClassResult> class_results = packageResult.getChildren();
-					for(ClassResult class_result : class_results){
-						Collection<CaseResult> case_results = class_result.getChildren();
-						for(CaseResult case_result: case_results){
-							if(case_result.isFailed()){
-								ret.add(new TestInfo(case_result.getFullName(), "Failed"));
-							}else if(case_result.isPassed()){
-								ret.add(new TestInfo(case_result.getFullName(), "Passed"));
-							}else if(case_result.isSkipped()){
-								ret.add(new TestInfo(case_result.getFullName(), "Skipped"));
-							}
-						}
-					}
-									
-				}				
+		List<AbstractTestResultAction> testActions = run.getActions(AbstractTestResultAction.class);
+		for (AbstractTestResultAction testAction : testActions) {
+			if (testAction.getResult() instanceof TestResult) {
+				TestResult testResult = (TestResult) testAction.getResult();
+				ret.addAll(getTests(testResult));
+			}
+			else {
+				List<AggregatedTestResultAction.ChildReport> child_reports = ((AggregatedTestResultAction)testAction).getChildReports();
+				for(AggregatedTestResultAction.ChildReport child_report: child_reports){
+					TestResult testResult = (TestResult) child_report.result;
+					ret.addAll(getTests(testResult));
+				}
 			}
 		}
 		return ret;
+	}
+	
+	public List<TestInfo> getTests(TestResult testResult) {
+		List<TestInfo> tests = new ArrayList<TestInfo>();
+
+		Collection<PackageResult> packageResults = testResult.getChildren();
+		for (PackageResult packageResult : packageResults) {
+			Collection<ClassResult> class_results = packageResult.getChildren();
+			for(ClassResult class_result : class_results){
+				Collection<CaseResult> case_results = class_result.getChildren();
+				for(CaseResult case_result: case_results){
+					if(case_result.isFailed()){
+						tests.add(new TestInfo(case_result.getDisplayName(), class_result.getDisplayName(), case_result.getPackageName(), "Failed"));
+					}else if(case_result.isPassed()){
+						tests.add(new TestInfo(case_result.getDisplayName(), class_result.getDisplayName(), case_result.getPackageName(), "Passed"));
+					}else if(case_result.isSkipped()){
+						tests.add(new TestInfo(case_result.getDisplayName(), class_result.getDisplayName(), case_result.getPackageName(), "Skipped"));
+					}
+				}
+			}					
+		}
+
+		return tests;
 	}
 	
 	public List<TestInfo> getListNewPassFail() {
@@ -168,16 +181,28 @@ public class RegressionReportAction extends Actionable implements Action {
 	
 	public static class TestInfo implements ExtensionPoint {
 		private String name;
+		private String className;
+		private String packageName;
 		private String status;
 		
 		@DataBoundConstructor
-		public TestInfo(String name, String status) {
+		public TestInfo(String name, String className, String packageName, String status) {
 			this.name = name;
+			this.className = className;
+			this.packageName = packageName;
 			this.status = status;
 		}
 		
 		public String getName() {
 			return name;
+		}
+
+		public String getClassName() {
+			return className;
+		}
+		
+		public String getPackageName() {
+			return packageName;
 		}
 		
 		public String getStatus() {

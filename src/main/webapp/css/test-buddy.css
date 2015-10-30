@@ -1,0 +1,14 @@
+.tb-navbar {
+	margin-bottom: 20px;
+}
+.tb-nav {
+	display: inline-block;
+	padding: 0 20px;
+	border-left: 1px solid #bbb;
+	text-decoration: none;
+	font-size: 1.1em;
+}
+.tb-nav.first {
+	padding-left: 0;
+	border-left: none;
+}
