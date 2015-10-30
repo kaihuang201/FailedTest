@@ -69,7 +69,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import jp.skypencil.jenkins.regression.TestResultsAnalyzerAction;
+
 import hudson.tasks.junit.PackageResult;
 import hudson.tasks.junit.ClassResult;
 
