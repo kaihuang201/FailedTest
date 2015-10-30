@@ -1,0 +1,22 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	<table class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header">Build Number</td>
+				<td class="pane-header">Timestamp</td>
+           	</tr>
+		</thead>
+		<tbody>
+			<j:forEach var="build" items="${it.builds}">
+				<tr>
+					<td class="pane" data="${build.number}">
+						<a href="${rootURL}/${it.url}?buildNumber=${build.number}&amp;displayType=buildDetails">
+							${build.number}
+						</a>
+					</td>
+					<td class="pane" data="${build.timestampString}">${build.readableTimestamp}</td>
+				</tr>
+			</j:forEach>
+		</tbody>
+	</table>
+</j:jelly>

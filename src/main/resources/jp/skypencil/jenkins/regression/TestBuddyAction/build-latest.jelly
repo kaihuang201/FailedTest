@@ -1,0 +1,20 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	<table class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header">Test Name</td>
+				<td class="pane-header">Time</td>
+				<td class="pane-header">Status</td>
+				<td class="pane-header">Package</td>
+			</tr>
+		</thead>
+		<tbody>
+			<j:forEach var="test" items="${it.listNewPassFail}">
+				<tr>
+					<td class="pane" data="${test.name}">${test.name}</td>
+					<td class="pane" data="${test.status}">${test.status}</td>
+				</tr>
+			</j:forEach>
+		</tbody>
+	</table>
+</j:jelly>
