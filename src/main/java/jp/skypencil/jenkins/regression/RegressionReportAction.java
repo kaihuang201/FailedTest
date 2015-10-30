@@ -15,9 +15,12 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Actionable;
 import hudson.model.Run;
+import hudson.tasks.junit.CaseResult;
+import hudson.tasks.junit.ClassResult;
 import hudson.tasks.junit.PackageResult;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.util.RunList;
 
 public class RegressionReportAction extends Actionable implements Action {
@@ -100,19 +103,34 @@ public class RegressionReportAction extends Actionable implements Action {
 	
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getTests(String number) {
+		List<TestInfo> ret = new ArrayList<TestInfo>();
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
-		List<AbstractTestResultAction> testActions = run.getActions(hudson.tasks.test.AbstractTestResultAction.class);
-		for (hudson.tasks.test.AbstractTestResultAction testAction : testActions) {
-			/*TestResult testResult = (TestResult) testAction.getResult();
-			System.out.println(testResult.getDisplayName());
-			Collection<PackageResult> packageResults = testResult.getChildren();
-			for (PackageResult packageResult : packageResults) {
-				System.out.println(packageResult.getDisplayName());
-				resultInfo.addPackage(buildNumber, packageResult);					
-			}*/
+		List<AggregatedTestResultAction> testActions = run.getActions(hudson.tasks.test.AggregatedTestResultAction.class);
+		for (hudson.tasks.test.AggregatedTestResultAction testAction : testActions) {
+			List<AggregatedTestResultAction.ChildReport> child_reports = testAction.getChildReports();
+			for(AggregatedTestResultAction.ChildReport child_report: child_reports){
+				TestResult testResult = (TestResult) child_report.result;
+				Collection<PackageResult> packageResults = testResult.getChildren();
+				for (PackageResult packageResult : packageResults) {
+					Collection<ClassResult> class_results = packageResult.getChildren();
+					for(ClassResult class_result : class_results){
+						Collection<CaseResult> case_results = class_result.getChildren();
+						for(CaseResult case_result: case_results){
+							if(case_result.isFailed()){
+								ret.add(new TestInfo(case_result.getFullName(), "Failed"));
+							}else if(case_result.isPassed()){
+								ret.add(new TestInfo(case_result.getFullName(), "Passed"));
+							}else if(case_result.isSkipped()){
+								ret.add(new TestInfo(case_result.getFullName(), "Skipped"));
+							}
+						}
+					}
+									
+				}				
+			}
 		}
-		return new ArrayList<TestInfo>();
+		return ret;
 	}
 	
 	public List<TestInfo> getListNewPassFail() {
