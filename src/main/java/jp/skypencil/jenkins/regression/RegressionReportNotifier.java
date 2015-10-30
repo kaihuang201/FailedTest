@@ -70,6 +70,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import jp.skypencil.jenkins.regression.TestResultsAnalyzerAction;
+import hudson.tasks.junit.PackageResult;
+import hudson.tasks.junit.ClassResult;
 
 /**
  * @version 1.0
@@ -126,31 +128,20 @@ public final class RegressionReportNotifier extends Notifier {
         AbstractTestResultAction<?> testResultAction = build.getAction(AbstractTestResultAction.class);
         if (testResultAction == null) {
             // maybe compile error occurred
-            logger.println("regression/newly-passing reporter doesn't run because test doesn\'t run.");
+            logger.println("TestBuddy reporter doesn't run because test doesn\'t run.");
             return true;
         }
 
         /* S01: Obtain list of newly passed tests and write to console */
-        logger.println("newly-passing reporter starts now...");
-		List<CaseResult> newlyPassedTests = listPassed(testResultAction, logger);
+        logger.println("TestBuddy reporter starts now...");
+        List<CaseResult> tests = listAllTests(build, build.getId(), logger);
+        //for(CaseResult cr : tests) logger.println(cr.getFullName() + "is passing: " + cr.isPassed());
+		List<CaseResult> newlyPassedTests = listNewlyPassed(testResultAction, tests, logger);
 		writeToConsolePassed(newlyPassedTests, listener);
-        
-        if (build.getResult() == Result.SUCCESS) {
-            logger.println("regression reporter doesn't run because build is success.");
-            return true;
-        }
-//moved up
-/*
-        AbstractTestResultAction<?> testResultAction = build.getAction(AbstractTestResultAction.class);
-        if (testResultAction == null) {
-            // maybe compile error occurred
-            logger.println("regression reporter doesn't run because test doesn\'t run.");
-            return true;
-        }
-*/
-        logger.println("regression reporter starts now...");
         List<CaseResult> regressionedTests = listRegressions(testResultAction);
         writeToConsole(regressionedTests, listener);
+
+        
 
         try {
             mailReport(regressionedTests, newlyPassedTests, recipients, listener, build);
@@ -158,8 +149,9 @@ public final class RegressionReportNotifier extends Notifier {
             e.printStackTrace(listener.error("failed to send mails."));
         }
 
-        logger.println("regression/newly-passing reporter ends.");
-        logger.println("The number of test results we got back are " + getSimpleFunc(build));
+        logger.println("TestBuddy reporter ends.");
+
+        //logger.println("The number of test results we got back are " + getSimpleFunc(build, logger));
         return true;
     }
 
@@ -185,36 +177,113 @@ public final class RegressionReportNotifier extends Notifier {
 //		}
 //	}
 	
-	@SuppressWarnings("unchecked")
-	public int getSimpleFunc(AbstractBuild<?, ?> build){
-		ArrayList<TestResult> myArrayList = new ArrayList<TestResult>();
-		AbstractProject project = build.getProject();
-		if (project == null) {
-			return 9;
-		}
-		else {
-			RunList<Run> runs = project.getBuilds();
-			String lastBuild = project.getBuilds().getFirstBuild().getDisplayName();
-			Iterator<Run> runIterator = runs.iterator();
-			//int size = runs.size();
-			ArrayList<String> buildNames = new ArrayList<String>();
-			while (runIterator.hasNext()) {
-				Run run = runIterator.next();
-				buildNames.add(run.getDisplayName());
-				List<hudson.tasks.junit.TestResultAction> testActions = run.getActions(hudson.tasks.junit.TestResultAction.class);
-				if(testActions.isEmpty()){
-					return 1010101;
-				}
-				for (TestResultAction testAction : testActions) {
-					System.out.println("type of testAction: " + testAction.getResult().getClass());
-					Class<? extends Object> x = testAction.getResult().getClass();
-					TestResult testResult = testAction.getResult();
-					myArrayList.add(testResult);
-				}
-			}
-			return myArrayList.size();
-		}
-	}
+	// @SuppressWarnings("unchecked")
+	// public int getSimpleFunc(AbstractBuild<?, ?> build, PrintStream logger){
+	// 	ArrayList<TestResult> myArrayList = new ArrayList<TestResult>();
+	// 	AbstractProject project = build.getProject();
+	// 	if (project == null) {
+	// 		return 9;
+	// 	}
+	// 	else {
+	// 		RunList<Run> runs = project.getBuilds();
+	// 		String lastBuild = project.getBuilds().getFirstBuild().getDisplayName();
+	// 		Iterator<Run> runIterator = runs.iterator();
+	// 		//int size = runs.size();
+	// 		ArrayList<String> buildNames = new ArrayList<String>();
+	// 		while (runIterator.hasNext()) {
+	// 			Run run = runIterator.next();
+	// 			buildNames.add(run.getDisplayName());
+	// 			List<hudson.tasks.test.AggregatedTestResultAction> testActions = run.getActions(hudson.tasks.test.AggregatedTestResultAction.class);
+	// 			if(testActions.isEmpty()){
+	// 				break;
+	// 			}
+	// 			for (hudson.tasks.test.AggregatedTestResultAction testAction : testActions) {
+	// 				System.out.println("type of testAction: " + testAction.getResult().getClass());
+ //                    List<AggregatedTestResultAction.ChildReport> list = testAction.getResult();
+ //                    //logger.println(list.size());
+ //                    logger.println(list.get(0).child);
+
+ //                    hudson.tasks.junit.TestResult t = (hudson.tasks.junit.TestResult)list.get(0).result;
+ //                    logger.print(t + ": ");
+ //                    logger.println(t.getFullName() + " is passing " + t.isPassed());
+ //                    Collection<PackageResult> pkgCol = t.getChildren();
+ //                    //logger.println(pkgCol.size()); //1
+ //                    //logger.println(pkgCol.iterator().next().getClass()); //expect PackageResult
+ //                    Collection<ClassResult> cCol = (pkgCol.iterator().next()).getChildren();
+ //                    //logger.println(cCol.size()); //3
+ //                    //logger.println(cCol.iterator().next().getClass()); //expect ClassResult
+ //                    Iterator<ClassResult> classIter = cCol.iterator();
+ //                    while(classIter.hasNext()) {
+ //                        ClassResult cl = classIter.next();
+ //                        Collection<CaseResult> caseCol = cl.getChildren();
+ //                        //logger.println(caseCol.size()); //3,5,2
+ //                        //logger.println(caseCol.iterator().next().getClass()); //expect CaseResult
+ //                        Iterator<CaseResult> caseIter = caseCol.iterator();
+ //                        while(caseIter.hasNext()) {
+ //                            CaseResult c = caseIter.next();
+ //                            logger.println(c.getFullName() + " is passing " + c.isPassed());
+ //                        }
+ //                    }
+                    
+
+	// 				//Class<? extends Object> x = testAction.getResult().getClass();
+	// 				//TestResult testResult = testAction.getResult();
+	// 				myArrayList.add(t);
+	// 			}
+	// 		}
+	// 		return myArrayList.size();
+	// 	}
+	// }
+
+
+
+
+    @SuppressWarnings("unchecked")
+    public List<CaseResult> listAllTests(AbstractBuild<?, ?> build, String buildId, PrintStream logger){
+        List<CaseResult> testsList = new ArrayList<CaseResult>();
+
+        AbstractProject project = build.getProject();
+        if (project == null) {
+            return testsList;
+        }
+        RunList<Run> runs = project.getBuilds();
+        String lastBuild = project.getBuilds().getFirstBuild().getDisplayName();
+        Iterator<Run> runIterator = runs.iterator();
+        while (runIterator.hasNext()) {
+            Run run = runIterator.next();
+            if(run.getId().equals(buildId)) {
+                List<hudson.tasks.test.AggregatedTestResultAction> testActions = run.getActions(hudson.tasks.test.AggregatedTestResultAction.class);
+                for (hudson.tasks.test.AggregatedTestResultAction testAction : testActions) {
+                    List<AggregatedTestResultAction.ChildReport> childReport = testAction.getResult();
+                    logger.println(childReport.get(0).child);
+
+                    hudson.tasks.junit.TestResult testResult = (hudson.tasks.junit.TestResult)childReport.get(0).result;
+                    Collection<PackageResult> pkgCol = testResult.getChildren();
+                    Collection<ClassResult> cCol = (pkgCol.iterator().next()).getChildren();
+                    Iterator<ClassResult> classIter = cCol.iterator();
+                    while(classIter.hasNext()) {
+                        ClassResult cl = classIter.next();
+                        Collection<CaseResult> caseCol = cl.getChildren();
+                        Iterator<CaseResult> caseIter = caseCol.iterator();
+                        while(caseIter.hasNext()) {
+                            CaseResult c = caseIter.next();
+                            testsList.add(c);
+                        }
+                    }
+                }
+            }
+            
+        }
+        return testsList;
+    }
+
+
+
+
+
+
+
+
 //	
 //	@SuppressWarnings("unchecked")
 //	public int getSimpleFunc(){
@@ -252,22 +321,57 @@ public final class RegressionReportNotifier extends Notifier {
 	}
 
     /* S01: Return a list of all newly passed tests (inverse of regression) */
-	private List<CaseResult> listPassed(AbstractTestResultAction<?> testResultAction, PrintStream logger) {
-		TestResultAction action = null;
+	private List<CaseResult> listNewlyPassed(AbstractTestResultAction<?> testResultAction, List<CaseResult> allTests, PrintStream logger) {
 		List<CaseResult> newlyPassedTests = new ArrayList<CaseResult>();
 		if(testResultAction.getPreviousResult() != null) {
 		    List<? extends TestResult> prevFailedTests = testResultAction.getPreviousResult().getFailedTests();
 		    //logger.println(prevFailedTests.size()); logger.println(prevFailedTests.get(0).getFullName());
-		    List<? extends TestResult> currFailedTests = testResultAction.getFailedTests();
+            //List<? extends TestResult> currFailedTests = testResultAction.getFailedTests();
 		    //logger.println(currFailedTests.size()); logger.println(currFailedTests.get(0).getFullName());
-		    for(TestResult r : prevFailedTests) {
-                if(!currFailedTests.contains(r)) {
-                    if(r instanceof CaseResult) newlyPassedTests.add((CaseResult)r);
+            List<TestResult> currPassedTests = new ArrayList<TestResult>();
+            for(TestResult c : allTests) {
+                if(c.isPassed()) currPassedTests.add(c);
+            }
+            logger.println(prevFailedTests.size());
+            logger.println(currPassedTests.size());
+            
+
+		    for(TestResult prev : prevFailedTests) {
+                String prevTestName = prev.getFullName();
+                for(TestResult cur : currPassedTests) {
+                    if(cur.getFullName().equals(prevTestName)) {
+                        if(prev instanceof CaseResult) {
+                            newlyPassedTests.add((CaseResult)prev);
+                        }
+                    }
                 }
-                else {
-                    logger.println(r.getFullName() + " is still failing or is not a CaseResult.");
-                }
+               
+                //CaseResult prevCase = (CaseResult)prev;
+                // if(currPassedTests.contains(prev)) {
+                //      if(prev instanceof CaseResult) {
+                //         newlyPassedTests.add((CaseResult)prev);
+                //     }
+                // }
+                
+                // String prevTestName = prev.getFullName();
+                // boolean stillFailing = false;
+                // for(TestResult cur : currFailedTests) {
+                //     if(cur.getFullName().equals(prevTestName)) {
+                //         stillFailing = true;
+                //         logger.println(prevTestName + " is still failing.");
+                //     }
+                // }
+                // if(!stillFailing) {
+                //     if(prev instanceof CaseResult) {
+                //         CaseResult c = (CaseResult)prev;
+                //         //logger.println(c.getPassedTests().size());
+                //         //logger.println(c.isPassed());
+                //         newlyPassedTests.add(c);
+                //     }
+                // }
 		    }
+            logger.println(newlyPassedTests.size());
+            
 		}
 		else {
 		    logger.println("testResultAction.getPreviousResult() returns null");
