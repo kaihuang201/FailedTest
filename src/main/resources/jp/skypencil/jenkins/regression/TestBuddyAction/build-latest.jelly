@@ -3,6 +3,7 @@
 		<thead>
 			<tr>
 				<td class="pane-header">Test Name</td>
+				<td class="pane-header">Time</td>
 				<td class="pane-header">Status</td>
 			</tr>
 		</thead>

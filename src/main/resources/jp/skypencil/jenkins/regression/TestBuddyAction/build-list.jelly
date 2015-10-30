@@ -4,6 +4,7 @@
 			<tr>
 				<td class="pane-header">Build Number</td>
 				<td class="pane-header">Timestamp</td>
+                <td class="pane-header">Status</td>
 			</tr>
 		</thead>
 		<tbody>
