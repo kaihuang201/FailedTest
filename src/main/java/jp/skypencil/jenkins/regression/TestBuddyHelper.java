@@ -21,17 +21,50 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.ClassResult;
 import hudson.tasks.junit.PackageResult;
 import hudson.tasks.junit.TestResult;
+
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.AggregatedTestResultAction;
+import hudson.tasks.junit.TestResultAction;
 
 public class TestBuddyHelper {
 
 
+    @SuppressWarnings("rawtypes")
     public static ArrayList<CaseResult> getAllCaseResultsForBuild(AbstractBuild build) {
-        //TODO is this correct? Use getActions instead? Use AggregatedTestResultAction instead?
+        ArrayList<CaseResult> ret = new ArrayList<CaseResult>();
         List<AbstractTestResultAction> testActions = build.getActions(AbstractTestResultAction.class);
-        ArrayList<CaseResult> returnValue = new ArrayList<CaseResult>();
-        //TODO use Sundie's method here?
-        return returnValue;
+
+        for (AbstractTestResultAction testAction : testActions) {
+            if (testAction instanceof TestResultAction) {
+                TestResult testResult = (TestResult) testAction.getResult();
+                ret.addAll(getTestsFromTestResult(testResult));
+            }
+            else if (testAction instanceof AggregatedTestResultAction){
+                List<AggregatedTestResultAction.ChildReport> child_reports = ((AggregatedTestResultAction)testAction).getChildReports();
+                for(AggregatedTestResultAction.ChildReport child_report: child_reports){
+                    TestResult testResult = (TestResult) child_report.result;
+                    ret.addAll(getTestsFromTestResult(testResult));
+                }
+            } else {
+                //TODO Unexpected?
+            }
+        }
+        return ret;
+    }
+    
+  
+    private static ArrayList<CaseResult> getTestsFromTestResult(TestResult testResult) {
+        ArrayList<CaseResult> tests = new ArrayList<CaseResult>();
+        Collection<PackageResult> packageResults = testResult.getChildren();
+        for (PackageResult packageResult : packageResults) {
+            Collection<ClassResult> class_results = packageResult.getChildren();
+            for(ClassResult class_result : class_results){
+                Collection<CaseResult> case_results = class_result.getChildren();
+                tests.addAll(case_results);
+            }
+        }
+
+        return tests;
     }
 
 
