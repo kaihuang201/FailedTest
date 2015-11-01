@@ -16,6 +16,12 @@
 			<div class="tb-nav">
 				<a href="${rootURL}/${it.url}?displayType=buildList" class="task-link">All Builds</a>
 			</div>
+			<div class="tb-nav">
+				<a href="${rootURL}/${it.url}?displayType=regression" class="task-link">Regression</a>
+			</div>
+			<div class="tb-nav">
+				<a href="${rootURL}/${it.url}?displayType=compare" class="task-link">Test Compare</a>
+			</div>
 		</div>
 		<j:choose>
 			<j:when test="${displayType == 'buildDetails'}">
@@ -23,6 +29,12 @@
 			</j:when>
 			<j:when test="${displayType == 'buildList'}">
 				<st:include page="build-list.jelly" />
+			</j:when>
+			<j:when test="${displayType == 'regression'}">
+				<st:include page="test-regression.jelly" />
+			</j:when>
+			<j:when test="${displayType == 'compare'}">
+				<st:include page="test-compare.jelly" />
 			</j:when>
 			<j:otherwise>
 				<st:include page="build-latest.jelly" />

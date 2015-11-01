@@ -1,0 +1,37 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	<table class="pane sortable bigtable">
+		<thead>	
+			<h4>This feature allows you to compare the test results of any two builds</h4>
+		</thead><br/>
+		<tbody>
+			<div>
+				Compare Tests in Build:
+				<select name = "build1">
+					<option value=""></option>
+					<j:forEach var="build" items="${it.builds}">
+						<option value="${build.number}">${build.number}</option>
+					</j:forEach>
+				</select>
+				to Tests in Build:
+				<select name = "build2">
+					<option value=""></option>
+					<j:forEach var="build" items="${it.builds}">
+						<option value="${build.number}">${build.number}</option>
+					</j:forEach>
+				</select>
+			</div>
+		</tbody>
+	</table><br/><br/>
+	<table class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header">Build1 tests</td>
+				<td class="pane-header">test status</td>
+				<td class="pane-header">Build2 tests</td>
+				<td class="pane-header">test status</td>
+           	</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</j:jelly>

@@ -256,7 +256,6 @@ public final class RegressionReportNotifier extends Notifier {
                 for (hudson.tasks.test.AggregatedTestResultAction testAction : testActions) {
                     List<AggregatedTestResultAction.ChildReport> childReport = testAction.getResult();
                     logger.println(childReport.get(0).child);
-
                     hudson.tasks.junit.TestResult testResult = (hudson.tasks.junit.TestResult)childReport.get(0).result;
                     Collection<PackageResult> pkgCol = testResult.getChildren();
                     Collection<ClassResult> cCol = (pkgCol.iterator().next()).getChildren();
@@ -276,42 +275,8 @@ public final class RegressionReportNotifier extends Notifier {
         }
         return testsList;
     }
-
-
-
-
-
-
-
-
-//	
-//	@SuppressWarnings("unchecked")
-//	public int getSimpleFunc(){
-//		ArrayList<hudson.tasks.junit.TestResult> myArrayList = new ArrayList<hudson.tasks.junit.TestResult>();
-//		AbstractProject project = TestResultsAnalyzerAction.getProject();
-//		if (project == null) {
-//			return 9;
-//		}
-//		else {
-//			RunList<Run> runs = project.getBuilds();
-//			int size = runs.size();
-//			Iterator<Run> runIterator = runs.iterator();
-//			Run run = runIterator.next();
-//			while (runIterator.hasNext()) {
-//				List<AggregatedTestResultAction> testActions = run.getActions(hudson.tasks.test.AggregatedTestResultAction.class);
-//				if(testActions.isEmpty()){
-//					return 88680;
-//				}
-//				for (hudson.tasks.test.AbstractTestResultAction testAction : testActions) {
-//					hudson.tasks.junit.TestResult testResult = (hudson.tasks.junit.TestResult) testAction.getResult();
-//					myArrayList.add(testResult);
-//				}
-//			}
-//			return myArrayList.size();
-//		}
-//	}
     
-    private List<CaseResult> listRegressions(
+    public List<CaseResult> listRegressions(
             AbstractTestResultAction<?> testResultAction) {
         List<? extends TestResult> failedTest = testResultAction.getFailedTests();
         Iterable<? extends TestResult> filtered = Iterables.filter(failedTest, new RegressionPredicate());
@@ -321,7 +286,7 @@ public final class RegressionReportNotifier extends Notifier {
 	}
 
     /* S01: Return a list of all newly passed tests (inverse of regression) */
-	private List<CaseResult> listNewlyPassed(AbstractTestResultAction<?> testResultAction, List<CaseResult> allTests, PrintStream logger) {
+	public List<CaseResult> listNewlyPassed(AbstractTestResultAction<?> testResultAction, List<CaseResult> allTests, PrintStream logger) {
 		List<CaseResult> newlyPassedTests = new ArrayList<CaseResult>();
 		if(testResultAction.getPreviousResult() != null) {
 		    List<? extends TestResult> prevFailedTests = testResultAction.getPreviousResult().getFailedTests();
