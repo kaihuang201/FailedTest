@@ -143,6 +143,17 @@ public class TestBuddyAction extends Actionable implements Action {
 		return failPassTests;
 	}
 	
+	//compare two builds
+	public List<TestInfo> getBuildCompare(int build1, int build2){
+		  AbstractBuild buildOne = project.getBuildByNumber(build1);
+		  AbstractBuild buildTwo = project.getBuildByNumber(build2);
+		  List<TestInfo> compareList = new ArrayList<TestInfo>();
+		  ArrayList<CaseResult> buildCompare = TestBuddyHelper.getChangedTestsBetweenBuilds(buildOne, buildTwo);
+		  for (CaseResult caseResult : buildCompare) {
+		    compareList.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Status Changed"));
+		  }
+		  return compareList;  
+		 }
 	
 	public static class BuildInfo implements ExtensionPoint {
 		private int number;

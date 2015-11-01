@@ -6,23 +6,25 @@
 		<tbody>
 			<div>
 				Compare Tests in Build:
-				<select name = "build1">
+				<select name = "build1" id="build1">
 					<option value=""></option>
 					<j:forEach var="build" items="${it.builds}">
 						<option value="${build.number}">${build.number}</option>
 					</j:forEach>
 				</select>
 				to Tests in Build:
-				<select name = "build2">
+				<select name = "build2" id="build2">
 					<option value=""></option>
 					<j:forEach var="build" items="${it.builds}">
 						<option value="${build.number}">${build.number}</option>
 					</j:forEach>
 				</select>
+				 
+				<button type="button" onclick="compare()">Compare</button>
 			</div>
 		</tbody>
 	</table><br/><br/>
-	<table class="pane sortable bigtable">
+	<table class="pane sortable bigtable" id="table2">
 		<thead>
 			<tr>
 				<td class="pane-header">Build ${build1.value} tests</td>
@@ -34,4 +36,12 @@
 		<tbody>
 		</tbody>
 	</table>
+	<script>
+	compare()
+	{
+		
+	}
+	
+	</script>
+	
 </j:jelly>
