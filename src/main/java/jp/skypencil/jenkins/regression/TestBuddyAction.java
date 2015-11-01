@@ -17,10 +17,12 @@ import hudson.model.Actionable;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.util.RunList;
+import jp.skypencil.jenkins.regression.TestBuddyHelper;
 
 public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
+
 	
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
@@ -125,10 +127,20 @@ public class TestBuddyAction extends Actionable implements Action {
 		return tests;
 	}
 	
-	public List<TestInfo> getListNewPassFail() {
-		
-		
-		return new ArrayList<TestInfo>();
+	public List<TestInfo> getNewPassFail() {
+		AbstractBuild build = project.getLastBuild();
+		List<TestInfo> failPassTests = new ArrayList<TestInfo>();
+		ArrayList<CaseResult> newlyFailPass = TestBuddyHelper.getChangedTestsBetweenBuilds(build, build.getPreviousBuild());
+		for (CaseResult caseResult : newlyFailPass) {
+			if(caseResult.isFailed()){
+				failPassTests.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Newly Failed"));
+			}
+			else{
+				failPassTests.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Newly Passed"));
+			}		
+		}
+		//System.out.println("size of newPassFail array is " + newlyFailPass.size());
+		return failPassTests;
 	}
 	
 	

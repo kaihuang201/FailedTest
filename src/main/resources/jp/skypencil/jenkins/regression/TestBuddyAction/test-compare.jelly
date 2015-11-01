@@ -25,9 +25,9 @@
 	<table class="pane sortable bigtable">
 		<thead>
 			<tr>
-				<td class="pane-header">Build1 tests</td>
+				<td class="pane-header">Build ${build1.value} tests</td>
 				<td class="pane-header">test status</td>
-				<td class="pane-header">Build2 tests</td>
+				<td class="pane-header">Build ${build2.value} tests</td>
 				<td class="pane-header">test status</td>
            	</tr>
 		</thead>
