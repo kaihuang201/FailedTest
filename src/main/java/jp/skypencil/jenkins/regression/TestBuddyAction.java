@@ -3,7 +3,6 @@ package jp.skypencil.jenkins.regression;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,16 +10,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.Stapler;
 
 import hudson.ExtensionPoint;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Actionable;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
-import hudson.tasks.junit.ClassResult;
-import hudson.tasks.junit.PackageResult;
-import hudson.tasks.junit.TestResult;
-import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.util.RunList;
 
 public class TestBuddyAction extends Actionable implements Action {
@@ -103,46 +98,30 @@ public class TestBuddyAction extends Actionable implements Action {
 	
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getTests(String number) {
-		List<TestInfo> ret = new ArrayList<TestInfo>();
-		int buildNumber = Integer.parseInt(number);
-		Run run = project.getBuildByNumber(buildNumber);
-		List<AbstractTestResultAction> testActions = run.getActions(AbstractTestResultAction.class);
-		for (AbstractTestResultAction testAction : testActions) {
-			if (testAction.getResult() instanceof TestResult) {
-				TestResult testResult = (TestResult) testAction.getResult();
-				ret.addAll(getTests(testResult));
-			}
-			else {
-				List<AggregatedTestResultAction.ChildReport> child_reports = ((AggregatedTestResultAction)testAction).getChildReports();
-				for(AggregatedTestResultAction.ChildReport child_report: child_reports){
-					TestResult testResult = (TestResult) child_report.result;
-					ret.addAll(getTests(testResult));
-				}
-			}
-		}
-		return ret;
-	}
-	
-	public List<TestInfo> getTests(TestResult testResult) {
 		List<TestInfo> tests = new ArrayList<TestInfo>();
+		
+		int buildNumber = Integer.parseInt(number);
+		AbstractBuild build = project.getBuildByNumber(buildNumber);
+		
+		ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
+		for (CaseResult caseResult : caseResults) {
+			String className = "";
+			String[] fullClassName = caseResult.getClassName().split("\\.");
+			if (fullClassName.length > 0) {
+				className = fullClassName[fullClassName.length - 1];
+			}
 
-		Collection<PackageResult> packageResults = testResult.getChildren();
-		for (PackageResult packageResult : packageResults) {
-			Collection<ClassResult> class_results = packageResult.getChildren();
-			for(ClassResult class_result : class_results){
-				Collection<CaseResult> case_results = class_result.getChildren();
-				for(CaseResult case_result: case_results){
-					if(case_result.isFailed()){
-						tests.add(new TestInfo(case_result.getDisplayName(), class_result.getDisplayName(), case_result.getPackageName(), "Failed"));
-					}else if(case_result.isPassed()){
-						tests.add(new TestInfo(case_result.getDisplayName(), class_result.getDisplayName(), case_result.getPackageName(), "Passed"));
-					}else if(case_result.isSkipped()){
-						tests.add(new TestInfo(case_result.getDisplayName(), class_result.getDisplayName(), case_result.getPackageName(), "Skipped"));
-					}
-				}
-			}					
+			if(caseResult.isFailed()){
+				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Failed"));
+			}
+			else if(caseResult.isPassed()){
+				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Passed"));
+			}
+			else if(caseResult.isSkipped()){
+				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Skipped"));
+			}			
 		}
-
+		
 		return tests;
 	}
 	
