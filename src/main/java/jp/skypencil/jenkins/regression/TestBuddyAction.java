@@ -111,7 +111,7 @@ public class TestBuddyAction extends Actionable implements Action {
 			String[] fullClassName = caseResult.getClassName().split("\\.");
 			if (fullClassName.length > 0) {
 				className = fullClassName[fullClassName.length - 1];
-			}
+			}  
 			String name[] = caseResult.getDisplayName().split("\\.");
 			String short_name = name[name.length-1];
 			if(caseResult.isFailed()){
