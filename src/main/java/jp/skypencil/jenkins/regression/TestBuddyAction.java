@@ -112,15 +112,16 @@ public class TestBuddyAction extends Actionable implements Action {
 			if (fullClassName.length > 0) {
 				className = fullClassName[fullClassName.length - 1];
 			}
-
+			String name[] = caseResult.getDisplayName().split("\\.");
+			String short_name = name[name.length-1];
 			if(caseResult.isFailed()){
-				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Failed"));
+				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Failed"));
 			}
 			else if(caseResult.isPassed()){
-				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Passed"));
+				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Passed"));
 			}
 			else if(caseResult.isSkipped()){
-				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Skipped"));
+				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Skipped"));
 			}			
 		}
 		
