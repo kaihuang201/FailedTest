@@ -37,11 +37,20 @@
 		</tbody>
 	</table>
 	<script>
-	compare()
-	{
-		
-	}
-	
+		compare = function() {
+			var build1 = jQuery('#build1').val();
+			var build2 = jQuery('#build2').val();
+			
+			remoteAction.getBuildCompare(build1, build2, jQuery.proxy(function(t) {
+				var results = t.responseObject();
+				
+				/* Console.log(results);
+				1. Clear tbody content of table2
+				2. Add row to tbody of table2
+				3. Add column with the values
+				*/
+			}, this));
+		}
 	</script>
 	
 </j:jelly>

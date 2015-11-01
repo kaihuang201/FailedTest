@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import hudson.ExtensionPoint;
 import hudson.model.AbstractBuild;
@@ -142,9 +143,12 @@ public class TestBuddyAction extends Actionable implements Action {
 		//System.out.println("size of newPassFail array is " + newlyFailPass.size());
 		return failPassTests;
 	}
-	
+
 	//compare two builds
-	public List<TestInfo> getBuildCompare(int build1, int build2){
+	@JavaScriptMethod
+	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2){
+		int build1 = Integer.parseInt(buildNumber1);
+		int build2 = Integer.parseInt(buildNumber2);
 		  AbstractBuild buildOne = project.getBuildByNumber(build1);
 		  AbstractBuild buildTwo = project.getBuildByNumber(build2);
 		  List<TestInfo> compareList = new ArrayList<TestInfo>();
