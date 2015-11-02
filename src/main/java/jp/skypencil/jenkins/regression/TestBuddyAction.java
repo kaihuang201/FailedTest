@@ -155,7 +155,9 @@ public class TestBuddyAction extends Actionable implements Action {
 		  List<TestInfo> compareList = new ArrayList<TestInfo>();
 		  ArrayList<CaseResult> buildCompare = TestBuddyHelper.getChangedTestsBetweenBuilds(buildOne, buildTwo);
 		  for (CaseResult caseResult : buildCompare) {
+		    //compareList.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Status Changed"));
 		    compareList.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Status Changed"));
+
 		  }
 		  return compareList;  
 		 }
