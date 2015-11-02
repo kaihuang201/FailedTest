@@ -3,9 +3,13 @@ package jp.skypencil.jenkins.regression;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.Stapler;
@@ -24,7 +28,7 @@ import jp.skypencil.jenkins.regression.TestBuddyHelper;
 public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
-	private static final String[] Status = {"SUCCESS", "UNSTABLE", "FAILURE", "NOT_BUILT", "ABORTED"};
+	private static final String[] BUILD_STATUSES = {"SUCCESS", "UNSTABLE", "FAILURE", "NOT_BUILT", "ABORTED"};
 	
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
@@ -90,7 +94,7 @@ public class TestBuddyAction extends Actionable implements Action {
 			Run run = runIterator.next();
 			List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
 			double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), Status[run.getResult().ordinal], authors, rates[0], rates[1]);
+			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
 			builds.add(build);
 		}
 		
@@ -104,6 +108,26 @@ public class TestBuddyAction extends Actionable implements Action {
 		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
 		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
 		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getBuildStatusSummary().message, authors, rates[0], rates[1]);
+	}
+	
+	public List<String> getAllBuildStatuses() {
+		List<String> buildStatuses = Arrays.asList(BUILD_STATUSES.clone());
+		Collections.sort(buildStatuses);
+		return buildStatuses;
+	}
+	
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public Set<String> getAllAuthors() {
+		Set<String> authors = new HashSet<String>();
+		RunList<Run> runs = project.getBuilds();
+		Iterator<Run> runIterator = runs.iterator();
+
+		while (runIterator.hasNext()) {
+			Run run = runIterator.next();
+			authors.addAll(TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run));
+		}
+		
+		return authors;
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -205,6 +229,10 @@ public class TestBuddyAction extends Actionable implements Action {
 		
 		public List<String> getAuthors(){
 			return authors;
+		}
+		
+		public String getAuthorsString() {
+			return String.join(", ", authors);
 		}
 		
 		public int getPassedTests(){

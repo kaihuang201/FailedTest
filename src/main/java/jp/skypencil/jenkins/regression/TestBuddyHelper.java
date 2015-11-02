@@ -84,7 +84,7 @@ public class TestBuddyHelper {
 		ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
 		double total_tests = caseResults.size();
 		double passed_tests = 0;
-		double passing_rate = 1;
+		double passing_rate = 0;
 		for (CaseResult caseResult : caseResults){
 			if(caseResult.isPassed()){
 				passed_tests++;
