@@ -107,7 +107,6 @@ public class RegressionReportNotifierTest {
         assertThat(to[1].toString(), is(equalTo("culprit@mail.com")));
     }
 
-
     @Test
     public void testAttachLogFile() throws InterruptedException, MessagingException, IOException {
         makeRegression();
