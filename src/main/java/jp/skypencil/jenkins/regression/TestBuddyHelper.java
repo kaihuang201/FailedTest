@@ -17,7 +17,14 @@ import hudson.tasks.junit.TestResultAction;
 
 public class TestBuddyHelper {
 
-
+    /** 
+     * Returns a list of CaseResults that are contained in a build. Currently this
+     * function only handles builds whose getResult return 
+     * an object of type TestResultAction or AggregatedTestResultAction
+     * @param build an AbstractBuild object from which the caller wants to get
+     *      the case results.
+     * @return an ArrayList of CaseResult.
+     */
     @SuppressWarnings("rawtypes")
     public static ArrayList<CaseResult> getAllCaseResultsForBuild(AbstractBuild build) {
         ArrayList<CaseResult> ret = new ArrayList<CaseResult>();
@@ -41,7 +48,14 @@ public class TestBuddyHelper {
         return ret;
     }
     
-  
+
+    /**
+     * A helper fuction that returns a of CaseResult from a TestReult
+     * object.
+     * @param testResult a TestResult object that contains PackageResult as its
+     *      children
+     * @return An ArrayList of CaseResult.
+     */
     private static ArrayList<CaseResult> getTestsFromTestResult(TestResult testResult) {
         ArrayList<CaseResult> tests = new ArrayList<CaseResult>();
         Collection<PackageResult> packageResults = testResult.getChildren();
@@ -57,6 +71,17 @@ public class TestBuddyHelper {
     }
 
 
+    /**
+     * Given two builds thisBuild and otherBuild, returns the a list of
+     * CaseResult that have different fail/pass results.
+     *
+     * @param thisBuild an AbstractBuild.
+     * @param otherBuild another AbstractBuild, which is compared againt thisBuild
+     * @return an ArrayList of CaseResult in thisBuild that satisfies any of
+     *  the folloing conditions:
+     *      - fails in thisBuild, but passes in otherBuild
+     *      - passes in thisBuild, but failes in otherBuild
+     */
     public static ArrayList<CaseResult> getChangedTestsBetweenBuilds(AbstractBuild thisBuild, AbstractBuild otherBuild) {
         ArrayList<CaseResult> thisResults = getAllCaseResultsForBuild(thisBuild);
         ArrayList<CaseResult> otherResults = getAllCaseResultsForBuild(otherBuild);
