@@ -3,6 +3,7 @@ package jp.skypencil.jenkins.regression;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Rule;
@@ -10,7 +11,9 @@ import org.junit.Test;
 import org.jvnet.hudson.test.ExtractResourceSCM;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.tasks.junit.CaseResult;
 import jp.skypencil.jenkins.regression.TestBuddyAction.BuildInfo;
 import jp.skypencil.jenkins.regression.TestBuddyAction.TestInfo;
 
@@ -163,5 +166,19 @@ public class TestBuddyActionTest {
 		assertEquals("AppTest", tests.get(2).getClassName());
 		assertEquals("pkg", tests.get(2).getPackageName());
 		assertEquals("Skipped", tests.get(2).getStatus());
+	}
+	
+	@Test
+	public void testGetNewPassFail() throws Exception {
+		initMavenProject();
+		createBuild("Source_2");
+		createBuild("Source_3");
+
+		List<TestInfo> newFailPass = testBuddyAction.getNewPassFail();
+		
+		assertEquals(2, newFailPass.size());
+
+		assertEquals("Newly Passed", newFailPass.get(0).getStatus());
+		assertEquals("Newly Failed", newFailPass.get(1).getStatus());
 	}
 }
