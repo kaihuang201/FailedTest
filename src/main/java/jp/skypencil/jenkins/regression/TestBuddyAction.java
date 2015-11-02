@@ -1,5 +1,6 @@
 package jp.skypencil.jenkins.regression;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import hudson.ExtensionPoint;
 import hudson.model.AbstractBuild;
@@ -77,14 +79,18 @@ public class TestBuddyAction extends Actionable implements Action {
 		return Stapler.getCurrentRequest().getParameter(parameterName);
 	}
 
+	
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public List<BuildInfo> getBuilds() {
 		List<BuildInfo> builds = new ArrayList<BuildInfo>();
 		RunList<Run> runs = project.getBuilds();
 		Iterator<Run> runIterator = runs.iterator();
+
 		while (runIterator.hasNext()) {
 			Run run = runIterator.next();
-			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
+			List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+			double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
+			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors, rates[0], rates[1]);
 			builds.add(build);
 		}
 		
@@ -95,7 +101,9 @@ public class TestBuddyAction extends Actionable implements Action {
 	public BuildInfo getBuildInfo(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
+		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors, rates[0], rates[1]);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -111,16 +119,17 @@ public class TestBuddyAction extends Actionable implements Action {
 			String[] fullClassName = caseResult.getClassName().split("\\.");
 			if (fullClassName.length > 0) {
 				className = fullClassName[fullClassName.length - 1];
-			}
-
+			}  
+			String name[] = caseResult.getDisplayName().split("\\.");
+			String short_name = name[name.length-1];
 			if(caseResult.isFailed()){
-				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Failed"));
+				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Failed"));
 			}
 			else if(caseResult.isPassed()){
-				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Passed"));
+				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Passed"));
 			}
 			else if(caseResult.isSkipped()){
-				tests.add(new TestInfo(caseResult.getDisplayName(), className, caseResult.getPackageName(), "Skipped"));
+				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Skipped"));
 			}			
 		}
 		
@@ -142,29 +151,37 @@ public class TestBuddyAction extends Actionable implements Action {
 		//System.out.println("size of newPassFail array is " + newlyFailPass.size());
 		return failPassTests;
 	}
-	
-//	public List<TestInfo> getBuildCompare(int build1, int build2){
-//		AbstractBuild buildOne = project.getBuildByNumber(build1);
-//		AbstractBuild buildTwo = project.getBuildByNumber(build2);
-//		List<TestInfo> compareList = new ArrayList<TestInfo>();
-//		ArrayList<CaseResult> buildCompare = TestBuddyHelper.getChangedTestsBetweenBuilds(buildOne, buildTwo);
-//		for (CaseResult caseResult : buildCompare) {
-//				compareList.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Status Changed"));
-//		}
-//		return compareList;		
-//	}
-	
+
+	//compare two builds
+	@JavaScriptMethod
+	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2){
+		int build1 = Integer.parseInt(buildNumber1);
+		int build2 = Integer.parseInt(buildNumber2);
+		  AbstractBuild buildOne = project.getBuildByNumber(build1);
+		  AbstractBuild buildTwo = project.getBuildByNumber(build2);
+		  List<TestInfo> compareList = new ArrayList<TestInfo>();
+		  ArrayList<CaseResult> buildCompare = TestBuddyHelper.getChangedTestsBetweenBuilds(buildOne, buildTwo);
+		  for (CaseResult caseResult : buildCompare) {
+		    compareList.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Status Changed"));
+		  }
+		  return compareList;  
+		 }
 	
 	public static class BuildInfo implements ExtensionPoint {
 		private int number;
 		private Calendar timestamp;
 		private String timestampString;
-
+		private List<String> authors;
+		private int passed_tests;
+		private double passing_rate;
 		@DataBoundConstructor
-		public BuildInfo(int number, Calendar timestamp, String timestampString) {
+		public BuildInfo(int number, Calendar timestamp, String timestampString, List<String> a, double pt, double pr) {
 			this.number = number;
 			this.timestamp = timestamp;
 			this.timestampString = timestampString;
+			this.authors = new ArrayList<String>(a);
+			this.passed_tests = (int) pt;
+			this.passing_rate = pr;
 		}
 
 		public int getNumber() {
@@ -178,6 +195,18 @@ public class TestBuddyAction extends Actionable implements Action {
 		public String getReadableTimestamp() {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy h:mm:ss a");
 			return dateFormat.format(timestamp.getTime());
+		}
+		
+		public List<String> getAuthors(){
+			return authors;
+		}
+		
+		public int getPassedTests(){
+			return passed_tests;
+		}
+		
+		public double getPassingRate(){
+			return passing_rate;
 		}
 	}
 	

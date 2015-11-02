@@ -6,32 +6,88 @@
 		<tbody>
 			<div>
 				Compare Tests in Build:
-				<select name = "build1">
+				<select name = "build1" id="build1">
 					<option value=""></option>
 					<j:forEach var="build" items="${it.builds}">
 						<option value="${build.number}">${build.number}</option>
 					</j:forEach>
 				</select>
 				to Tests in Build:
-				<select name = "build2">
+				<select name = "build2" id="build2">
 					<option value=""></option>
 					<j:forEach var="build" items="${it.builds}">
 						<option value="${build.number}">${build.number}</option>
 					</j:forEach>
 				</select>
+				 
+				<button type="button" onclick="compare()">Compare</button>
 			</div>
 		</tbody>
 	</table><br/><br/>
-	<table class="pane sortable bigtable">
+	<table class="pane sortable bigtable" id="table2">
 		<thead>
 			<tr>
-				<td class="pane-header">Build ${build1.value} tests</td>
-				<td class="pane-header">test status</td>
-				<td class="pane-header">Build ${build2.value} tests</td>
-				<td class="pane-header">test status</td>
+				<td class="pane-header">Class<!--${build1.value} tests--></td>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Package Name<!--${build2.value} tests--></td>
+				<td class="pane-header">Status</td>
            	</tr>
 		</thead>
 		<tbody>
+		
 		</tbody>
 	</table>
+	<script>
+		compare = function() {
+			var build1 = jQuery('#build1').val();
+			var build2 = jQuery('#build2').val();
+			
+			remoteAction.getBuildCompare(build1, build2, jQuery.proxy(function(t) {
+				var results = t.responseObject();
+			 
+				console.log(results);
+					
+					console.log(results[0].className); 
+					console.log(results[0].name);
+					console.log(results[0].packageName);
+					console.log(results[0].status);
+					<!--var text = "text is ";-->
+					var i=0; 
+				var text = "text is ";
+				<!--
+					while (i<1)
+					{ 
+    						
+    						text += results[0].className;
+    						text += results[0].name;
+    						text += results[0].packageName;
+    						text += results[0].status;
+    							console.log(text); 
+    										
+					} --> 
+					var tbody = jQuery('#table2').find('tbody');
+					tbody.empty();
+					var a = results;
+					a.forEach(function(entry) {
+					
+						console.log(entry.className); 
+					console.log(entry.name);
+					console.log(entry.packageName);
+					console.log(entry.status);
+					
+					
+				tbody.append('<tr><td>'+entry.className+'</td><td>'+entry.name+'</td><td>'+entry.packageName+'</td><td>'+entry.status+'</td></tr>');
+					
+					
+    				
+					});
+						
+			
+				
+					}, this));
+			
+				<!-- console.log(results); --> 
+		}; 
+	</script>
+		
 </j:jelly>
