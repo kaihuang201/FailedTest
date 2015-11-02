@@ -51,7 +51,7 @@ import java.io.FileOutputStream;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CaseResult.class)
-public class TestBuddyNotifierTest {
+public class RegressionReportNotifierTest {
     private BuildListener listener;
     private Launcher launcher;
     private AbstractBuild<?, ?> build, build2;
@@ -71,7 +71,7 @@ public class TestBuddyNotifierTest {
     public void testCompileErrorOccured() throws InterruptedException,
             IOException {
         doReturn(null).when(build).getAction(AbstractTestResultAction.class);
-        TestBuddyNotifier notifier = new TestBuddyNotifier("", false, false);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("", false, false);
 
         assertThat(notifier.perform(build, launcher, listener), is(true));
     }
@@ -80,7 +80,7 @@ public class TestBuddyNotifierTest {
     public void testSend() throws InterruptedException, MessagingException {
         makeRegression();
 
-        TestBuddyNotifier notifier = new TestBuddyNotifier("author@mail.com", false, false);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -95,7 +95,7 @@ public class TestBuddyNotifierTest {
     public void testSendToCulprits() throws InterruptedException, MessagingException {
         makeRegression();
 
-        TestBuddyNotifier notifier = new TestBuddyNotifier("author@mail.com", true, false);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -120,7 +120,7 @@ public class TestBuddyNotifierTest {
         File f = new File("log");
         doReturn(f).when(build).getLogFile();
 
-        TestBuddyNotifier notifier = new TestBuddyNotifier("author@mail.com", false, true);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -151,7 +151,7 @@ public class TestBuddyNotifierTest {
         File f = new File("log");
         doReturn(f).when(build).getLogFile();
 
-        TestBuddyNotifier notifier = new TestBuddyNotifier("author@mail.com", true, true);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, true);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -192,7 +192,7 @@ public class TestBuddyNotifierTest {
 
 
     private static final class MockedMailSender implements
-            TestBuddyNotifier.MailSender {
+            RegressionReportNotifier.MailSender {
         private MimeMessage sentMessage = null;
 
         @Override
