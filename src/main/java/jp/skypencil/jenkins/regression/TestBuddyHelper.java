@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.HashMap;
 
 import hudson.model.AbstractBuild;
+import hudson.scm.ChangeLogSet;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.ClassResult;
 import hudson.tasks.junit.PackageResult;
@@ -48,7 +49,24 @@ public class TestBuddyHelper {
         return ret;
     }
     
-
+    /**
+     * Returns a list of authors that make the change to the build
+     * **/
+    @SuppressWarnings("rawtypes")
+    public static List<String> getChangeLogForBuild(AbstractBuild build) {
+    	List<String> ret = new ArrayList<String>();
+    	ChangeLogSet change = build.getChangeSet();
+    	if(!change.isEmptySet()){
+    		for(Object entry:change.getItems()){
+    			hudson.scm.ChangeLogSet.Entry e = (hudson.scm.ChangeLogSet.Entry)entry;
+    			ret.add(e.getAuthor().getDisplayName());
+    			System.out.println(e.getAuthor().getDisplayName());
+    		}
+    	}
+    	
+    	return ret;
+      // System.out.println(build.getChangeSet().getItems()[0].toString());
+    }
     /**
      * A helper fuction that returns a of CaseResult from a TestReult
      * object.
