@@ -1,9 +1,46 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
-	<table class="pane sortable bigtable">
+	<div id="tblBuildsFilters" class="tb-filters">
+		<div class="tb-filter">
+			Status:
+			<select id="buildStatus">
+				<option value="">- Status -</option>
+				<j:forEach var="buildStatus" items="${it.allBuildStatuses}">
+					<option value="${buildStatus}">${buildStatus}</option>
+				</j:forEach>
+			</select>
+		</div>
+		<div class="tb-filter">
+			Authors:
+			<select id="author">
+				<option value="">- Author -</option>
+				<j:forEach var="author" items="${it.allAuthors}">
+					<option value="${author}">${author}</option>
+				</j:forEach>
+			</select>
+		</div>
+		<div class="tb-filter">
+			Min Passing Rate:
+			<input type="text" id="minPassingRate" size="4" />
+		</div>
+		<div class="tb-filter">
+			Min Passed Tests:
+			<input type="text" id="minPassedTests" size="4" />
+		</div>
+		<div class="tb-filter">
+			<button type="button" id="btnGo" onclick="filterBuilds();">Go</button>
+			<button type="button" id="btnClear" onclick="clearFilters('tblBuilds');">Clear</button>
+		</div>
+	</div>
+
+	<table id="tblBuilds" class="pane sortable bigtable">
 		<thead>
 			<tr>
 				<td class="pane-header">Build Number</td>
+				<td class="pane-header">Status</td>
 				<td class="pane-header">Timestamp</td>
+				<td class="pane-header">Authors</td>
+				<td class="pane-header">Passing Rate</td>
+				<td class="pane-header">Passed Tests</td>
            	</tr>
 		</thead>
 		<tbody>
@@ -14,7 +51,11 @@
 							${build.number}
 						</a>
 					</td>
+					<td class="pane" data="${build.status}" data-col="status">${build.status}</td>
 					<td class="pane" data="${build.timestampString}">${build.readableTimestamp}</td>
+					<td class="pane" data="${build.authorsString}" data-col="authors">${build.authorsString}</td>
+					<td class="pane" data="${build.passingRate}" data-col="passingRate">${build.passingRate}</td>
+					<td class="pane" data="${build.passedTests}" data-col="passedTests">${build.passedTests}</td>
 				</tr>
 			</j:forEach>
 		</tbody>
