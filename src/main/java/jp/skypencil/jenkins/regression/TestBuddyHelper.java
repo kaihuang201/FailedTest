@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.HashMap;
 
 import hudson.model.AbstractBuild;
+import hudson.scm.ChangeLogSet;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.ClassResult;
 import hudson.tasks.junit.PackageResult;
@@ -17,7 +18,14 @@ import hudson.tasks.junit.TestResultAction;
 
 public class TestBuddyHelper {
 
-
+    /** 
+     * Returns a list of CaseResults that are contained in a build. Currently this
+     * function only handles builds whose getResult return 
+     * an object of type TestResultAction or AggregatedTestResultAction
+     * @param build an AbstractBuild object from which the caller wants to get
+     *      the case results.
+     * @return an ArrayList of CaseResult.
+     */
     @SuppressWarnings("rawtypes")
     public static ArrayList<CaseResult> getAllCaseResultsForBuild(AbstractBuild build) {
         ArrayList<CaseResult> ret = new ArrayList<CaseResult>();
@@ -41,7 +49,31 @@ public class TestBuddyHelper {
         return ret;
     }
     
-  
+    /**
+     * Returns a list of authors that make the change to the build
+     * **/
+    @SuppressWarnings("rawtypes")
+    public static List<String> getChangeLogForBuild(AbstractBuild build) {
+    	List<String> ret = new ArrayList<String>();
+    	ChangeLogSet change = build.getChangeSet();
+    	if(!change.isEmptySet()){
+    		for(Object entry:change.getItems()){
+    			hudson.scm.ChangeLogSet.Entry e = (hudson.scm.ChangeLogSet.Entry)entry;
+    			ret.add(e.getAuthor().getDisplayName());
+    			System.out.println(e.getAuthor().getDisplayName());
+    		}
+    	}
+    	
+    	return ret;
+      // System.out.println(build.getChangeSet().getItems()[0].toString());
+    }
+    /**
+     * A helper fuction that returns a of CaseResult from a TestReult
+     * object.
+     * @param testResult a TestResult object that contains PackageResult as its
+     *      children
+     * @return An ArrayList of CaseResult.
+     */
     private static ArrayList<CaseResult> getTestsFromTestResult(TestResult testResult) {
         ArrayList<CaseResult> tests = new ArrayList<CaseResult>();
         Collection<PackageResult> packageResults = testResult.getChildren();
@@ -57,6 +89,17 @@ public class TestBuddyHelper {
     }
 
 
+    /**
+     * Given two builds thisBuild and otherBuild, returns the a list of
+     * CaseResult that have different fail/pass results.
+     *
+     * @param thisBuild an AbstractBuild.
+     * @param otherBuild another AbstractBuild, which is compared againt thisBuild
+     * @return an ArrayList of CaseResult in thisBuild that satisfies any of
+     *  the folloing conditions:
+     *      - fails in thisBuild, but passes in otherBuild
+     *      - passes in thisBuild, but failes in otherBuild
+     */
     public static ArrayList<CaseResult> getChangedTestsBetweenBuilds(AbstractBuild thisBuild, AbstractBuild otherBuild) {
         ArrayList<CaseResult> thisResults = getAllCaseResultsForBuild(thisBuild);
         ArrayList<CaseResult> otherResults = getAllCaseResultsForBuild(otherBuild);

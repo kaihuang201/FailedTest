@@ -83,9 +83,12 @@ public class TestBuddyAction extends Actionable implements Action {
 		List<BuildInfo> builds = new ArrayList<BuildInfo>();
 		RunList<Run> runs = project.getBuilds();
 		Iterator<Run> runIterator = runs.iterator();
+
 		while (runIterator.hasNext()) {
 			Run run = runIterator.next();
-			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
+			List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+
+			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors);
 			builds.add(build);
 		}
 		
@@ -96,7 +99,8 @@ public class TestBuddyAction extends Actionable implements Action {
 	public BuildInfo getBuildInfo(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2());
+		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -166,12 +170,13 @@ public class TestBuddyAction extends Actionable implements Action {
 		private int number;
 		private Calendar timestamp;
 		private String timestampString;
-
+		private List<String> authors;
 		@DataBoundConstructor
-		public BuildInfo(int number, Calendar timestamp, String timestampString) {
+		public BuildInfo(int number, Calendar timestamp, String timestampString, List<String> a) {
 			this.number = number;
 			this.timestamp = timestamp;
 			this.timestampString = timestampString;
+			this.authors = new ArrayList<String>(a);
 		}
 
 		public int getNumber() {
@@ -185,6 +190,10 @@ public class TestBuddyAction extends Actionable implements Action {
 		public String getReadableTimestamp() {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy h:mm:ss a");
 			return dateFormat.format(timestamp.getTime());
+		}
+		
+		public List<String> getAuthors(){
+			return authors;
 		}
 	}
 	
