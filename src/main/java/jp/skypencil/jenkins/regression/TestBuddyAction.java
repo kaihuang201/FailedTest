@@ -24,7 +24,7 @@ import jp.skypencil.jenkins.regression.TestBuddyHelper;
 public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
-
+	private static final String[] Status = {"SUCCESS", "UNSTABLE", "FAILURE", "NOT_BUILT", "ABORTED"};
 	
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
@@ -90,7 +90,7 @@ public class TestBuddyAction extends Actionable implements Action {
 			Run run = runIterator.next();
 			List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
 			double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors, rates[0], rates[1]);
+			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), Status[run.getResult().ordinal], authors, rates[0], rates[1]);
 			builds.add(build);
 		}
 		
@@ -103,7 +103,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		Run run = project.getBuildByNumber(buildNumber);
 		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
 		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors, rates[0], rates[1]);
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getBuildStatusSummary().message, authors, rates[0], rates[1]);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -171,14 +171,16 @@ public class TestBuddyAction extends Actionable implements Action {
 		private int number;
 		private Calendar timestamp;
 		private String timestampString;
+		private String status;
 		private List<String> authors;
 		private int passed_tests;
 		private double passing_rate;
 		@DataBoundConstructor
-		public BuildInfo(int number, Calendar timestamp, String timestampString, List<String> a, double pt, double pr) {
+		public BuildInfo(int number, Calendar timestamp, String timestampString, String s, List<String> a, double pt, double pr) {
 			this.number = number;
 			this.timestamp = timestamp;
 			this.timestampString = timestampString;
+			this.status = s;
 			this.authors = new ArrayList<String>(a);
 			this.passed_tests = (int) pt;
 			this.passing_rate = pr;
@@ -195,6 +197,10 @@ public class TestBuddyAction extends Actionable implements Action {
 		public String getReadableTimestamp() {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy h:mm:ss a");
 			return dateFormat.format(timestamp.getTime());
+		}
+		
+		public String getStatus(){
+			return status;
 		}
 		
 		public List<String> getAuthors(){
