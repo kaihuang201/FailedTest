@@ -15,6 +15,10 @@ import hudson.model.User;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.CaseResult.Status;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.AggregatedTestResultAction;
+import hudson.tasks.junit.ClassResult;
+import hudson.tasks.junit.PackageResult;
+import hudson.tasks.junit.TestResult;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -47,16 +51,17 @@ import java.io.FileOutputStream;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CaseResult.class)
-public class RegressionReportNotifierTest {
+public class TestBuddyNotifierTest {
     private BuildListener listener;
     private Launcher launcher;
-    private AbstractBuild<?, ?> build;
+    private AbstractBuild<?, ?> build, build2;
 
     @Before
     public void setUp() throws Exception {
         listener = mock(BuildListener.class);
         launcher = mock(Launcher.class);
         build = mock(AbstractBuild.class);
+        build2 = mock(AbstractBuild.class);
         PrintStream logger = mock(PrintStream.class);
         doReturn("").when(build).getUrl();
         doReturn(logger).when(listener).getLogger();
@@ -66,7 +71,7 @@ public class RegressionReportNotifierTest {
     public void testCompileErrorOccured() throws InterruptedException,
             IOException {
         doReturn(null).when(build).getAction(AbstractTestResultAction.class);
-        RegressionReportNotifier notifier = new RegressionReportNotifier("", false, false);
+        TestBuddyNotifier notifier = new TestBuddyNotifier("", false, false);
 
         assertThat(notifier.perform(build, launcher, listener), is(true));
     }
@@ -75,7 +80,7 @@ public class RegressionReportNotifierTest {
     public void testSend() throws InterruptedException, MessagingException {
         makeRegression();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, false);
+        TestBuddyNotifier notifier = new TestBuddyNotifier("author@mail.com", false, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -90,7 +95,7 @@ public class RegressionReportNotifierTest {
     public void testSendToCulprits() throws InterruptedException, MessagingException {
         makeRegression();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, false);
+        TestBuddyNotifier notifier = new TestBuddyNotifier("author@mail.com", true, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -102,11 +107,6 @@ public class RegressionReportNotifierTest {
         assertThat(to[1].toString(), is(equalTo("culprit@mail.com")));
     }
 
-    //@Test
-    public void testListPassed() {
-        makeNewlyPassing();
-        //...
-    }
 
     @Test
     public void testAttachLogFile() throws InterruptedException, MessagingException, IOException {
@@ -114,12 +114,13 @@ public class RegressionReportNotifierTest {
         
         Writer writer = null;
         writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("log"), "utf-8"));
-        writer.write("testtttt");
+        writer.write("regression");
         writer.close();
 
-        doReturn(new File("log")).when(build).getLogFile();
+        File f = new File("log");
+        doReturn(f).when(build).getLogFile();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
+        TestBuddyNotifier notifier = new TestBuddyNotifier("author@mail.com", false, true);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -134,9 +135,45 @@ public class RegressionReportNotifierTest {
         assertThat(multipartContent.getCount(), is(2));
         assertThat(((MimeBodyPart)multipartContent.getBodyPart(1)).getDisposition(), is(equalTo(Part.ATTACHMENT)));
         assertThat(((MimeBodyPart)multipartContent.getBodyPart(0)).getDisposition(), is(nullValue()));
+
+        f.delete();
     }
 
+    @Test
+    public void testAttachLogFile2() throws InterruptedException, MessagingException, IOException {
+        makeRegression();
+        
+        Writer writer = null;
+        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("log"), "utf-8"));
+        writer.write("test");
+        writer.close();
 
+        File f = new File("log");
+        doReturn(f).when(build).getLogFile();
+
+        TestBuddyNotifier notifier = new TestBuddyNotifier("author@mail.com", true, true);
+        MockedMailSender mailSender = new MockedMailSender();
+        notifier.setMailSender(mailSender);
+
+        assertThat(build.getLogFile(), is(notNullValue()));
+        assertThat(notifier.perform(build, launcher, listener), is(true)); 
+        assertThat(mailSender.getSentMessage(), is(notNullValue()));
+
+        Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
+        assertThat(to.length, is(2));
+        assertThat(to[0].toString(), is(equalTo("author@mail.com")));
+        assertThat(to[1].toString(), is(equalTo("culprit@mail.com")));
+
+        assertThat(notifier.getAttachLogs(), is(true));
+        assertThat(mailSender.getSentMessage().getContent() instanceof Multipart, is(true));
+        
+        Multipart multipartContent = (Multipart) mailSender.getSentMessage().getContent();
+        assertThat(multipartContent.getCount(), is(2));
+        assertThat(((MimeBodyPart)multipartContent.getBodyPart(1)).getDisposition(), is(equalTo(Part.ATTACHMENT)));
+        assertThat(((MimeBodyPart)multipartContent.getBodyPart(0)).getDisposition(), is(nullValue()));
+
+        f.delete();
+    }
 
 
     private void makeRegression() {
@@ -153,22 +190,9 @@ public class RegressionReportNotifierTest {
         doReturn(failedTests).when(result).getFailedTests();
     }
 
-    private void makeNewlyPassing() {
-        AbstractTestResultAction<?> result = mock(AbstractTestResultAction.class);
-        doReturn(result).when(build).getAction(AbstractTestResultAction.class);
-        doReturn(Result.SUCCESS).when(build).getResult();
-        User culprit = mock(User.class);
-        doReturn("culprit").when(culprit).getId();
-        doReturn(new ChangeLogSetMock(build).withChangeBy(culprit)).when(build).getChangeSet();
-
-        CaseResult passedTest = mock(CaseResult.class);
-        doReturn(Status.PASSED).when(passedTest).getStatus();
-        List<CaseResult> passedTests = Lists.newArrayList(passedTest);
-        doReturn(passedTests).when(result).getFailedTests();
-    }
 
     private static final class MockedMailSender implements
-            RegressionReportNotifier.MailSender {
+            TestBuddyNotifier.MailSender {
         private MimeMessage sentMessage = null;
 
         @Override

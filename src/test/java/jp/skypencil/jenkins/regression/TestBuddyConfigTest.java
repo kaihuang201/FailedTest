@@ -21,11 +21,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-public class RegressionReportConfigTest {
+public class TestBuddyConfigTest {
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 
-    private static final String NAME_CHECKBOX = "jp-skypencil-jenkins-regression-RegressionReportNotifier";
+    private static final String NAME_CHECKBOX = "jp-skypencil-jenkins-regression-TestBuddyNotifier";
     private static final String JOB_NAME = "Test";
 
     @Test
