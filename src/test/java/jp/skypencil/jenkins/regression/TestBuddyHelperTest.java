@@ -18,6 +18,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.CaseResult;
 
+import jp.skypencil.jenkins.regression.TestBuddyAction.BuildInfo;
+import jp.skypencil.jenkins.regression.TestBuddyAction.TestInfo;
+
 public class TestBuddyHelperTest {
 	@Rule
 	public JenkinsRule j = new JenkinsRule();
@@ -30,12 +33,12 @@ public class TestBuddyHelperTest {
 		project = j.createMavenProject("project1");
 		testBuddyAction = new TestBuddyAction(project);
 
-		createBuild("Source_1");
-		createBuild("Source_2");
-		createBuild("Source_3");
-		createBuild("Source_4");
-		createBuild("Source_5");
-		createBuild("Source_6");
+		//createBuild("Source_1");
+		//createBuild("Source_2");
+		//createBuild("Source_3");
+		//createBuild("Source_4");
+		//createBuild("Source_5");
+		//createBuild("Source_6");
 	}
 
 	private void createBuild(String source) throws Exception {
@@ -46,7 +49,7 @@ public class TestBuddyHelperTest {
 	@Test
 	public void testGetBuilds1() {
 		List<BuildInfo> myBuilds = testBuddyAction.getBuilds();
-		assertTrue(myBuilds.size() == 6);		
+		assertTrue(myBuilds.size() == 0);		
 	}
 
 	@Test
@@ -59,7 +62,7 @@ public class TestBuddyHelperTest {
 		createBuild("Source_1");
 		AbstractBuild build = project.getBuildByNumber(1);
         List<CaseResult> case_results = TestBuddyHelper.getAllCaseResultsForBuild(build);
-        assertEquals(case_results.size(), 3);
+        assertEquals(3, case_results.size());
 	}
 
 	@Test
@@ -67,7 +70,7 @@ public class TestBuddyHelperTest {
 		createBuild("Source_4");
         AbstractBuild build = project.getBuildByNumber(1);
         List<CaseResult> case_results = TestBuddyHelper.getAllCaseResultsForBuild(build);
-        assertEquals(case_results.size(), 4);
+        assertEquals(4, case_results.size());
 	}
 
     @Test
@@ -76,7 +79,9 @@ public class TestBuddyHelperTest {
     }
 
     @Test
-    public void testGetChangedTestsBetweenBuilds1() {
+    public void testGetChangedTestsBetweenBuilds1() throws Exception {
+		createBuild("Source_1");
+		createBuild("Source_2");
 		List<CaseResult> diffArray;	
 	
 		AbstractBuild b1 = project.getBuildByNumber(1);
@@ -86,7 +91,7 @@ public class TestBuddyHelperTest {
 		List<CaseResult> caseResultsB2 = TestBuddyHelper.getAllCaseResultsForBuild(b2);
 
 		assertEquals(3, caseResultsB1.size());
-		// diffArray = TestBuddyHelper.getChangedTestsBetweenBuilds(b1, b2);
-		assertTrue(true);
+		diffArray = TestBuddyHelper.getChangedTestsBetweenBuilds(b1, b2);
+		assertEquals(1, diffArray.size());
     }
 }
