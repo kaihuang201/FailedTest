@@ -79,7 +79,7 @@ import jp.skypencil.jenkins.regression.TestBuddyHelper;
  * @version 1.0
  * @author eller86 (Kengo TODA)
  */
-public final class TestBuddyNotifier extends Notifier {
+public final class RegressionReportNotifier extends Notifier {
     static interface MailSender {
         void send(MimeMessage message) throws MessagingException;
     }
@@ -88,7 +88,7 @@ public final class TestBuddyNotifier extends Notifier {
     private final String recipients;
     private final boolean sendToCulprits;
     private final boolean attachLogs;
-    private MailSender mailSender = new TestBuddyNotifier.MailSender() {
+    private MailSender mailSender = new RegressionReportNotifier.MailSender() {
         @Override
         public void send(MimeMessage message) throws MessagingException {
             Transport.send(message);
@@ -96,7 +96,7 @@ public final class TestBuddyNotifier extends Notifier {
     };
 
     @DataBoundConstructor
-    public TestBuddyNotifier(String recipients, boolean sendToCulprits, boolean attachLogs) {
+    public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean attachLogs) {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
         this.attachLogs = attachLogs;
@@ -275,7 +275,7 @@ public final class TestBuddyNotifier extends Notifier {
 
         MimeMessage message = new MimeMessage(session);
                 
-        message.setSubject(Messages.TestBuddyNotifier_MailSubject());
+        message.setSubject(Messages.RegressionReportNotifier_MailSubject());
         message.setRecipients(RecipientType.TO, recipentList.toArray(new Address[recipentList.size()]));
         
         
@@ -352,7 +352,7 @@ public final class TestBuddyNotifier extends Notifier {
 
         @Override
         public String getDisplayName() {
-            return Messages.TestBuddyNotifier_DisplayName();
+            return Messages.RegressionReportNotifier_DisplayName();
         }
     }
     
