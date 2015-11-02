@@ -1,5 +1,6 @@
 package jp.skypencil.jenkins.regression;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,6 +79,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return Stapler.getCurrentRequest().getParameter(parameterName);
 	}
 
+	
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public List<BuildInfo> getBuilds() {
 		List<BuildInfo> builds = new ArrayList<BuildInfo>();
@@ -87,8 +89,8 @@ public class TestBuddyAction extends Actionable implements Action {
 		while (runIterator.hasNext()) {
 			Run run = runIterator.next();
 			List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
-
-			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors);
+			double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
+			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors, rates[0], rates[1]);
 			builds.add(build);
 		}
 		
@@ -100,7 +102,8 @@ public class TestBuddyAction extends Actionable implements Action {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
 		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors);
+		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), authors, rates[0], rates[1]);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -159,9 +162,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		  List<TestInfo> compareList = new ArrayList<TestInfo>();
 		  ArrayList<CaseResult> buildCompare = TestBuddyHelper.getChangedTestsBetweenBuilds(buildOne, buildTwo);
 		  for (CaseResult caseResult : buildCompare) {
-		    //compareList.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Status Changed"));
 		    compareList.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Status Changed"));
-
 		  }
 		  return compareList;  
 		 }
@@ -171,12 +172,16 @@ public class TestBuddyAction extends Actionable implements Action {
 		private Calendar timestamp;
 		private String timestampString;
 		private List<String> authors;
+		private int passed_tests;
+		private double passing_rate;
 		@DataBoundConstructor
-		public BuildInfo(int number, Calendar timestamp, String timestampString, List<String> a) {
+		public BuildInfo(int number, Calendar timestamp, String timestampString, List<String> a, double pt, double pr) {
 			this.number = number;
 			this.timestamp = timestamp;
 			this.timestampString = timestampString;
 			this.authors = new ArrayList<String>(a);
+			this.passed_tests = (int) pt;
+			this.passing_rate = pr;
 		}
 
 		public int getNumber() {
@@ -194,6 +199,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		
 		public List<String> getAuthors(){
 			return authors;
+		}
+		
+		public int getPassedTests(){
+			return passed_tests;
+		}
+		
+		public double getPassingRate(){
+			return passing_rate;
 		}
 	}
 	

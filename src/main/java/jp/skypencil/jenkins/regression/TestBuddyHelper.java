@@ -1,5 +1,6 @@
 package jp.skypencil.jenkins.regression;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -51,6 +52,9 @@ public class TestBuddyHelper {
     
     /**
      * Returns a list of authors that make the change to the build
+     * @param build an AbstractBuild object from which the caller wants to get
+     *      the case results.
+     * @return an List of String.
      * **/
     @SuppressWarnings("rawtypes")
     public static List<String> getChangeLogForBuild(AbstractBuild build) {
@@ -60,13 +64,42 @@ public class TestBuddyHelper {
     		for(Object entry:change.getItems()){
     			hudson.scm.ChangeLogSet.Entry e = (hudson.scm.ChangeLogSet.Entry)entry;
     			ret.add(e.getAuthor().getDisplayName());
-    			System.out.println(e.getAuthor().getDisplayName());
+    			//System.out.println(e.getAuthor().getDisplayName());
     		}
     	}
     	
     	return ret;
       // System.out.println(build.getChangeSet().getItems()[0].toString());
     }
+    
+	/**
+	 * Returns a double array containing passed tests number, and passing rate for a build
+     * @param build an AbstractBuild object from which the caller wants to get
+     *      the case results.
+     * @return an Array of double.
+	 * **/
+	@SuppressWarnings("rawtypes")
+	public static double[] getRatesforBuild(AbstractBuild build){
+		double[] ret = new double[2];
+		ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
+		double total_tests = caseResults.size();
+		double passed_tests = 0;
+		double passing_rate = 1;
+		for (CaseResult caseResult : caseResults){
+			if(caseResult.isPassed()){
+				passed_tests++;
+			}
+		}
+		if(total_tests != 0){
+			passing_rate = passed_tests/total_tests;
+		}
+		DecimalFormat df = new DecimalFormat("#.##");      
+		passing_rate = Double.valueOf(df.format(passing_rate));
+		ret[0] = passed_tests;
+		ret[1] = passing_rate;
+		return ret;
+	}
+    
     /**
      * A helper fuction that returns a of CaseResult from a TestReult
      * object.
