@@ -2,7 +2,6 @@ package jp.skypencil.jenkins.regression;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
@@ -12,11 +11,12 @@ import org.jvnet.hudson.test.ExtractResourceSCM;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import hudson.maven.MavenModuleSet;
-import jp.skypencil.jenkins.regression.TestBuddyAction.BuildInfo;
-import jp.skypencil.jenkins.regression.TestBuddyAction.TestInfo;
+import jp.skypencil.jenkins.regression.TestBuddyHelper;
 
 import hudson.tasks.junit.CaseResult;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractBuild;
+import hudson.tasks.junit.CaseResult;
 
 public class TestBuddyHelperTest {
 	@Rule
@@ -40,10 +40,7 @@ public class TestBuddyHelperTest {
 
 	private void createBuild(String source) throws Exception {
 		project.setScm(new ExtractResourceSCM(getClass().getResource(source + ".zip")));
-		project.scheduleBuild2(0);
-
-		// This will ensure the build is completed before continuing the process
-		j.waitUntilNoActivity();
+		project.scheduleBuild2(0).get();
 	}
 	
 	@Test
@@ -53,13 +50,24 @@ public class TestBuddyHelperTest {
 	}
 
 	@Test
-	public void testGetAllCaseResultForBuild1() {
+	public void testGetAllCaseResultForBuild2() {
 		assertTrue(true);
 	}
 
 	@Test
-	public void testGetAllCaseResultForBuild2() {
-		assertTrue(true);
+	public void testGetAllCaseResultsForBuild1() throws Exception {
+		createBuild("Source_1");
+		AbstractBuild build = project.getBuildByNumber(1);
+        List<CaseResult> case_results = TestBuddyHelper.getAllCaseResultsForBuild(build);
+        assertEquals(case_results.size(), 3);
+	}
+
+	@Test
+	public void testGetAllCaseResultsForBuild2() throws Exception {
+		createBuild("Source_4");
+        AbstractBuild build = project.getBuildByNumber(1);
+        List<CaseResult> case_results = TestBuddyHelper.getAllCaseResultsForBuild(build);
+        assertEquals(case_results.size(), 4);
 	}
 
     @Test

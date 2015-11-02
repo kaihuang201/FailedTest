@@ -73,6 +73,8 @@ import com.google.common.collect.Sets;
 import hudson.tasks.junit.PackageResult;
 import hudson.tasks.junit.ClassResult;
 
+import jp.skypencil.jenkins.regression.TestBuddyHelper;
+
 /**
  * @version 1.0
  * @author eller86 (Kengo TODA)
@@ -133,15 +135,15 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         /* S01: Obtain list of newly passed tests and write to console */
-        logger.println("TestBuddy reporter starts now...");
-        List<CaseResult> tests = listAllTests(build, build.getId(), logger);
+        logger.println("TestBuddy reporter starts now......");
+        //List<CaseResult> tests = listAllTests(build, build.getId(), logger);
+        List<CaseResult> tests = TestBuddyHelper.getAllCaseResultsForBuild(build);
         //for(CaseResult cr : tests) logger.println(cr.getFullName() + "is passing: " + cr.isPassed());
-		List<CaseResult> newlyPassedTests = listNewlyPassed(testResultAction, tests, logger);
+        List<CaseResult> newlyPassedTests = listNewlyPassed(testResultAction, tests);
 		writeToConsolePassed(newlyPassedTests, listener);
         List<CaseResult> regressionedTests = listRegressions(testResultAction);
         writeToConsole(regressionedTests, listener);
 
-        
 
         try {
             mailReport(regressionedTests, newlyPassedTests, recipients, listener, build);
@@ -150,51 +152,10 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         logger.println("TestBuddy reporter ends.");
-
-        //logger.println("The number of test results we got back are " + getSimpleFunc(build, logger));
         return true;
     }
 
-    @SuppressWarnings("unchecked")
-    public List<CaseResult> listAllTests(AbstractBuild<?, ?> build, String buildId, PrintStream logger){
-        List<CaseResult> testsList = new ArrayList<CaseResult>();
-
-        AbstractProject project = build.getProject();
-        if (project == null) {
-            return testsList;
-        }
-        RunList<Run> runs = project.getBuilds();
-        String lastBuild = project.getBuilds().getFirstBuild().getDisplayName();
-        Iterator<Run> runIterator = runs.iterator();
-        while (runIterator.hasNext()) {
-            Run run = runIterator.next();
-            if(run.getId().equals(buildId)) {
-                List<hudson.tasks.test.AggregatedTestResultAction> testActions = run.getActions(hudson.tasks.test.AggregatedTestResultAction.class);
-                for (hudson.tasks.test.AggregatedTestResultAction testAction : testActions) {
-                    List<AggregatedTestResultAction.ChildReport> childReport = testAction.getResult();
-                    logger.println(childReport.get(0).child);
-                    hudson.tasks.junit.TestResult testResult = (hudson.tasks.junit.TestResult)childReport.get(0).result;
-                    Collection<PackageResult> pkgCol = testResult.getChildren();
-                    Collection<ClassResult> cCol = (pkgCol.iterator().next()).getChildren();
-                    Iterator<ClassResult> classIter = cCol.iterator();
-                    while(classIter.hasNext()) {
-                        ClassResult cl = classIter.next();
-                        Collection<CaseResult> caseCol = cl.getChildren();
-                        Iterator<CaseResult> caseIter = caseCol.iterator();
-                        while(caseIter.hasNext()) {
-                            CaseResult c = caseIter.next();
-                            testsList.add(c);
-                        }
-                    }
-                }
-            }
-            
-        }
-        return testsList;
-    }
-    
-    public List<CaseResult> listRegressions(
-            AbstractTestResultAction<?> testResultAction) {
+    public List<CaseResult> listRegressions(AbstractTestResultAction<?> testResultAction) {
         List<? extends TestResult> failedTest = testResultAction.getFailedTests();
         Iterable<? extends TestResult> filtered = Iterables.filter(failedTest, new RegressionPredicate());
         List<CaseResult> regressionedTests =
@@ -203,21 +164,14 @@ public final class RegressionReportNotifier extends Notifier {
 	}
 
     /* S01: Return a list of all newly passed tests (inverse of regression) */
-	public List<CaseResult> listNewlyPassed(AbstractTestResultAction<?> testResultAction, List<CaseResult> allTests, PrintStream logger) {
+	public List<CaseResult> listNewlyPassed(AbstractTestResultAction<?> testResultAction, List<CaseResult> allTests) {
 		List<CaseResult> newlyPassedTests = new ArrayList<CaseResult>();
 		if(testResultAction.getPreviousResult() != null) {
-		    List<? extends TestResult> prevFailedTests = testResultAction.getPreviousResult().getFailedTests();
-		    //logger.println(prevFailedTests.size()); logger.println(prevFailedTests.get(0).getFullName());
-            //List<? extends TestResult> currFailedTests = testResultAction.getFailedTests();
-		    //logger.println(currFailedTests.size()); logger.println(currFailedTests.get(0).getFullName());
+		    List<TestResult> prevFailedTests = testResultAction.getPreviousResult().getFailedTests();
             List<TestResult> currPassedTests = new ArrayList<TestResult>();
             for(TestResult c : allTests) {
                 if(c.isPassed()) currPassedTests.add(c);
             }
-            logger.println(prevFailedTests.size());
-            logger.println(currPassedTests.size());
-            
-
 		    for(TestResult prev : prevFailedTests) {
                 String prevTestName = prev.getFullName();
                 for(TestResult cur : currPassedTests) {
@@ -227,43 +181,12 @@ public final class RegressionReportNotifier extends Notifier {
                         }
                     }
                 }
-               
-                //CaseResult prevCase = (CaseResult)prev;
-                // if(currPassedTests.contains(prev)) {
-                //      if(prev instanceof CaseResult) {
-                //         newlyPassedTests.add((CaseResult)prev);
-                //     }
-                // }
-                
-                // String prevTestName = prev.getFullName();
-                // boolean stillFailing = false;
-                // for(TestResult cur : currFailedTests) {
-                //     if(cur.getFullName().equals(prevTestName)) {
-                //         stillFailing = true;
-                //         logger.println(prevTestName + " is still failing.");
-                //     }
-                // }
-                // if(!stillFailing) {
-                //     if(prev instanceof CaseResult) {
-                //         CaseResult c = (CaseResult)prev;
-                //         //logger.println(c.getPassedTests().size());
-                //         //logger.println(c.isPassed());
-                //         newlyPassedTests.add(c);
-                //     }
-                // }
 		    }
-            logger.println(newlyPassedTests.size());
-            
-		}
-		else {
-		    logger.println("testResultAction.getPreviousResult() returns null");
 		}
         return newlyPassedTests;
-
     }
 
-    private void writeToConsole(List<CaseResult> regressions,
-            BuildListener listener) {
+    private void writeToConsole(List<CaseResult> regressions, BuildListener listener) {
         if (regressions.isEmpty()) {
             return;
         }
@@ -272,14 +195,12 @@ public final class RegressionReportNotifier extends Notifier {
         // TODO link to test result page
         for (CaseResult result : regressions) {
             // listener.hyperlink(url, text)
-            oStream.printf("[REGRESSION]%s - description: %s%n",
-                    result.getFullName(), result.getErrorDetails());
+            oStream.printf("[REGRESSION]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
         }
     }
 
     /* S01: Write newly passed tests to console */
-    private void writeToConsolePassed(List<CaseResult> regressions,
-            BuildListener listener) {
+    private void writeToConsolePassed(List<CaseResult> regressions, BuildListener listener) {
         if (regressions.isEmpty()) {
             return;
         }
@@ -288,8 +209,7 @@ public final class RegressionReportNotifier extends Notifier {
         // TODO link to test result page
         for (CaseResult result : regressions) {
             // listener.hyperlink(url, text)
-            oStream.printf("[NEWLYPASSED]%s - description: %s%n",
-                    result.getFullName(), result.getErrorDetails());
+            oStream.printf("[PROGRESSION]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
         }
 	}
 
