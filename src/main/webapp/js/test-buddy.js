@@ -6,7 +6,7 @@ function toggleProg(){
 }
 
 clearFilters = function(tableID) {
-	jQuery('#'+tableID+'Filters').find('input[type="text"],select').each(function() {
+	jQuery('#'+tableID+'Filters').find('input[type="text"],input[type="number"],select').each(function() {
 		jQuery(this).val('');
 	});
 	
@@ -16,24 +16,15 @@ clearFilters = function(tableID) {
 }
 
 filterBuilds = function() {
-	var positiveIntegerRegex = /^[0-9]+?$/;
-	var positiveFloatRegex = /(^[0-9]+?(\.[0-9]*?)?$)|(^\.[0-9]+?$)/;
-
 	var buildStatus = jQuery('#buildStatus').val();
 	var author = jQuery('#author').val();
 	
 	var minPassingRate = jQuery('#minPassingRate').val();
-	if (!positiveIntegerRegex.test(minPassingRate)) {
-		minPassingRate = '';
-	}
 	if (minPassingRate != '') {
 		minPassingRate = parseFloat(minPassingRate);
 	}
 
 	var minPassedTests = jQuery('#minPassedTests').val();
-	if (!positiveFloatRegex.test(minPassedTests)) {
-		minPassedTests = '';
-	}
 	if (minPassedTests != '') {
 		minPassedTests = parseInt(minPassedTests);
 	}

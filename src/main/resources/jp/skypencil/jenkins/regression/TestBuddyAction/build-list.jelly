@@ -1,35 +1,37 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
-	<div id="tblBuildsFilters" class="tb-filters">
-		<div class="tb-filter">
-			Status:
-			<select id="buildStatus">
-				<option value="">- Status -</option>
-				<j:forEach var="buildStatus" items="${it.allBuildStatuses}">
-					<option value="${buildStatus}">${buildStatus}</option>
-				</j:forEach>
-			</select>
-		</div>
-		<div class="tb-filter">
-			Authors:
-			<select id="author">
-				<option value="">- Author -</option>
-				<j:forEach var="author" items="${it.allAuthors}">
-					<option value="${author}">${author}</option>
-				</j:forEach>
-			</select>
-		</div>
-		<div class="tb-filter">
-			Min Passing Rate:
-			<input type="text" id="minPassingRate" size="4" />
-		</div>
-		<div class="tb-filter">
-			Min Passed Tests:
-			<input type="text" id="minPassedTests" size="4" />
-		</div>
-		<div class="tb-filter">
-			<button type="button" id="btnGo" onclick="filterBuilds();">Go</button>
-			<button type="button" id="btnClear" onclick="clearFilters('tblBuilds');">Clear</button>
-		</div>
+	<div class="tb-filters">
+		<form id="tblBuildsFilters">
+			<div class="tb-filter">
+				Status:
+				<select id="buildStatus">
+					<option value="">- Status -</option>
+					<j:forEach var="buildStatus" items="${it.allBuildStatuses}">
+						<option value="${buildStatus}">${buildStatus}</option>
+					</j:forEach>
+				</select>
+			</div>
+			<div class="tb-filter">
+				Authors:
+				<select id="author">
+					<option value="">- Author -</option>
+					<j:forEach var="author" items="${it.allAuthors}">
+						<option value="${author}">${author}</option>
+					</j:forEach>
+				</select>
+			</div>
+			<div class="tb-filter">
+				Min Passing Rate:
+				<input type="number" id="minPassingRate" min="0" max="1" step="0.01" size="4" />
+			</div>
+			<div class="tb-filter">
+				Min Passed Tests:
+				<input type="number" id="minPassedTests" min="0" step="1" size="4" />
+			</div>
+			<div class="tb-filter">
+				<button type="submit" id="btnGo">Go</button>
+				<button type="button" id="btnClear" onclick="clearFilters('tblBuilds');">Clear</button>
+			</div>
+		</form>
 	</div>
 
 	<table id="tblBuilds" class="pane sortable bigtable">
@@ -60,4 +62,16 @@
 			</j:forEach>
 		</tbody>
 	</table>
+	
+	<script type="text/javascript">
+		jQuery('#tblBuildsFilters').submit(function(e){
+			e.preventDefault();
+			
+			if(this.checkValidity()) {
+				 filterBuilds();
+			}
+
+			return false;
+		});
+	</script>
 </j:jelly>
