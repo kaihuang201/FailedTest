@@ -1,0 +1,57 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	<j:set var="buildNumber" value="${it.getUrlParam('buildNumber')}"/>
+	<j:set var="build" value="${it.getBuildInfo(buildNumber)}"/>
+	<j:set var="authors" value="${build.authorsString}"/>
+
+	<h1>Build Details</h1>
+	<table>
+		<tr>
+			<td class="tb-label">Build Number:</td>
+			<td>${build.number}</td>
+		</tr>
+		<tr>
+			<td class="tb-label">Status:</td>
+			<td>${build.status}</td>
+		</tr>
+		<tr>
+			<td class="tb-label">Timestamp:</td>
+			<td>${build.readableTimestamp}</td>
+		</tr>
+		<j:if test="${authors != ''}">
+			<tr>
+				<td class="tb-label">Authors:</td>
+				<td>${authors}</td>
+			</tr>
+		</j:if>
+		<tr>
+			<td class="tb-label">Passing Rate:</td>
+			<td>${build.passingRate}</td>
+		</tr>
+		<tr>
+			<td class="tb-label">Passed Tests:</td>
+			<td>${build.passedTests}</td>
+		</tr>
+	</table>
+
+	<h2>Tests</h2>
+	<table class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header">Class</td>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Status</td>
+				<td class="pane-header">Package</td>
+			</tr>
+		</thead>
+		<tbody>
+			<j:forEach var="test" items="${it.getTests(buildNumber)}">
+				<tr>
+					<td class="pane" data="${test.className}">${test.className}</td>
+					<td class="pane" data="${test.name}">${test.name}</td>
+					<td class="pane" data="${test.status}">${test.status}</td>
+					<td class="pane" data="${test.packageName}">${test.packageName}</td>
+				</tr>
+			</j:forEach>
+		</tbody>
+	</table>
+</j:jelly>

@@ -1,0 +1,60 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	
+			
+			<h4>This feature allows you to compare the test results of any two builds</h4>
+			
+			<div class="tb-filters">
+			<div class="tb-filter">
+				Compare Tests in Build:
+				<select name = "build1" id="build1">
+					<option value=""></option>
+					<j:forEach var="build" items="${it.builds}">
+						<option value="${build.number}">${build.number}</option>
+					</j:forEach>
+				</select>
+			</div>
+			<div class="tb-filter">
+				to Tests in Build:
+				<select name = "build2" id="build2">
+					<option value=""></option>
+					<j:forEach var="build" items="${it.builds}">
+						<option value="${build.number}">${build.number}</option>
+					</j:forEach>
+				</select>
+			</div>
+			<div class="tb-filter">	 
+				<button type="button" onclick="compare()">Compare</button>
+			</div>
+			</div>
+	
+	<table class="pane sortable bigtable" id="table2">
+		<thead>
+			<tr>
+				<td class="pane-header">Class</td>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Status</td>
+				<td class="pane-header">Package</td>
+           	</tr>
+		</thead>
+		<tbody>
+		
+		</tbody>
+	</table>
+	<script>
+		compare = function() {
+			var build1 = jQuery('#build1').val();
+			var build2 = jQuery('#build2').val();
+			
+			remoteAction.getBuildCompare(build1, build2, jQuery.proxy(function(t) {
+				var results = t.responseObject();
+
+				var tbody = jQuery('#table2').find('tbody');
+				tbody.empty();
+				results.forEach(function(entry) {
+					tbody.append('<tr><td>'+entry.className+'</td><td>'+entry.name+'</td><td>'+entry.status+'</td><td>'+entry.packageName+'</td></tr>');
+				});
+			}, this));
+		}; 
+	</script>
+		
+</j:jelly>

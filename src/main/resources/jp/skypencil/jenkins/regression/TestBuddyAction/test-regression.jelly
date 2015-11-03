@@ -1,0 +1,24 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+ <input id="Regression" type="checkbox" checked="blue" onclick="toggleReg()"/>Regression
+ <input id="Progression" type="checkbox" checked="blue" onclick="toggleProg()"/>Progression<br/><br/>
+ <table id="mytable" class="pane sortable bigtable">
+  <thead>
+   <tr>
+	<td class="pane-header">Class</td>
+    <td class="pane-header">Name</td>
+    <td class="pane-header">Status</td>
+	<td class="pane-header">Package</td>
+   </tr>
+  </thead>
+  <tbody>
+   <j:forEach var="test" items="${it.newPassFail}">
+    <tr>
+     <td class="pane" data="${test.className}">${test.className}</td>
+     <td class="pane" data="${test.name}">${test.name}</td>
+     <td class="pane" data="${test.status}">${test.status}</td>
+     <td class="pane" data="${test.packageName}">${test.packageName}</td>
+    </tr>
+   </j:forEach>
+  </tbody>
+ </table>
+</j:jelly>

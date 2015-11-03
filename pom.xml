@@ -5,8 +5,8 @@
     <artifactId>plugin</artifactId>
     <version>1.609.3</version>
   </parent>
-  <artifactId>regression-report-plugin</artifactId>
-  <name>Regression Report Plugin</name>
+  <artifactId>test-buddy-plugin</artifactId>
+  <name>Test Buddy Plugin</name>
   <version>1.5-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Regression+Report+Plugin</url>

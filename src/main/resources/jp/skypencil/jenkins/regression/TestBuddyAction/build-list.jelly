@@ -1,0 +1,77 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	<div class="tb-filters">
+		<form id="tblBuildsFilters">
+			<div class="tb-filter">
+				Status:
+				<select id="buildStatus">
+					<option value="">- Status -</option>
+					<j:forEach var="buildStatus" items="${it.allBuildStatuses}">
+						<option value="${buildStatus}">${buildStatus}</option>
+					</j:forEach>
+				</select>
+			</div>
+			<div class="tb-filter">
+				Authors:
+				<select id="author">
+					<option value="">- Author -</option>
+					<j:forEach var="author" items="${it.allAuthors}">
+						<option value="${author}">${author}</option>
+					</j:forEach>
+				</select>
+			</div>
+			<div class="tb-filter">
+				Min Passing Rate:
+				<input type="number" id="minPassingRate" min="0" max="1" step="0.01" size="4" />
+			</div>
+			<div class="tb-filter">
+				Min Passed Tests:
+				<input type="number" id="minPassedTests" min="0" step="1" size="4" />
+			</div>
+			<div class="tb-filter">
+				<button type="submit" id="btnGo">Go</button>
+				<button type="button" id="btnClear" onclick="clearFilters('tblBuilds');">Clear</button>
+			</div>
+		</form>
+	</div>
+
+	<table id="tblBuilds" class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header">Build Number</td>
+				<td class="pane-header">Status</td>
+				<td class="pane-header">Timestamp</td>
+				<td class="pane-header">Authors</td>
+				<td class="pane-header">Passing Rate</td>
+				<td class="pane-header">Passed Tests</td>
+           	</tr>
+		</thead>
+		<tbody>
+			<j:forEach var="build" items="${it.builds}">
+				<tr>
+					<td class="pane" data="${build.number}">
+						<a href="${rootURL}/${it.url}?buildNumber=${build.number}&amp;displayType=buildDetails">
+							${build.number}
+						</a>
+					</td>
+					<td class="pane" data="${build.status}" data-col="status">${build.status}</td>
+					<td class="pane" data="${build.timestampString}">${build.readableTimestamp}</td>
+					<td class="pane" data="${build.authorsString}" data-col="authors">${build.authorsString}</td>
+					<td class="pane" data="${build.passingRate}" data-col="passingRate">${build.passingRate}</td>
+					<td class="pane" data="${build.passedTests}" data-col="passedTests">${build.passedTests}</td>
+				</tr>
+			</j:forEach>
+		</tbody>
+	</table>
+	
+	<script type="text/javascript">
+		jQuery('#tblBuildsFilters').submit(function(e){
+			e.preventDefault();
+			
+			if(this.checkValidity()) {
+				 filterBuilds();
+			}
+
+			return false;
+		});
+	</script>
+</j:jelly>
