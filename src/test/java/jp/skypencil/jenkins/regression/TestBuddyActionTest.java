@@ -120,6 +120,18 @@ public class TestBuddyActionTest {
 		assertEquals(5, testBuddyAction.getBuildInfo("5").getNumber());
 	}
 	
+
+	@Test
+	public void testGetBuildInfo3() throws Exception {
+		initMavenProject();
+		createBuild("Source_5");
+		BuildInfo a = testBuddyAction.getBuildInfo("1");
+		assertEquals(3, a.getPassedTests());
+		assertEquals(0.75, a.getPassingRate(), 0.001);
+		assertEquals("UNSTABLE", a.getStatus());
+		assertEquals(0, a.getAuthors().size());
+	}
+	
 	@Test
 	public void testGetTests1() throws Exception {
 		initMavenProject();

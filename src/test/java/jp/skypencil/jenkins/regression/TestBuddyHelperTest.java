@@ -73,6 +73,16 @@ public class TestBuddyHelperTest {
         assertEquals(4, case_results.size());
 	}
 
+	@SuppressWarnings({ "rawtypes" })
+	@Test
+	public void testgetRatesforBuild() throws Exception {
+		createBuild("Source_5");
+        AbstractBuild build = project.getBuildByNumber(1);
+        double[] rates = TestBuddyHelper.getRatesforBuild(build);
+        assertEquals(3.0, rates[0], 0.001);
+        assertEquals(0.75, rates[1], 0.001);
+	}
+	
     @Test
     public void testGetTestFromTestResult1() {
 		assertTrue(true);

@@ -107,7 +107,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		Run run = project.getBuildByNumber(buildNumber);
 		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
 		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getBuildStatusSummary().message, authors, rates[0], rates[1]);
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
 	}
 	
 	public List<String> getAllBuildStatuses() {
