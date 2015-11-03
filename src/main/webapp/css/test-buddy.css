@@ -21,3 +21,8 @@
 	padding-right: 20px;
 	font-weight: bold;
 }
+.tb-label {
+	text-align: right;
+	font-weight: bold;
+	padding-right: 10px;
+}
