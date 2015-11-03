@@ -132,48 +132,17 @@ public class TestBuddyAction extends Actionable implements Action {
 	
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getTests(String number) {
-		List<TestInfo> tests = new ArrayList<TestInfo>();
-		
 		int buildNumber = Integer.parseInt(number);
 		AbstractBuild build = project.getBuildByNumber(buildNumber);
 		
 		ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
-		for (CaseResult caseResult : caseResults) {
-			String className = "";
-			String[] fullClassName = caseResult.getClassName().split("\\.");
-			if (fullClassName.length > 0) {
-				className = fullClassName[fullClassName.length - 1];
-			}  
-			String name[] = caseResult.getDisplayName().split("\\.");
-			String short_name = name[name.length-1];
-			if(caseResult.isFailed()){
-				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Failed"));
-			}
-			else if(caseResult.isPassed()){
-				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Passed"));
-			}
-			else if(caseResult.isSkipped()){
-				tests.add(new TestInfo(short_name, className, caseResult.getPackageName(), "Skipped"));
-			}			
-		}
-		
-		return tests;
+
+		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed");
 	}
 	
 	public List<TestInfo> getNewPassFail() {
 		AbstractBuild build = project.getLastBuild();
-		List<TestInfo> failPassTests = new ArrayList<TestInfo>();
-		ArrayList<CaseResult> newlyFailPass = TestBuddyHelper.getChangedTestsBetweenBuilds(build, build.getPreviousBuild());
-		for (CaseResult caseResult : newlyFailPass) {
-			if(caseResult.isFailed()){
-				failPassTests.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Newly Failed"));
-			}
-			else{
-				failPassTests.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Newly Passed"));
-			}		
-		}
-		//System.out.println("size of newPassFail array is " + newlyFailPass.size());
-		return failPassTests;
+		return getChangedTests(build, build.getPreviousBuild(), "Newly Passed", "Newly Failed");
 	}
 
 	//compare two builds
@@ -181,15 +150,44 @@ public class TestBuddyAction extends Actionable implements Action {
 	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2){
 		int build1 = Integer.parseInt(buildNumber1);
 		int build2 = Integer.parseInt(buildNumber2);
-		  AbstractBuild buildOne = project.getBuildByNumber(build1);
-		  AbstractBuild buildTwo = project.getBuildByNumber(build2);
-		  List<TestInfo> compareList = new ArrayList<TestInfo>();
-		  ArrayList<CaseResult> buildCompare = TestBuddyHelper.getChangedTestsBetweenBuilds(buildOne, buildTwo);
-		  for (CaseResult caseResult : buildCompare) {
-		    compareList.add(new TestInfo(caseResult.getDisplayName(), null, caseResult.getPackageName(), "Status Changed"));
-		  }
-		  return compareList;  
-		 }
+		AbstractBuild buildOne = project.getBuildByNumber(build1);
+		AbstractBuild buildTwo = project.getBuildByNumber(build2);
+
+		return getChangedTests(buildOne, buildTwo, "Status Changed", "Status Changed");  
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public List<TestInfo> getChangedTests(AbstractBuild build1, AbstractBuild build2, String passedStatus, String failedStatus) {
+		ArrayList<CaseResult> changedTests = TestBuddyHelper.getChangedTestsBetweenBuilds(build1, build2);
+		return convertCaseResultsToTestInfos(changedTests, passedStatus, failedStatus);
+	}
+	
+	public List<TestInfo> convertCaseResultsToTestInfos(List<CaseResult> caseResults, String passedStatus, String failedStatus) {
+		List<TestInfo> tests = new ArrayList<TestInfo>();
+
+		for (CaseResult caseResult : caseResults) {
+			String className = "";
+			String[] fullClassName = caseResult.getClassName().split("\\.");
+			if (fullClassName.length > 0) {
+				className = fullClassName[fullClassName.length - 1];
+			}
+	
+			String fullTestName[] = caseResult.getDisplayName().split("\\.");
+			String testName = fullTestName[fullTestName.length - 1];
+	
+			if(caseResult.isFailed()){
+				tests.add(new TestInfo(testName, className, caseResult.getPackageName(), failedStatus));
+			}
+			else if(caseResult.isPassed()){
+				tests.add(new TestInfo(testName, className, caseResult.getPackageName(), passedStatus));
+			}
+			else if(caseResult.isSkipped()){
+				tests.add(new TestInfo(testName, className, caseResult.getPackageName(), "Skipped"));
+			}
+		}
+		
+		return tests;
+	}
 	
 	public static class BuildInfo implements ExtensionPoint {
 		private int number;

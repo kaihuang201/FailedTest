@@ -27,10 +27,10 @@
 	<table class="pane sortable bigtable" id="table2">
 		<thead>
 			<tr>
-				<td class="pane-header">Class<!--${build1.value} tests--></td>
+				<td class="pane-header">Class</td>
 				<td class="pane-header">Name</td>
-				<td class="pane-header">Package Name<!--${build2.value} tests--></td>
 				<td class="pane-header">Status</td>
+				<td class="pane-header">Package</td>
            	</tr>
 		</thead>
 		<tbody>
@@ -44,49 +44,13 @@
 			
 			remoteAction.getBuildCompare(build1, build2, jQuery.proxy(function(t) {
 				var results = t.responseObject();
-			 
-				console.log(results);
-					
-					console.log(results[0].className); 
-					console.log(results[0].name);
-					console.log(results[0].packageName);
-					console.log(results[0].status);
-					<!--var text = "text is ";-->
-					var i=0; 
-				var text = "text is ";
-				<!--
-					while (i<1)
-					{ 
-    						
-    						text += results[0].className;
-    						text += results[0].name;
-    						text += results[0].packageName;
-    						text += results[0].status;
-    							console.log(text); 
-    										
-					} --> 
-					var tbody = jQuery('#table2').find('tbody');
-					tbody.empty();
-					var a = results;
-					a.forEach(function(entry) {
-					
-						console.log(entry.className); 
-					console.log(entry.name);
-					console.log(entry.packageName);
-					console.log(entry.status);
-					
-					
-				tbody.append('<tr><td>'+entry.className+'</td><td>'+entry.name+'</td><td>'+entry.packageName+'</td><td>'+entry.status+'</td></tr>');
-					
-					
-    				
-					});
-						
-			
-				
-					}, this));
-			
-				<!-- console.log(results); --> 
+
+				var tbody = jQuery('#table2').find('tbody');
+				tbody.empty();
+				results.forEach(function(entry) {
+					tbody.append('<tr><td>'+entry.className+'</td><td>'+entry.name+'</td><td>'+entry.status+'</td><td>'+entry.packageName+'</td></tr>');
+				});
+			}, this));
 		}; 
 	</script>
 		
