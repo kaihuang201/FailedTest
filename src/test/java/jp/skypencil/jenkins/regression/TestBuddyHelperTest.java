@@ -53,11 +53,6 @@ public class TestBuddyHelperTest {
 	}
 
 	@Test
-	public void testGetAllCaseResultForBuild2() {
-		assertTrue(true);
-	}
-
-	@Test
 	public void testGetAllCaseResultsForBuild1() throws Exception {
 		createBuild("Source_1");
 		AbstractBuild build = project.getBuildByNumber(1);
