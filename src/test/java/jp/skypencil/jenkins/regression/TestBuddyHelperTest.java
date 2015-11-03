@@ -2,6 +2,7 @@ package jp.skypencil.jenkins.regression;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
@@ -15,30 +16,16 @@ import jp.skypencil.jenkins.regression.TestBuddyHelper;
 
 import hudson.tasks.junit.CaseResult;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractBuild;
-import hudson.tasks.junit.CaseResult;
-
-import jp.skypencil.jenkins.regression.TestBuddyAction.BuildInfo;
-import jp.skypencil.jenkins.regression.TestBuddyAction.TestInfo;
 
 public class TestBuddyHelperTest {
 	@Rule
 	public JenkinsRule j = new JenkinsRule();
 	private MavenModuleSet project;
-	private TestBuddyAction testBuddyAction;
 	
 	@Before
 	public void init() throws Exception {
 		j.configureMaven3();
 		project = j.createMavenProject("project1");
-		testBuddyAction = new TestBuddyAction(project);
-
-		//createBuild("Source_1");
-		//createBuild("Source_2");
-		//createBuild("Source_3");
-		//createBuild("Source_4");
-		//createBuild("Source_5");
-		//createBuild("Source_6");
 	}
 
 	private void createBuild(String source) throws Exception {
@@ -47,17 +34,19 @@ public class TestBuddyHelperTest {
 	}
 	
 	@Test
-	public void testGetBuilds1() {
-		List<BuildInfo> myBuilds = testBuddyAction.getBuilds();
-		assertTrue(myBuilds.size() == 0);		
-	}
-
-	@Test
 	public void testGetAllCaseResultsForBuild1() throws Exception {
 		createBuild("Source_1");
 		AbstractBuild build = project.getBuildByNumber(1);
         List<CaseResult> case_results = TestBuddyHelper.getAllCaseResultsForBuild(build);
         assertEquals(3, case_results.size());
+
+        List<String> fullTestNames = new ArrayList<String>();
+        for (CaseResult caseResult : case_results) {
+        	fullTestNames.add(caseResult.getFullName());
+        }
+        assertTrue(fullTestNames.contains("pkg.AppTest.testApp1"));
+        assertTrue(fullTestNames.contains("pkg.AppTest.testApp2"));
+        assertTrue(fullTestNames.contains("pkg.AppTest.testApp3"));
 	}
 
 	@Test
@@ -66,6 +55,15 @@ public class TestBuddyHelperTest {
         AbstractBuild build = project.getBuildByNumber(1);
         List<CaseResult> case_results = TestBuddyHelper.getAllCaseResultsForBuild(build);
         assertEquals(4, case_results.size());
+        
+        List<String> fullTestNames = new ArrayList<String>();
+        for (CaseResult caseResult : case_results) {
+        	fullTestNames.add(caseResult.getFullName());
+        }
+        assertTrue(fullTestNames.contains("pkg.AppTest.testApp1"));
+        assertTrue(fullTestNames.contains("pkg.AppTest.testApp2"));
+        assertTrue(fullTestNames.contains("pkg.AppTest.testApp3"));
+        assertTrue(fullTestNames.contains("pkg.AppTest.testApp4"));
 	}
 
 	@SuppressWarnings({ "rawtypes" })
@@ -78,11 +76,6 @@ public class TestBuddyHelperTest {
         assertEquals(0.75, rates[1], 0.001);
 	}
 	
-    @Test
-    public void testGetTestFromTestResult1() {
-		assertTrue(true);
-    }
-
     @Test
     public void testGetChangedTestsBetweenBuilds1() throws Exception {
 		createBuild("Source_1");
