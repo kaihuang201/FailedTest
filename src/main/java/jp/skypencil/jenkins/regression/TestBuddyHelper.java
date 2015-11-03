@@ -63,7 +63,10 @@ public class TestBuddyHelper {
     	if(!change.isEmptySet()){
     		for(Object entry:change.getItems()){
     			hudson.scm.ChangeLogSet.Entry e = (hudson.scm.ChangeLogSet.Entry)entry;
-    			ret.add(e.getAuthor().getDisplayName());
+    			if(!ret.contains(e.getAuthor().getDisplayName())){
+    				ret.add(e.getAuthor().getDisplayName());
+    			}
+    			
     			//System.out.println(e.getAuthor().getDisplayName());
     		}
     	}
