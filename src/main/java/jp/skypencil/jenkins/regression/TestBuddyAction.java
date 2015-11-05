@@ -30,6 +30,8 @@ public class TestBuddyAction extends Actionable implements Action {
 	AbstractProject project;
 	private static final String[] BUILD_STATUSES = {"SUCCESS", "UNSTABLE", "FAILURE", "NOT_BUILT", "ABORTED"};
 	
+	public static List<BuildInfo> all_builds = new ArrayList<BuildInfo>();
+	
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
 	}
@@ -85,7 +87,7 @@ public class TestBuddyAction extends Actionable implements Action {
 
 	
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public List<BuildInfo> getBuilds() {
+	public List<BuildInfo> getBuildsINIT() {
 		List<BuildInfo> builds = new ArrayList<BuildInfo>();
 		RunList<Run> runs = project.getBuilds();
 		Iterator<Run> runIterator = runs.iterator();
@@ -97,12 +99,32 @@ public class TestBuddyAction extends Actionable implements Action {
 			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
 			builds.add(build);
 		}
-		
+		for(BuildInfo build: builds){
+			build.add_tests(get_ini_Tests(String.valueOf(build.getNumber())));
+		}
+		all_builds = builds;
 		return builds;
 	}
 	
-	@SuppressWarnings("rawtypes")
+	public List<BuildInfo> getBuilds() {
+		return all_builds;
+	}
+	
 	public BuildInfo getBuildInfo(String number) {
+	
+		for(BuildInfo b: all_builds){
+			if(b.getNumber() == Integer.valueOf(number)){
+				//System.out.println("nice");
+				return b;
+			}
+		}
+
+		//System.out.println("NOT nice, calling back up function");
+		return getBuildInfo_backup(number);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public BuildInfo getBuildInfo_backup(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
 		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
@@ -116,25 +138,34 @@ public class TestBuddyAction extends Actionable implements Action {
 		return buildStatuses;
 	}
 	
-	@SuppressWarnings({"rawtypes", "unchecked"})
+
 	public Set<String> getAllAuthors() {
 		Set<String> authors = new HashSet<String>();
-		RunList<Run> runs = project.getBuilds();
-		Iterator<Run> runIterator = runs.iterator();
-
-		while (runIterator.hasNext()) {
-			Run run = runIterator.next();
-			authors.addAll(TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run));
+		for (BuildInfo b: all_builds) {
+			authors.addAll(b.getAuthors());
 		}
 		
 		return authors;
 	}
 	
-	@SuppressWarnings("rawtypes")
+
 	public List<TestInfo> getTests(String number) {
+
+		for(BuildInfo b: all_builds){
+			if(b.getNumber() == Integer.valueOf(number)){
+				//System.out.println("nice");
+				return b.getTests();
+			}
+		}
+
+		//System.out.println("NOT nice, calling back up function");
+		return get_ini_Tests(number);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public List<TestInfo> get_ini_Tests(String number) {
 		int buildNumber = Integer.parseInt(number);
 		AbstractBuild build = project.getBuildByNumber(buildNumber);
-		
 		ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
 
 		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed");
@@ -174,7 +205,6 @@ public class TestBuddyAction extends Actionable implements Action {
 	
 			String fullTestName[] = caseResult.getDisplayName().split("\\.");
 			String testName = fullTestName[fullTestName.length - 1];
-	
 			if(caseResult.isFailed()){
 				tests.add(new TestInfo(testName, className, caseResult.getPackageName(), failedStatus));
 			}
@@ -197,6 +227,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		private List<String> authors;
 		private int passed_tests;
 		private double passing_rate;
+		private List<TestInfo> tests;
 		@DataBoundConstructor
 		public BuildInfo(int number, Calendar timestamp, String timestampString, String s, List<String> a, double pt, double pr) {
 			this.number = number;
@@ -206,8 +237,17 @@ public class TestBuddyAction extends Actionable implements Action {
 			this.authors = new ArrayList<String>(a);
 			this.passed_tests = (int) pt;
 			this.passing_rate = pr;
+			this.tests = new ArrayList<TestInfo>();
 		}
 
+		public void add_tests(List<TestInfo> t){
+			tests = t;
+		}
+		
+		public List<TestInfo> getTests(){
+			return tests;
+		}
+		
 		public int getNumber() {
 			return number;
 		}
