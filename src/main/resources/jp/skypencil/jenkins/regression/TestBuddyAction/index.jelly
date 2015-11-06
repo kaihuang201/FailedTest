@@ -20,8 +20,14 @@
 			<div class="tb-nav">
 				<a href="${rootURL}/${it.url}?displayType=compare" class="task-link">Test Compare</a>
 			</div>
+			<div class="tb-nav">
+				<a href="${rootURL}/${it.url}?displayType=chartView" class="task-link">ChartView</a>
+			</div>
 		</div>
 		<j:choose>
+			<j:when test="${displayType == 'chartView'}">
+				<st:include page="chart-view.jelly" />
+			</j:when>
 			<j:when test="${displayType == 'buildDetails'}">
 				<st:include page="build-details.jelly" />
 			</j:when>

@@ -356,6 +356,21 @@ public class TestBuddyAction extends Actionable implements Action {
 			return status;
 		}
 		
+		public int getPassedCount(){
+			return passedCount;
+			
+		}
+		
+		public int getFailedCount(){
+			return failedCount;
+			
+		}
+		
+		public int getSkippedCount(){
+			return skippedCount;
+			
+		}
+		
 		public void incrementCount(String statusToIncrement) {
 			if (statusToIncrement == "Passed") {
 				passedCount++;
