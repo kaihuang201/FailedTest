@@ -121,7 +121,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	
 	public BuildInfo getBuildInfo(String number) {
 		if(all_builds.containsKey(Integer.valueOf(number))){
-			System.out.println("getting local copy");
+			//System.out.println("getting local copy");
 			return all_builds.get(Integer.valueOf(number));
 		}
 
@@ -180,7 +180,7 @@ public class TestBuddyAction extends Actionable implements Action {
 
 	public List<TestInfo> getTests(String number) {
 		if(all_builds.containsKey(Integer.valueOf(number))){
-			System.out.println("getting local copy");
+			//System.out.println("getting local copy");
 			return all_builds.get(Integer.valueOf(number)).getTests();
 		}
 		
