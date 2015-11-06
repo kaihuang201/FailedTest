@@ -270,4 +270,23 @@ public class TestBuddyActionTest {
 		assertEquals("Newly Failed", newFailPass.get(1).getStatus());
 		assertEquals("Newly Passed", newFailPass.get(2).getStatus());
 	}
+	
+	@LocalData
+	@Test
+	public void testGetBuildCompare1() throws Exception {
+		List<TestInfo> testDifferences = testBuddyAction.getBuildCompare("4", "1");
+		
+		assertEquals(0, testDifferences.size());
+	}
+
+	@LocalData
+	@Test
+	public void testGetBuildCompare2() throws Exception {
+		List<TestInfo> testDifferences = testBuddyAction.getBuildCompare("5", "3");
+		
+		assertEquals(2, testDifferences.size());
+
+		assertEquals("Status Changed", testDifferences.get(0).getStatus());
+		assertEquals("Status Changed", testDifferences.get(1).getStatus());
+	}
 }
