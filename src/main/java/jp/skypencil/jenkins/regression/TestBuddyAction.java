@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -143,6 +144,28 @@ public class TestBuddyAction extends Actionable implements Action {
 		return buildStatuses;
 	}
 	
+	public List<TestInfo> searchTest(String searchText) {
+		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
+		
+		for (BuildInfo build: getBuilds()) {
+			for (TestInfo test: build.getTests()) {
+				if (test.getFullName().contains(searchText)) {
+					TestInfo testInfo;
+					if (!testMap.containsKey(test.getFullName())) {
+						testInfo = new TestInfo(test.getFullName(), test.getName(), test.getClassName(), test.getPackageName(), test.getStatus());
+						testMap.put(test.getFullName(), testInfo);
+					}
+					else {
+						testInfo = testMap.get(test.getFullName());
+					}
+					
+					testInfo.incrementCount(test.getStatus());
+				}
+			}
+		}
+		
+		return new ArrayList<TestInfo> (testMap.values());
+	}
 
 	public Set<String> getAllAuthors() {
 		getBuilds();
@@ -210,13 +233,13 @@ public class TestBuddyAction extends Actionable implements Action {
 			String fullTestName[] = caseResult.getDisplayName().split("\\.");
 			String testName = fullTestName[fullTestName.length - 1];
 			if(caseResult.isFailed()){
-				tests.add(new TestInfo(testName, className, caseResult.getPackageName(), failedStatus));
+				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), failedStatus));
 			}
 			else if(caseResult.isPassed()){
-				tests.add(new TestInfo(testName, className, caseResult.getPackageName(), passedStatus));
+				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), passedStatus));
 			}
 			else if(caseResult.isSkipped()){
-				tests.add(new TestInfo(testName, className, caseResult.getPackageName(), "Skipped"));
+				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), "Skipped"));
 			}
 		}
 		
@@ -295,17 +318,26 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 	
 	public static class TestInfo implements ExtensionPoint {
+		private String fullName;
 		private String name;
 		private String className;
 		private String packageName;
 		private String status;
+		private int passedCount = 0;
+		private int failedCount = 0;
+		private int skippedCount = 0;
 		
 		@DataBoundConstructor
-		public TestInfo(String name, String className, String packageName, String status) {
+		public TestInfo(String fullName, String name, String className, String packageName, String status) {
+			this.fullName = fullName;
 			this.name = name;
 			this.className = className;
 			this.packageName = packageName;
 			this.status = status;
+		}
+		
+		public String getFullName() {
+			return fullName;
 		}
 		
 		public String getName() {
@@ -322,6 +354,18 @@ public class TestBuddyAction extends Actionable implements Action {
 		
 		public String getStatus() {
 			return status;
+		}
+		
+		public void incrementCount(String statusToIncrement) {
+			if (statusToIncrement == "Passed") {
+				passedCount++;
+			}
+			else if (statusToIncrement == "Failed") {
+				failedCount++;
+			}
+			else if (statusToIncrement == "Skipped") {
+				skippedCount++;
+			}
 		}
 	}
 	
