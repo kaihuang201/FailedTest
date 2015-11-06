@@ -133,6 +133,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
 	}
 
+	@JavaScriptMethod
 	public List<TestInfo> searchTests(String searchText) {
 		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
 		
