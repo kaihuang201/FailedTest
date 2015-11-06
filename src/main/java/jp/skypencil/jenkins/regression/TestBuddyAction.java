@@ -9,7 +9,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.Stapler;
@@ -30,7 +32,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	AbstractProject project;
 	private static final String[] BUILD_STATUSES = {"SUCCESS", "UNSTABLE", "FAILURE", "NOT_BUILT", "ABORTED"};
 	
-	public static List<BuildInfo> all_builds = new ArrayList<BuildInfo>();
+	public static TreeMap<Integer,BuildInfo> all_builds = new TreeMap<Integer,BuildInfo>();
 	
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
@@ -86,37 +88,40 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public List<BuildInfo> getBuildsINIT() {
-		List<BuildInfo> builds = new ArrayList<BuildInfo>();
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public List<BuildInfo> getBuilds() {
+		List<BuildInfo> ret = new ArrayList<BuildInfo>();
 		RunList<Run> runs = project.getBuilds();
 		Iterator<Run> runIterator = runs.iterator();
-
-		while (runIterator.hasNext()) {
+		int check = 0;
+		while(runIterator.hasNext()){
 			Run run = runIterator.next();
-			List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
-			double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-			BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
-			builds.add(build);
+			int num = run.getNumber();
+			while(num > check){
+				if(all_builds.containsKey(check)){
+					all_builds.remove(check);
+				}
+				check++;
+			}
+			if(!all_builds.containsKey(num)){
+				List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+				double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
+				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
+				build.add_tests(get_ini_Tests(String.valueOf(build.getNumber())));
+				all_builds.put(num, build);
+			}
+			check++;
 		}
-		for(BuildInfo build: builds){
-			build.add_tests(get_ini_Tests(String.valueOf(build.getNumber())));
-		}
-		all_builds = builds;
-		return builds;
-	}
-	
-	public List<BuildInfo> getBuilds() {
-		return all_builds;
+		for(Map.Entry<Integer,BuildInfo> entry : all_builds.entrySet()) {
+			  ret.add(entry.getValue());
+			}
+		return ret;
 	}
 	
 	public BuildInfo getBuildInfo(String number) {
-	
-		for(BuildInfo b: all_builds){
-			if(b.getNumber() == Integer.valueOf(number)){
-				//System.out.println("nice");
-				return b;
-			}
+		if(all_builds.containsKey(Integer.valueOf(number))){
+			System.out.println("getting local copy");
+			return all_builds.get(Integer.valueOf(number));
 		}
 
 		//System.out.println("NOT nice, calling back up function");
@@ -140,9 +145,10 @@ public class TestBuddyAction extends Actionable implements Action {
 	
 
 	public Set<String> getAllAuthors() {
+		getBuilds();
 		Set<String> authors = new HashSet<String>();
-		for (BuildInfo b: all_builds) {
-			authors.addAll(b.getAuthors());
+		for(Map.Entry<Integer,BuildInfo> b : all_builds.entrySet()) {
+			authors.addAll(b.getValue().getAuthors());
 		}
 		
 		return authors;
@@ -150,13 +156,11 @@ public class TestBuddyAction extends Actionable implements Action {
 	
 
 	public List<TestInfo> getTests(String number) {
-
-		for(BuildInfo b: all_builds){
-			if(b.getNumber() == Integer.valueOf(number)){
-				//System.out.println("nice");
-				return b.getTests();
-			}
+		if(all_builds.containsKey(Integer.valueOf(number))){
+			System.out.println("getting local copy");
+			return all_builds.get(Integer.valueOf(number)).getTests();
 		}
+		
 
 		//System.out.println("NOT nice, calling back up function");
 		return get_ini_Tests(number);
