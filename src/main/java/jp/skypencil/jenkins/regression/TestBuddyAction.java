@@ -1,6 +1,5 @@
 package jp.skypencil.jenkins.regression;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +32,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	AbstractProject project;
 	private static final String[] BUILD_STATUSES = {"SUCCESS", "UNSTABLE", "FAILURE", "NOT_BUILT", "ABORTED"};
 	
-	public static TreeMap<Integer,BuildInfo> all_builds = new TreeMap<Integer,BuildInfo>();
+	public static TreeMap<Integer,BuildInfo> all_builds = new TreeMap<Integer,BuildInfo>(Collections.reverseOrder());
 	
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
@@ -198,12 +197,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed");
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getNewPassFail() {
 		AbstractBuild build = project.getLastBuild();
 		return getChangedTests(build, build.getPreviousBuild(), "Newly Passed", "Newly Failed");
 	}
 
 	//compare two builds
+	@SuppressWarnings("rawtypes")
 	@JavaScriptMethod
 	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2){
 		int build1 = Integer.parseInt(buildNumber1);
