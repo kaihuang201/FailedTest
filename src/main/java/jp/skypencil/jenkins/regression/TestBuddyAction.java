@@ -99,7 +99,7 @@ public class TestBuddyAction extends Actionable implements Action {
 			missingBuildNumbers.remove(num);
 
 			if(!all_builds.containsKey(num)){
-				List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+				List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
 				double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
 				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
 				build.add_tests(get_ini_Tests(String.valueOf(build.getNumber())));
@@ -128,7 +128,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	public BuildInfo getBuildInfo_backup(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
-		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+		List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
 		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
 		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
 	}
@@ -157,10 +157,9 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	public Set<String> getAllAuthors() {
-		getBuilds();
 		Set<String> authors = new HashSet<String>();
-		for(Map.Entry<Integer,BuildInfo> b : all_builds.entrySet()) {
-			authors.addAll(b.getValue().getAuthors());
+		for(BuildInfo build : getBuilds()) {
+			authors.addAll(build.getAuthors());
 		}
 		
 		return authors;

@@ -119,4 +119,28 @@ public class TestBuddyHelperTest {
 		diffArray = TestBuddyHelper.getChangedTestsBetweenBuilds(b1, b2);
 		assertEquals(3, diffArray.size());
 	}
+
+	@LocalData
+	@Test
+	public void testGetAuthors1() {
+		List<String> authors = TestBuddyHelper.getAuthors(project.getBuildByNumber(1));
+		assertEquals(0, authors.size());
+	}
+
+	@LocalData
+	@Test
+	public void testGetAuthors2() {
+		List<String> authors = TestBuddyHelper.getAuthors(project.getBuildByNumber(5));
+		assertEquals(1, authors.size());
+		assertEquals("developer1", authors.get(0));
+	}
+
+	@LocalData
+	@Test
+	public void testGetAuthors3() {
+		List<String> authors = TestBuddyHelper.getAuthors(project.getBuildByNumber(3));
+		assertEquals(2, authors.size());
+		assertEquals("developer1", authors.get(0));
+		assertEquals("developer2", authors.get(1));
+	}
 }

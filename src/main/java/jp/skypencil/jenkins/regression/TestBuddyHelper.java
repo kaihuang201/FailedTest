@@ -57,7 +57,7 @@ public class TestBuddyHelper {
      * @return an List of String.
      * **/
     @SuppressWarnings("rawtypes")
-    public static List<String> getChangeLogForBuild(AbstractBuild build) {
+    public static List<String> getAuthors(AbstractBuild build) {
     	List<String> ret = new ArrayList<String>();
     	ChangeLogSet change = build.getChangeSet();
     	if(!change.isEmptySet()){
