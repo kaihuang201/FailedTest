@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.runners.MethodSorters;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -17,7 +15,6 @@ import hudson.model.AbstractProject;
 import jp.skypencil.jenkins.regression.TestBuddyAction.BuildInfo;
 import jp.skypencil.jenkins.regression.TestBuddyAction.TestInfo;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestBuddyActionTest {
 	@Rule
 	public JenkinsRule j = new JenkinsRule();
@@ -98,10 +95,7 @@ public class TestBuddyActionTest {
 	@LocalData
 	@Test
 	public void testGetBuildInfo3() {
-		//System.out.println(project.getBuildByNumber(3).getResult().ordinal);
-		
 		BuildInfo buildInfo = testBuddyAction.getBuildInfo("3");
-		//System.out.println(buildInfo.getStatus());
 		assertEquals(3, buildInfo.getNumber());
 		assertEquals("SUCCESS", buildInfo.getStatus());
 		assertEquals(4, buildInfo.getPassedTests());

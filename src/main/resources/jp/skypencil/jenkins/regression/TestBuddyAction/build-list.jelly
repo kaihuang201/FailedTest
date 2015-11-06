@@ -5,9 +5,11 @@
 				Status:
 				<select id="buildStatus">
 					<option value="">- Status -</option>
-					<j:forEach var="buildStatus" items="${it.allBuildStatuses}">
-						<option value="${buildStatus}">${buildStatus}</option>
-					</j:forEach>
+					<option value="ABORTED">ABORTED</option>
+					<option value="FAILURE">FAILURE</option>
+					<option value="NOT_BUILT">NOT_BUILT</option>
+					<option value="SUCCESS">SUCCESS</option>
+					<option value="UNSTABLE">UNSTABLE</option>
 				</select>
 			</div>
 			<div class="tb-filter">

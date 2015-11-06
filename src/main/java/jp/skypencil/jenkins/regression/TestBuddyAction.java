@@ -30,8 +30,7 @@ import jp.skypencil.jenkins.regression.TestBuddyHelper;
 public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
-	private static final String[] BUILD_STATUSES = {"SUCCESS", "UNSTABLE", "FAILURE", "NOT_BUILT", "ABORTED"};
-	
+
 	public static TreeMap<Integer,BuildInfo> all_builds = new TreeMap<Integer,BuildInfo>(Collections.reverseOrder());
 	
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
@@ -90,32 +89,29 @@ public class TestBuddyAction extends Actionable implements Action {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<BuildInfo> getBuilds() {
-		List<BuildInfo> ret = new ArrayList<BuildInfo>();
+		Set<Integer> missingBuildNumbers = new HashSet<Integer> (all_builds.keySet()); 
 		RunList<Run> runs = project.getBuilds();
 		Iterator<Run> runIterator = runs.iterator();
-		int check = 0;
+
 		while(runIterator.hasNext()){
 			Run run = runIterator.next();
 			int num = run.getNumber();
-			while(num > check){
-				if(all_builds.containsKey(check)){
-					all_builds.remove(check);
-				}
-				check++;
-			}
+			missingBuildNumbers.remove(num);
+
 			if(!all_builds.containsKey(num)){
 				List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
 				double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
+				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
 				build.add_tests(get_ini_Tests(String.valueOf(build.getNumber())));
 				all_builds.put(num, build);
 			}
-			check++;
 		}
-		for(Map.Entry<Integer,BuildInfo> entry : all_builds.entrySet()) {
-			  ret.add(entry.getValue());
-			}
-		return ret;
+		
+		for (int missingBuildNumber: missingBuildNumbers) {
+			all_builds.remove(missingBuildNumber);
+		}
+
+		return new ArrayList<BuildInfo> (all_builds.values());
 	}
 	
 	public BuildInfo getBuildInfo(String number) {
@@ -134,15 +130,9 @@ public class TestBuddyAction extends Actionable implements Action {
 		Run run = project.getBuildByNumber(buildNumber);
 		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
 		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
 	}
-	
-	public List<String> getAllBuildStatuses() {
-		List<String> buildStatuses = Arrays.asList(BUILD_STATUSES.clone());
-		Collections.sort(buildStatuses);
-		return buildStatuses;
-	}
-	
+
 	public List<TestInfo> searchTest(String searchText) {
 		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
 		
