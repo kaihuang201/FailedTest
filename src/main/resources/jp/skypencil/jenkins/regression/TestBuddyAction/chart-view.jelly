@@ -11,7 +11,7 @@
   </thead>
   <tbody>
   <j:set var="i" value="0"/>
-   <j:forEach var="test" items="${it.searchTest('Get')}">
+   <j:forEach var="test" items="${it.searchTests('Get')}">
     <tr id = "${i}" >
      <td class="pane" data="${test.className}">${test.className}</td>
      <td class="pane name" data="${test.name}">${test.name}</td>

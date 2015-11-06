@@ -133,15 +133,15 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
 	}
 
-	public List<TestInfo> searchTest(String searchText) {
+	public List<TestInfo> searchTests(String searchText) {
 		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
 		
 		for (BuildInfo build: getBuilds()) {
 			for (TestInfo test: build.getTests()) {
-				if (test.getFullName().contains(searchText)) {
+				if (test.getFullName().toLowerCase().contains(searchText.toLowerCase())) {
 					TestInfo testInfo;
 					if (!testMap.containsKey(test.getFullName())) {
-						testInfo = new TestInfo(test.getFullName(), test.getName(), test.getClassName(), test.getPackageName(), test.getStatus());
+						testInfo = new TestInfo(test.getFullName(), test.getStatus());
 						testMap.put(test.getFullName(), testInfo);
 					}
 					else {
@@ -214,22 +214,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		List<TestInfo> tests = new ArrayList<TestInfo>();
 
 		for (CaseResult caseResult : caseResults) {
-			String className = "";
-			String[] fullClassName = caseResult.getClassName().split("\\.");
-			if (fullClassName.length > 0) {
-				className = fullClassName[fullClassName.length - 1];
-			}
-	
-			String fullTestName[] = caseResult.getDisplayName().split("\\.");
-			String testName = fullTestName[fullTestName.length - 1];
 			if(caseResult.isFailed()){
-				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), failedStatus));
+				tests.add(new TestInfo(caseResult.getFullName(), failedStatus));
 			}
 			else if(caseResult.isPassed()){
-				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), passedStatus));
+				tests.add(new TestInfo(caseResult.getFullName(), passedStatus));
 			}
 			else if(caseResult.isSkipped()){
-				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), "Skipped"));
+				tests.add(new TestInfo(caseResult.getFullName(), "Skipped"));
 			}
 		}
 		
@@ -318,12 +310,22 @@ public class TestBuddyAction extends Actionable implements Action {
 		private int skippedCount = 0;
 		
 		@DataBoundConstructor
-		public TestInfo(String fullName, String name, String className, String packageName, String status) {
+		public TestInfo(String fullName, String status) {
 			this.fullName = fullName;
-			this.name = name;
-			this.className = className;
-			this.packageName = packageName;
 			this.status = status;
+			
+			parseNames();
+		}
+		
+		/* Parse name, className, and packageName from fullName */
+		private void parseNames() {
+			String[] fullNameArray = fullName.split("\\.");
+			name = fullNameArray[fullNameArray.length - 1];
+			className = fullNameArray[fullNameArray.length - 2];
+			
+			if (fullName.length() > (name.length() + className.length() + 1)) {
+				packageName = fullName.substring(0, fullName.length() - name.length() - className.length() - 2);
+			}
 		}
 		
 		public String getFullName() {

@@ -261,7 +261,7 @@ public class TestBuddyActionTest {
 	
 	@LocalData
 	@Test
-	public void testGetNewPassFail() throws Exception {
+	public void testGetNewPassFail() {
 		List<TestInfo> newFailPass = testBuddyAction.getNewPassFail();
 		
 		assertEquals(3, newFailPass.size());
@@ -273,7 +273,7 @@ public class TestBuddyActionTest {
 	
 	@LocalData
 	@Test
-	public void testGetBuildCompare1() throws Exception {
+	public void testGetBuildCompare1() {
 		List<TestInfo> testDifferences = testBuddyAction.getBuildCompare("4", "1");
 		
 		assertEquals(0, testDifferences.size());
@@ -281,12 +281,26 @@ public class TestBuddyActionTest {
 
 	@LocalData
 	@Test
-	public void testGetBuildCompare2() throws Exception {
+	public void testGetBuildCompare2() {
 		List<TestInfo> testDifferences = testBuddyAction.getBuildCompare("5", "3");
 		
 		assertEquals(2, testDifferences.size());
 
 		assertEquals("Status Changed", testDifferences.get(0).getStatus());
 		assertEquals("Status Changed", testDifferences.get(1).getStatus());
+	}
+
+	@LocalData
+	@Test
+	public void testSearchTests() {
+		List<TestInfo> searchResults = testBuddyAction.searchTests("app3");
+		assertEquals(1, searchResults.size());
+
+		assertEquals("testApp3", searchResults.get(0).getName());
+		assertEquals("AppTest", searchResults.get(0).getClassName());
+		assertEquals("pkg", searchResults.get(0).getPackageName());
+		assertEquals(3, searchResults.get(0).getPassedCount());
+		assertEquals(1, searchResults.get(0).getFailedCount());
+		assertEquals(1, searchResults.get(0).getSkippedCount());
 	}
 }
