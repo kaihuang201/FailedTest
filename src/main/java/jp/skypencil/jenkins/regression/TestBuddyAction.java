@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,204 +32,202 @@ public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
 
-	public static TreeMap<Integer,BuildInfo> all_builds = new TreeMap<Integer,BuildInfo>(Collections.reverseOrder());
-	
-	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
+	public static TreeMap<Integer, BuildInfo> all_builds = new TreeMap<Integer, BuildInfo>(Collections.reverseOrder());
+
+	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project) {
 		this.project = project;
 	}
 
 	/**
-     * The display name for the action.
-     * 
-     * @return the name as String
-     */
-    public final String getDisplayName() {
-        return "Test Buddy";
-    }
+	 * The display name for the action.
+	 * 
+	 * @return the name as String
+	 */
+	public final String getDisplayName() {
+		return "Test Buddy";
+	}
 
-    /**
-     * The icon for this action.
-     * 
-     * @return the icon file as String
-     */
-    public final String getIconFileName() {
-    	return "/images/jenkins.png";
-    }
+	/**
+	 * The icon for this action.
+	 * 
+	 * @return the icon file as String
+	 */
+	public final String getIconFileName() {
+		return "/images/jenkins.png";
+	}
 
-    /**
-     * The url for this action.
-     * 
-     * @return the url as String
-     */
-    public String getUrlName() {
-        return "test_buddy";
-    }
+	/**
+	 * The url for this action.
+	 * 
+	 * @return the url as String
+	 */
+	public String getUrlName() {
+		return "test_buddy";
+	}
 
-    /**
-     * Search url for this action.
-     * 
-     * @return the url as String
-     */
+	/**
+	 * Search url for this action.
+	 * 
+	 * @return the url as String
+	 */
 	public String getSearchUrl() {
 		return "test_buddy";
 	}
 
-    @SuppressWarnings("rawtypes")
-	public AbstractProject getProject(){
-    	return this.project;
-    }
+	@SuppressWarnings("rawtypes")
+	public AbstractProject getProject() {
+		return this.project;
+	}
 
 	public String getUrl() {
 		return this.project.getUrl() + this.getUrlName();
 	}
-	
+
 	public String getUrlParam(String parameterName) {
 		return Stapler.getCurrentRequest().getParameter(parameterName);
 	}
 
-	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<BuildInfo> getBuilds() {
-		Set<Integer> missingBuildNumbers = new HashSet<Integer> (all_builds.keySet()); 
+		Set<Integer> missingBuildNumbers = new HashSet<Integer>(all_builds.keySet());
 		RunList<Run> runs = project.getBuilds();
 		Iterator<Run> runIterator = runs.iterator();
 
-		while(runIterator.hasNext()){
+		while (runIterator.hasNext()) {
 			Run run = runIterator.next();
 			int num = run.getNumber();
 			missingBuildNumbers.remove(num);
 
-			if(!all_builds.containsKey(num)){
+			if (!all_builds.containsKey(num)) {
 				List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
 				double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
+				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(),
+						run.getResult().toString(), authors, rates[0], rates[1]);
 				build.add_tests(get_ini_Tests(String.valueOf(build.getNumber())));
 				all_builds.put(num, build);
 			}
 		}
-		
-		for (int missingBuildNumber: missingBuildNumbers) {
+
+		for (int missingBuildNumber : missingBuildNumbers) {
 			all_builds.remove(missingBuildNumber);
 		}
 
-		return new ArrayList<BuildInfo> (all_builds.values());
+		return new ArrayList<BuildInfo>(all_builds.values());
 	}
-	
+
 	public BuildInfo getBuildInfo(String number) {
-		if(all_builds.containsKey(Integer.valueOf(number))){
-			//System.out.println("getting local copy");
+		if (all_builds.containsKey(Integer.valueOf(number))) {
+			// System.out.println("getting local copy");
 			return all_builds.get(Integer.valueOf(number));
 		}
 
-		//System.out.println("NOT nice, calling back up function");
+		// System.out.println("NOT nice, calling back up function");
 		return getBuildInfo_backup(number);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public BuildInfo getBuildInfo_backup(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
 		List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
 		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(),
+				authors, rates[0], rates[1]);
 	}
 
 	@JavaScriptMethod
 	public List<TestInfo> searchTests(String searchText) {
 		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
-		
-		for (BuildInfo build: getBuilds()) {
-			for (TestInfo test: build.getTests()) {
+
+		for (BuildInfo build : getBuilds()) {
+			for (TestInfo test : build.getTests()) {
 				if (test.getFullName().toLowerCase().contains(searchText.toLowerCase())) {
 					TestInfo testInfo;
 					if (!testMap.containsKey(test.getFullName())) {
-						testInfo = new TestInfo(test.getFullName(), test.getStatus());
+						testInfo = new TestInfo(test.getFullName(), test.getStatus(), build.getNumber());
 						testMap.put(test.getFullName(), testInfo);
-					}
-					else {
+					} else {
 						testInfo = testMap.get(test.getFullName());
 					}
-					
+
 					testInfo.incrementCount(test.getStatus());
 				}
 			}
 		}
-		
-		return new ArrayList<TestInfo> (testMap.values());
+
+		return new ArrayList<TestInfo>(testMap.values());
 	}
 
 	public Set<String> getAllAuthors() {
 		Set<String> authors = new HashSet<String>();
-		for(BuildInfo build : getBuilds()) {
+		for (BuildInfo build : getBuilds()) {
 			authors.addAll(build.getAuthors());
 		}
-		
+
 		return authors;
 	}
-	
 
 	public List<TestInfo> getTests(String number) {
-		if(all_builds.containsKey(Integer.valueOf(number))){
-			//System.out.println("getting local copy");
+		if (all_builds.containsKey(Integer.valueOf(number))) {
+			// System.out.println("getting local copy");
 			return all_builds.get(Integer.valueOf(number)).getTests();
 		}
-		
 
-		//System.out.println("NOT nice, calling back up function");
+		// System.out.println("NOT nice, calling back up function");
 		return get_ini_Tests(number);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> get_ini_Tests(String number) {
 		int buildNumber = Integer.parseInt(number);
 		AbstractBuild build = project.getBuildByNumber(buildNumber);
 		ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
 
-		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed");
+		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed", Integer.parseInt(number));
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getNewPassFail() {
 		AbstractBuild build = project.getLastBuild();
 		return getChangedTests(build, build.getPreviousBuild(), "Newly Passed", "Newly Failed");
 	}
 
-	//compare two builds
+	// compare two builds
 	@SuppressWarnings("rawtypes")
 	@JavaScriptMethod
-	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2){
+	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2) {
 		int build1 = Integer.parseInt(buildNumber1);
 		int build2 = Integer.parseInt(buildNumber2);
 		AbstractBuild buildOne = project.getBuildByNumber(build1);
 		AbstractBuild buildTwo = project.getBuildByNumber(build2);
 
-		return getChangedTests(buildOne, buildTwo, "Status Changed", "Status Changed");  
+		return getChangedTests(buildOne, buildTwo, "Status Changed", "Status Changed");
 	}
-	
+
 	@SuppressWarnings("rawtypes")
-	public List<TestInfo> getChangedTests(AbstractBuild build1, AbstractBuild build2, String passedStatus, String failedStatus) {
+	public List<TestInfo> getChangedTests(AbstractBuild build1, AbstractBuild build2, String passedStatus,
+			String failedStatus) {
 		ArrayList<CaseResult> changedTests = TestBuddyHelper.getChangedTestsBetweenBuilds(build1, build2);
-		return convertCaseResultsToTestInfos(changedTests, passedStatus, failedStatus);
+		return convertCaseResultsToTestInfos(changedTests, passedStatus, failedStatus, 0);
 	}
-	
-	public List<TestInfo> convertCaseResultsToTestInfos(List<CaseResult> caseResults, String passedStatus, String failedStatus) {
+
+	public List<TestInfo> convertCaseResultsToTestInfos(List<CaseResult> caseResults, String passedStatus,
+			String failedStatus, int build_no) {
 		List<TestInfo> tests = new ArrayList<TestInfo>();
 
 		for (CaseResult caseResult : caseResults) {
-			if(caseResult.isFailed()){
-				tests.add(new TestInfo(caseResult.getFullName(), failedStatus));
-			}
-			else if(caseResult.isPassed()){
-				tests.add(new TestInfo(caseResult.getFullName(), passedStatus));
-			}
-			else if(caseResult.isSkipped()){
-				tests.add(new TestInfo(caseResult.getFullName(), "Skipped"));
+			if (caseResult.isFailed()) {
+				tests.add(new TestInfo(caseResult.getFullName(), failedStatus, build_no));
+			} else if (caseResult.isPassed()) {
+				tests.add(new TestInfo(caseResult.getFullName(), passedStatus, build_no));
+			} else if (caseResult.isSkipped()) {
+				tests.add(new TestInfo(caseResult.getFullName(), "Skipped", build_no));
 			}
 		}
-		
+
 		return tests;
 	}
-	
+
 	public static class BuildInfo implements ExtensionPoint {
 		private int number;
 		private Calendar timestamp;
@@ -237,9 +236,11 @@ public class TestBuddyAction extends Actionable implements Action {
 		private List<String> authors;
 		private int passed_tests;
 		private double passing_rate;
-		private List<TestInfo> tests;
+		private LinkedHashMap<String, TestInfo> tests;
+
 		@DataBoundConstructor
-		public BuildInfo(int number, Calendar timestamp, String timestampString, String s, List<String> a, double pt, double pr) {
+		public BuildInfo(int number, Calendar timestamp, String timestampString, String s, List<String> a, double pt,
+				double pr) {
 			this.number = number;
 			this.timestamp = timestamp;
 			this.timestampString = timestampString;
@@ -247,15 +248,30 @@ public class TestBuddyAction extends Actionable implements Action {
 			this.authors = new ArrayList<String>(a);
 			this.passed_tests = (int) pt;
 			this.passing_rate = pr;
-			this.tests = new ArrayList<TestInfo>();
+			this.tests = new LinkedHashMap<String, TestInfo>();
 		}
 
-		public void add_tests(List<TestInfo> t){
-			tests = t;
+		public void add_tests(List<TestInfo> t) {
+			for (TestInfo a : t) {
+				tests.put(a.getFullName(), a);
+			}
 		}
-		
-		public List<TestInfo> getTests(){
-			return tests;
+
+		public List<TestInfo> getTests() {
+			List<TestInfo> ret = new ArrayList<TestInfo>();
+			Iterator<TestInfo> it = tests.values().iterator();
+			while (it.hasNext()) {
+				TestInfo t = it.next();
+				ret.add(t);
+			}
+			return ret;
+		}
+
+		public TestInfo getTest(String name){
+			if(tests.containsKey(name)){
+				return tests.get(name);
+			}
+			return null;
 		}
 		
 		public int getNumber() {
@@ -270,15 +286,15 @@ public class TestBuddyAction extends Actionable implements Action {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy h:mm:ss a");
 			return dateFormat.format(timestamp.getTime());
 		}
-		
-		public String getStatus(){
+
+		public String getStatus() {
 			return status;
 		}
-		
-		public List<String> getAuthors(){
+
+		public List<String> getAuthors() {
 			return authors;
 		}
-		
+
 		public String getAuthorsString() {
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < authors.size(); i++) {
@@ -290,16 +306,16 @@ public class TestBuddyAction extends Actionable implements Action {
 
 			return builder.toString();
 		}
-		
-		public int getPassedTests(){
+
+		public int getPassedTests() {
 			return passed_tests;
 		}
-		
-		public double getPassingRate(){
+
+		public double getPassingRate() {
 			return passing_rate;
 		}
 	}
-	
+
 	public static class TestInfo implements ExtensionPoint {
 		private String fullName;
 		private String name;
@@ -309,30 +325,31 @@ public class TestBuddyAction extends Actionable implements Action {
 		private int passedCount = 0;
 		private int failedCount = 0;
 		private int skippedCount = 0;
-		
+		private int build_number;
+
 		@DataBoundConstructor
-		public TestInfo(String fullName, String status) {
+		public TestInfo(String fullName, String status, int number) {
 			this.fullName = fullName;
 			this.status = status;
-			
+			this.build_number = number;
 			parseNames();
 		}
-		
+
 		/* Parse name, className, and packageName from fullName */
 		private void parseNames() {
 			String[] fullNameArray = fullName.split("\\.");
 			name = fullNameArray[fullNameArray.length - 1];
 			className = fullNameArray[fullNameArray.length - 2];
-			
+
 			if (fullName.length() > (name.length() + className.length() + 1)) {
 				packageName = fullName.substring(0, fullName.length() - name.length() - className.length() - 2);
 			}
 		}
-		
+
 		public String getFullName() {
 			return fullName;
 		}
-		
+
 		public String getName() {
 			return name;
 		}
@@ -340,41 +357,43 @@ public class TestBuddyAction extends Actionable implements Action {
 		public String getClassName() {
 			return className;
 		}
-		
+
 		public String getPackageName() {
 			return packageName;
 		}
-		
+
 		public String getStatus() {
 			return status;
 		}
-		
-		public int getPassedCount(){
+
+		public int getPassedCount() {
 			return passedCount;
-			
+
 		}
-		
-		public int getFailedCount(){
+
+		public int getFailedCount() {
 			return failedCount;
-			
+
 		}
-		
-		public int getSkippedCount(){
+
+		public int getSkippedCount() {
 			return skippedCount;
-			
+
 		}
-		
+
 		public void incrementCount(String statusToIncrement) {
 			if (statusToIncrement == "Passed") {
 				passedCount++;
-			}
-			else if (statusToIncrement == "Failed") {
+			} else if (statusToIncrement == "Failed") {
 				failedCount++;
-			}
-			else if (statusToIncrement == "Skipped") {
+			} else if (statusToIncrement == "Skipped") {
 				skippedCount++;
 			}
 		}
+		
+		public int getBuildNumber(){
+			return build_number;
+		}
 	}
-	
+
 }
