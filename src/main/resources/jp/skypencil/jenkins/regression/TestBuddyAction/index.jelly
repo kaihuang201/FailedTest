@@ -3,10 +3,11 @@
     <st:include it="${it.project}" page="sidepanel.jelly" />
     <st:bind var="remoteAction" value="${it}"/> 
 	<l:header>
-		<link href="${resURL}/plugin/test-buddy-plugin/css/test-buddy.css" rel="stylesheet" type="text/css" />
-		<script type="text/javascript" src="${resURL}/plugin/test-buddy-plugin/js/jquery-1.11.3.min.js"></script>
+		<link href="${resURL}/plugin/regression-report-plugin/css/test-buddy.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="${resURL}/plugin/regression-report-plugin/js/jquery-1.11.3.min.js"></script>
 		<script>jQuery.noConflict();</script>
-		<script type="text/javascript" src="${resURL}/plugin/test-buddy-plugin/js/test-buddy.js"/>
+		<script type="text/javascript" src="${resURL}/plugin/regression-report-plugin/js/google-chart.js"/>
+		<script type="text/javascript" src="${resURL}/plugin/regression-report-plugin/js/test-buddy.js"/>
 	</l:header>
 	<l:main-panel>
 		<j:set var="displayType" value="${it.getUrlParam('displayType')}"/>

@@ -29,6 +29,8 @@
 			Chart Type:
 			<input type="radio" id="rdbChartType_bar" name="rdbChartType" value="bar" checked="checked" class="first" />
 			<label for="rdbChartType_bar">Bar Chart</label>
+			<input type="radio" id="rdbChartType_stackedbar" name="rdbChartType" value="stackedbar" />
+			<label for="rdbChartType_bar">Stacked Bar Chart</label>
 			<input type="radio" id="rdbChartType_pie" name="rdbChartType" value="pie" />
 			<label for="rdbChartType_pie">Pie Chart</label>
 		</div>
@@ -55,6 +57,7 @@
 	<div id="divCharts"></div>
 
 	<script type="text/javascript">
+		google.load('visualization', '1', {packages: ['corechart']});
 		jQuery('#txtSearch').keyup(function(e){
 			if (e.keyCode == 13) {
 				searchTests();

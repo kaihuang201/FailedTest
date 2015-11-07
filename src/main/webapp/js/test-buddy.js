@@ -82,11 +82,11 @@ searchTests = function() {
 
 			var tr = jQuery('<tr></tr>');
 			tr.append(tdAction);
-			tr.append('<td>' + test.className + '</td>');
-			tr.append('<td>' + test.name + '</td>');
-			tr.append('<td>' + test.passedCount + '</td>');
-			tr.append('<td>' + test.failedCount + '</td>');
-			tr.append('<td>' + test.skippedCount + '</td>');
+			tr.append('<td data-col="className">' + test.className + '</td>');
+			tr.append('<td data-col="testName">' + test.name + '</td>');
+			tr.append('<td data-col="passedCount">' + test.passedCount + '</td>');
+			tr.append('<td data-col="failedCount">' + test.failedCount + '</td>');
+			tr.append('<td data-col="skippedCount">' + test.skippedCount + '</td>');
 			tr.append('<td>' + test.packageName + '</td>');
 
 			tbody.append(tr);
@@ -123,9 +123,9 @@ addTestToChart = function(addButton) {
 		
 		/* Add row to chart data */
 		jQuery('#tblChartData').find('tbody').append(tr);
+
+		toggleAddTestToChartButtons();
 	}
-	
-	toggleAddTestToChartButtons();
 }
 
 removeTestFromChart = function(deleteButton) {
@@ -150,6 +150,56 @@ toggleAddTestToChartButtons = function() {
 	}
 }
 
-generateTestCharts() = function() {
+generateTestCharts = function() {
+	var chartType = jQuery('input[name="rdbChartType"]:checked').val();
+	jQuery('#divCharts').empty();
+	
+	if (chartType == 'bar') {
+		generateBarChart();
+	}
+	else if (chartType == 'stackedbar') {
+		generateStackedBarChart();
+	}
+	else if (chartType == 'pie') {
+		generatePieCharts();
+	}
+}
+
+generateStackedBarChart = function() {
+	var data = new google.visualization.DataTable;
+	
+	data.addColumn('string', 'Test Name');
+	data.addColumn('number', 'Passed');
+	data.addColumn('number', 'Failed');
+	data.addColumn('number', 'Skipped');
+    
+    var i = 0;
+    jQuery('#tblChartData').find('tbody').find('tr').each(function() {
+    	data.addRow();
+    	data.setCell(i, 0, jQuery(this).find('td[data-col="className"]').text() + '.' + jQuery(this).find('td[data-col="testName"]').text());
+    	data.setCell(i, 1, parseInt(jQuery(this).find('td[data-col="passedCount"]').text()));
+    	data.setCell(i, 2, parseInt(jQuery(this).find('td[data-col="failedCount"]').text()));
+    	data.setCell(i, 3, parseInt(jQuery(this).find('td[data-col="skippedCount"]').text()));
+    	
+    	i++;
+    });
+    
+    var options = {
+        width: '80%',
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+        bar: { groupWidth: '75%' },
+        isStacked: true
+      };
+    
+    var chart = new google.visualization.ColumnChart(document.getElementById('divCharts'));
+    chart.draw(data, options);
+}
+
+generateBarChart = function() {
+	
+}
+
+generatePieCharts = function() {
 	
 }
