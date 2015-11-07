@@ -164,8 +164,6 @@ public class TestBuddyAction extends Actionable implements Action {
             TestInfo testInfo = build.getTest(testName);
             if(testInfo != null){
             	ret.add(testInfo);
-            }else{
-            	//System.out.println("search getting null");
             }
             	
         }
@@ -210,11 +208,6 @@ public class TestBuddyAction extends Actionable implements Action {
 
 	public List<TestInfo> getTests(String number) {
 		if (all_builds.containsKey(Integer.valueOf(number))) {
-			// System.out.println("getting local copy");
-			String[] a = getTestRates((all_builds.get(Integer.valueOf(number)).getTests().get(0)));
-			for(String b: a){
-				System.out.println(b);
-			}
 
 			return all_builds.get(Integer.valueOf(number)).getTests();
 		}
