@@ -1,53 +1,64 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
- <table id="mytable" class="pane sortable bigtable">
-  <thead>
-   <tr>
-	<td class="pane-header">Class</td>
-    <td class="pane-header">Name</td>
-	<td class="pane-header">Pass Count</td>
-	<td class="pane-header">Fail Count</td>
-	<td class="pane-header">Skip Count</td>
-   </tr>
-  </thead>
-  <tbody>
-  <j:set var="i" value="0"/>
-   <j:forEach var="test" items="${it.searchTest('Get')}">
-    <tr id = "${i}" >
-     <td class="pane" data="${test.className}">${test.className}</td>
-     <td class="pane name" data="${test.name}">${test.name}</td>
-     <td class="pane pass" data="${test.passedCount}">${test.passedCount}</td>
-     <td class="pane fail" data="${test.failedCount}">${test.failedCount}</td>
-     <td class="pane skip" data="${test.skippedCount}">${test.skippedCount}</td>
-    </tr>
-    <j:set var="i" value="${i+1}"/>
-   </j:forEach>
-  </tbody>
- </table>
- <div id="piechart" style="width: 900px; height: 500px;"></div>
-     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
-      function drawChart() {
+	<div class="tb-filters">
+		<div class="tb-filter">
+			Search Tests:
+			<input type="text" id="txtSearch" />
+		</div>
+		<div class="tb-filter">
+			<button type="button" onclick="searchTests();">Go</button>
+		</div>
+	</div>
 
-        var data = google.visualization.arrayToDataTable([
-          ['Data', 'Total Tests'],
-          ['Pass',  0],
-          ['Fail',  0],
-          ['Skip',  0]
-        ]);
+	<table id="tblSearchResults" class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header" width="1%">&amp;nbsp;</td>
+				<td class="pane-header">Class</td>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Passed Count</td>
+				<td class="pane-header">Failed Count</td>
+				<td class="pane-header">Skipped Count</td>
+				<td class="pane-header">Package</td>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
 
-        data.setCell(0, 1, jQuery('#0 td.pass').text());
-        data.setCell(1, 1, jQuery('#0 td.fail').text());
-        data.setCell(2, 1, jQuery('#0 td.skip').text());
+	<div class="tb-filters">
+		<div class="tb-filter">
+			Chart Type:
+			<input type="radio" id="rdbChartType_bar" name="rdbChartType" value="bar" checked="checked" class="first" />
+			<label for="rdbChartType_bar">Bar Chart</label>
+			<input type="radio" id="rdbChartType_pie" name="rdbChartType" value="pie" />
+			<label for="rdbChartType_pie">Pie Chart</label>
+		</div>
+		<div class="tb-filter">
+			<button type="button" onclick="generateTestCharts();">Generate</button>
+		</div>
+	</div>
 
-        var options = {
-          title: jQuery('#0 td.name').text()
-        };
+	<table id="tblChartData" class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header" width="1%">&amp;nbsp;</td>
+				<td class="pane-header">Class</td>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Passed Count</td>
+				<td class="pane-header">Failed Count</td>
+				<td class="pane-header">Skipped Count</td>
+				<td class="pane-header">Package</td>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
 
-        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+	<div id="divCharts"></div>
 
-        chart.draw(data, options);
-      }
-    </script>
+	<script type="text/javascript">
+		jQuery('#txtSearch').keyup(function(e){
+			if (e.keyCode == 13) {
+				searchTests();
+			}
+		});
+	</script>
 </j:jelly>

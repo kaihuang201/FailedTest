@@ -1,6 +1,5 @@
 package jp.skypencil.jenkins.regression;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +30,8 @@ import jp.skypencil.jenkins.regression.TestBuddyHelper;
 public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
-	private static final String[] BUILD_STATUSES = {"SUCCESS", "UNSTABLE", "FAILURE", "NOT_BUILT", "ABORTED"};
-	
-	public static TreeMap<Integer,BuildInfo> all_builds = new TreeMap<Integer,BuildInfo>();
+
+	public static TreeMap<Integer,BuildInfo> all_builds = new TreeMap<Integer,BuildInfo>(Collections.reverseOrder());
 	
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project){
 		this.project = project;
@@ -91,32 +89,29 @@ public class TestBuddyAction extends Actionable implements Action {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<BuildInfo> getBuilds() {
-		List<BuildInfo> ret = new ArrayList<BuildInfo>();
+		Set<Integer> missingBuildNumbers = new HashSet<Integer> (all_builds.keySet()); 
 		RunList<Run> runs = project.getBuilds();
 		Iterator<Run> runIterator = runs.iterator();
-		int check = 0;
+
 		while(runIterator.hasNext()){
 			Run run = runIterator.next();
 			int num = run.getNumber();
-			while(num > check){
-				if(all_builds.containsKey(check)){
-					all_builds.remove(check);
-				}
-				check++;
-			}
+			missingBuildNumbers.remove(num);
+
 			if(!all_builds.containsKey(num)){
-				List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+				List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
 				double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
+				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
 				build.add_tests(get_ini_Tests(String.valueOf(build.getNumber())));
 				all_builds.put(num, build);
 			}
-			check++;
 		}
-		for(Map.Entry<Integer,BuildInfo> entry : all_builds.entrySet()) {
-			  ret.add(entry.getValue());
-			}
-		return ret;
+		
+		for (int missingBuildNumber: missingBuildNumbers) {
+			all_builds.remove(missingBuildNumber);
+		}
+
+		return new ArrayList<BuildInfo> (all_builds.values());
 	}
 	
 	public BuildInfo getBuildInfo(String number) {
@@ -133,26 +128,21 @@ public class TestBuddyAction extends Actionable implements Action {
 	public BuildInfo getBuildInfo_backup(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
-		List<String> authors = TestBuddyHelper.getChangeLogForBuild((AbstractBuild) run);
+		List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
 		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), BUILD_STATUSES[run.getResult().ordinal], authors, rates[0], rates[1]);
+		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(), authors, rates[0], rates[1]);
 	}
-	
-	public List<String> getAllBuildStatuses() {
-		List<String> buildStatuses = Arrays.asList(BUILD_STATUSES.clone());
-		Collections.sort(buildStatuses);
-		return buildStatuses;
-	}
-	
-	public List<TestInfo> searchTest(String searchText) {
+
+	@JavaScriptMethod
+	public List<TestInfo> searchTests(String searchText) {
 		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
 		
 		for (BuildInfo build: getBuilds()) {
 			for (TestInfo test: build.getTests()) {
-				if (test.getFullName().contains(searchText)) {
+				if (test.getFullName().toLowerCase().contains(searchText.toLowerCase())) {
 					TestInfo testInfo;
 					if (!testMap.containsKey(test.getFullName())) {
-						testInfo = new TestInfo(test.getFullName(), test.getName(), test.getClassName(), test.getPackageName(), test.getStatus());
+						testInfo = new TestInfo(test.getFullName(), test.getStatus());
 						testMap.put(test.getFullName(), testInfo);
 					}
 					else {
@@ -168,10 +158,9 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	public Set<String> getAllAuthors() {
-		getBuilds();
 		Set<String> authors = new HashSet<String>();
-		for(Map.Entry<Integer,BuildInfo> b : all_builds.entrySet()) {
-			authors.addAll(b.getValue().getAuthors());
+		for(BuildInfo build : getBuilds()) {
+			authors.addAll(build.getAuthors());
 		}
 		
 		return authors;
@@ -198,12 +187,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed");
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getNewPassFail() {
 		AbstractBuild build = project.getLastBuild();
 		return getChangedTests(build, build.getPreviousBuild(), "Newly Passed", "Newly Failed");
 	}
 
 	//compare two builds
+	@SuppressWarnings("rawtypes")
 	@JavaScriptMethod
 	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2){
 		int build1 = Integer.parseInt(buildNumber1);
@@ -224,22 +215,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		List<TestInfo> tests = new ArrayList<TestInfo>();
 
 		for (CaseResult caseResult : caseResults) {
-			String className = "";
-			String[] fullClassName = caseResult.getClassName().split("\\.");
-			if (fullClassName.length > 0) {
-				className = fullClassName[fullClassName.length - 1];
-			}
-	
-			String fullTestName[] = caseResult.getDisplayName().split("\\.");
-			String testName = fullTestName[fullTestName.length - 1];
 			if(caseResult.isFailed()){
-				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), failedStatus));
+				tests.add(new TestInfo(caseResult.getFullName(), failedStatus));
 			}
 			else if(caseResult.isPassed()){
-				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), passedStatus));
+				tests.add(new TestInfo(caseResult.getFullName(), passedStatus));
 			}
 			else if(caseResult.isSkipped()){
-				tests.add(new TestInfo(caseResult.getFullName(), testName, className, caseResult.getPackageName(), "Skipped"));
+				tests.add(new TestInfo(caseResult.getFullName(), "Skipped"));
 			}
 		}
 		
@@ -328,12 +311,22 @@ public class TestBuddyAction extends Actionable implements Action {
 		private int skippedCount = 0;
 		
 		@DataBoundConstructor
-		public TestInfo(String fullName, String name, String className, String packageName, String status) {
+		public TestInfo(String fullName, String status) {
 			this.fullName = fullName;
-			this.name = name;
-			this.className = className;
-			this.packageName = packageName;
 			this.status = status;
+			
+			parseNames();
+		}
+		
+		/* Parse name, className, and packageName from fullName */
+		private void parseNames() {
+			String[] fullNameArray = fullName.split("\\.");
+			name = fullNameArray[fullNameArray.length - 1];
+			className = fullNameArray[fullNameArray.length - 2];
+			
+			if (fullName.length() > (name.length() + className.length() + 1)) {
+				packageName = fullName.substring(0, fullName.length() - name.length() - className.length() - 2);
+			}
 		}
 		
 		public String getFullName() {

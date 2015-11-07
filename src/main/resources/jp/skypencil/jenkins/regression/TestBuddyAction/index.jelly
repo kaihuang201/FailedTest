@@ -21,26 +21,28 @@
 				<a href="${rootURL}/${it.url}?displayType=compare" class="task-link">Test Compare</a>
 			</div>
 			<div class="tb-nav">
-				<a href="${rootURL}/${it.url}?displayType=chartView" class="task-link">ChartView</a>
+				<a href="${rootURL}/${it.url}?displayType=chartView" class="task-link">Chart View</a>
 			</div>
 		</div>
-		<j:choose>
-			<j:when test="${displayType == 'chartView'}">
-				<st:include page="chart-view.jelly" />
-			</j:when>
-			<j:when test="${displayType == 'buildDetails'}">
-				<st:include page="build-details.jelly" />
-			</j:when>
-			<j:when test="${displayType == 'buildList'}">
-				<st:include page="build-list.jelly" />
-			</j:when>
-			<j:when test="${displayType == 'compare'}">
-				<st:include page="test-compare.jelly" />
-			</j:when>
-			<j:otherwise>
-				<st:include page="test-regression.jelly" />
-			</j:otherwise>
-		</j:choose>
+		<div class="tb-container">
+			<j:choose>
+				<j:when test="${displayType == 'chartView'}">
+					<st:include page="chart-view.jelly" />
+				</j:when>
+				<j:when test="${displayType == 'buildDetails'}">
+					<st:include page="build-details.jelly" />
+				</j:when>
+				<j:when test="${displayType == 'buildList'}">
+					<st:include page="build-list.jelly" />
+				</j:when>
+				<j:when test="${displayType == 'compare'}">
+					<st:include page="test-compare.jelly" />
+				</j:when>
+				<j:otherwise>
+					<st:include page="test-regression.jelly" />
+				</j:otherwise>
+			</j:choose>
+		</div>
 	</l:main-panel>
   </l:layout>
 </j:jelly>
