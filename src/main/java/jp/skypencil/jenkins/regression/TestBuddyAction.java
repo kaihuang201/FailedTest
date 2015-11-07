@@ -162,12 +162,22 @@ public class TestBuddyAction extends Actionable implements Action {
         ArrayList<TestInfo> ret = new ArrayList<TestInfo>();
         for (BuildInfo build: getBuilds()) {
             TestInfo testInfo = build.getTest(testName);
+<<<<<<< HEAD
             if(testInfo != null)
             	ret.add(testInfo);
+=======
+            if(testInfo != null){
+            	ret.add(testInfo);
+            }else{
+            	//System.out.println("search getting null");
+            }
+            	
+>>>>>>> hzhang49_yjong2_liang33
         }
         return ret;
     }
 
+<<<<<<< HEAD
     public double getPassingRateforTest(TestInfo testInfo) {
     	List<TestInfo> testInfos = getAllTestInfosForTestName(testInfo.getFullName());
     	int totalNum = testInfos.size();
@@ -176,12 +186,38 @@ public class TestBuddyAction extends Actionable implements Action {
     	for(TestInfo test : testInfos) {
     		if(test.getStatus().equals("PASSED")) {
     			passedNum++;
+=======
+    public String[] getTestRates(TestInfo testInfo) {
+    	List<TestInfo> testInfos = getAllTestInfosForTestName(testInfo.getFullName());
+    	String[] ret = new String[4];
+    	double totalNum = testInfos.size();
+    	//System.out.println(totalNum);
+    	int passedNum = 0;
+    	int failed = 0;
+    	int skipped = 0;
+    	if(totalNum == 0) return ret;
+    	for(TestInfo test : testInfos) {
+    		if(test.getStatus().toLowerCase().equals("passed")) {
+    			passedNum++;
+    		}else if(test.getStatus().toLowerCase().equals("failed")){
+    			failed++;
+    		}else if(test.getStatus().toLowerCase().equals("skipped")){
+    			skipped++;
+>>>>>>> hzhang49_yjong2_liang33
     		}
     	}
 		double passingRate = passedNum/totalNum;
     	DecimalFormat df = new DecimalFormat("#.##");      
 		passingRate = Double.valueOf(df.format(passingRate));
+<<<<<<< HEAD
 		return passingRate;
+=======
+		ret[0] = String.valueOf(passingRate);
+		ret[1] = String.valueOf((int)passedNum);
+		ret[2] = String.valueOf((int)failed);
+		ret[3] = String.valueOf((int)skipped);
+		return ret;
+>>>>>>> hzhang49_yjong2_liang33
     }
 
 	public Set<String> getAllAuthors() {
@@ -195,7 +231,15 @@ public class TestBuddyAction extends Actionable implements Action {
 	public List<TestInfo> getTests(String number) {
 		if (all_builds.containsKey(Integer.valueOf(number))) {
 			// System.out.println("getting local copy");
+<<<<<<< HEAD
 			System.out.println(getPassingRateforTest((all_builds.get(Integer.valueOf(number)).getTests().get(0))));
+=======
+			String[] a = getTestRates((all_builds.get(Integer.valueOf(number)).getTests().get(0)));
+			for(String b: a){
+				System.out.println(b);
+			}
+
+>>>>>>> hzhang49_yjong2_liang33
 			return all_builds.get(Integer.valueOf(number)).getTests();
 		}
 
