@@ -170,8 +170,8 @@ public class TestBuddyAction extends Actionable implements Action {
         return ret;
     }
 
-    public String[] getTestRates(TestInfo testInfo) {
-    	List<TestInfo> testInfos = getAllTestInfosForTestName(testInfo.getFullName());
+    public String[] getTestRates(String testName) {
+    	List<TestInfo> testInfos = getAllTestInfosForTestName(testName);
     	String[] ret = new String[4];
     	double totalNum = testInfos.size();
     	//System.out.println(totalNum);
