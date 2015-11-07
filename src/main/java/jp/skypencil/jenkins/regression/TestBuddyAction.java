@@ -1,5 +1,5 @@
 package jp.skypencil.jenkins.regression;
-
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -158,22 +158,49 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new ArrayList<TestInfo>(testMap.values());
 	}
 
+	public List<TestInfo> getAllTestInfosForTestName(String testName) {
+        ArrayList<TestInfo> ret = new ArrayList<TestInfo>();
+        for (BuildInfo build: getBuilds()) {
+            TestInfo testInfo = build.getTest(testName);
+            if(testInfo != null)
+            	ret.add(testInfo);
+        }
+        return ret;
+    }
+
+    public double getPassingRateforTest(TestInfo testInfo) {
+    	List<TestInfo> testInfos = getAllTestInfosForTestName(testInfo.getFullName());
+    	int totalNum = testInfos.size();
+    	int passedNum = 0;
+    	if(totalNum == 0) return 0;
+    	for(TestInfo test : testInfos) {
+    		if(test.getStatus().equals("PASSED")) {
+    			passedNum++;
+    		}
+    	}
+		double passingRate = passedNum/totalNum;
+    	DecimalFormat df = new DecimalFormat("#.##");      
+		passingRate = Double.valueOf(df.format(passingRate));
+		return passingRate;
+    }
+
 	public Set<String> getAllAuthors() {
 		Set<String> authors = new HashSet<String>();
 		for (BuildInfo build : getBuilds()) {
 			authors.addAll(build.getAuthors());
 		}
-
 		return authors;
 	}
 
 	public List<TestInfo> getTests(String number) {
 		if (all_builds.containsKey(Integer.valueOf(number))) {
 			// System.out.println("getting local copy");
+			System.out.println(getPassingRateforTest((all_builds.get(Integer.valueOf(number)).getTests().get(0))));
 			return all_builds.get(Integer.valueOf(number)).getTests();
 		}
 
 		// System.out.println("NOT nice, calling back up function");
+
 		return get_ini_Tests(number);
 	}
 
