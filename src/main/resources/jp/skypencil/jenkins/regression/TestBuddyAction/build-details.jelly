@@ -47,7 +47,13 @@
 			<j:forEach var="test" items="${it.getTests(buildNumber)}">
 				<tr>
 					<td class="pane" data="${test.className}">${test.className}</td>
-					<td class="pane" data="${test.name}">${test.name}</td>
+					<td class="pane" data="${test.name}"><!--${test.name}-->
+							<a href="${rootURL}/${it.url}?testName=${test.fullName}&amp;displayType=testDetails">
+								${test.name}
+							</a>
+							<!--console.log("got to test");--> 
+					</td>
+					
 					<td class="pane" data="${test.status}">${test.status}</td>
 					<td class="pane" data="${test.packageName}">${test.packageName}</td>
 				</tr>

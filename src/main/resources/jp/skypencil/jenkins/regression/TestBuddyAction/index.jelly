@@ -39,6 +39,9 @@
 				<j:when test="${displayType == 'compare'}">
 					<st:include page="test-compare.jelly" />
 				</j:when>
+				<j:when test="${displayType == 'testDetails'}">
+					<st:include page="test-details.jelly" />
+				</j:when>
 				<j:otherwise>
 					<st:include page="test-regression.jelly" />
 				</j:otherwise>

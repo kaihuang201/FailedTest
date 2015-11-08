@@ -169,7 +169,7 @@ public class TestBuddyAction extends Actionable implements Action {
         }
         return ret;
     }
-
+	
     public String[] getTestRates(String testName) {
     	List<TestInfo> testInfos = getAllTestInfosForTestName(testName);
     	String[] ret = new String[4];
@@ -195,6 +195,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		ret[1] = String.valueOf((int)passedNum);
 		ret[2] = String.valueOf((int)failed);
 		ret[3] = String.valueOf((int)skipped);
+		System.out.println("jelly called this java function"); 
 		return ret;
     }
 
