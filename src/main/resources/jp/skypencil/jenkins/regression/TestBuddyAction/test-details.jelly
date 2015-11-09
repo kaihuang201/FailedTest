@@ -1,0 +1,60 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	<j:set var="fullTestName" value="${it.getUrlParam('testName')}"/>
+	<j:set var="test" value="${it.getAllTestInfosForTestName(fullTestName)}"/>
+	<j:set var="testrates" value="${it.getTestRates(fullTestName)}"/>
+
+	
+	<h1>Test Details</h1>
+	<table>
+	<tr>
+	<td class="tb-label">Test Name:</td>
+	<td>${fullTestName}</td>
+	</tr>
+	<tr>
+		<td class="tb-label">Passing Rate:</td>
+		<td>${testrates[0]}</td>
+	</tr>
+	<tr>
+		<td class="tb-label">Number of Passed Tests:</td>
+		<td>${testrates[1]}</td>
+	</tr>
+	<tr>
+		<td class="tb-label">Number of Failed Tests:</td>
+		<td>${testrates[2]}</td>
+	</tr>
+	
+	<tr>
+		<td class="tb-label">Number of Skipped Tests:</td>
+		<td>${testrates[3]}</td>
+	</tr>
+</table>
+	
+	
+	
+	
+	<h2>Builds</h2>
+	<table class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header">Build Number</td>
+				
+				<td class="pane-header">Status</td>
+				
+			</tr>
+		</thead>
+		<tbody>
+			<j:forEach var="test2" items="${it.getAllTestInfosForTestName(fullTestName)}">
+				<tr>
+					<td class="pane" data="${test2.buildNumber}">
+					
+					<a href="${rootURL}/${it.url}?buildNumber=${test2.buildNumber}&amp;displayType=buildDetails">
+					${test2.buildNumber}
+				</a></td>
+				
+					<td class="pane" data="${test2.status}">${test2.status}</td>
+				
+				</tr>
+			</j:forEach>
+		</tbody>
+	</table>
+</j:jelly>
