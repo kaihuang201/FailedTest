@@ -68,7 +68,6 @@ filterBuilds = function() {
 
 searchTests = function() {
 	var searchText = jQuery('#txtSearch').val();
-
 	remoteAction.searchTests(searchText, jQuery.proxy(function(t) {
 		var results = t.responseObject();
 
@@ -197,9 +196,56 @@ generateStackedBarChart = function() {
 }
 
 generateBarChart = function() {
-	
+	 var data = new google.visualization.DataTable;
+	 
+	 data.addColumn('string', 'Test Name');
+	 data.addColumn('number', 'Passed');
+	 data.addColumn('number', 'Failed');
+	 data.addColumn('number', 'Skipped');
+     var i = 0;
+     jQuery('#tblChartData').find('tbody').find('tr').each(function() {
+          data.addRow();
+          data.setCell(i, 0, jQuery(this).find('td[data-col="className"]').text() + '.' + jQuery(this).find('td[data-col="testName"]').text());
+          data.setCell(i, 1, parseInt(jQuery(this).find('td[data-col="passedCount"]').text()));
+          data.setCell(i, 2, parseInt(jQuery(this).find('td[data-col="failedCount"]').text()));
+          data.setCell(i, 3, parseInt(jQuery(this).find('td[data-col="skippedCount"]').text()));
+          
+          i++;
+     });
+     var options = {
+             width: '80%',
+             height: 400,
+             legend: { position: 'top', maxLines: 3 },
+             bar: { groupWidth: '75%' },
+      };
+     var chart = new google.visualization.ColumnChart(document.getElementById('divCharts'));
+     chart.draw(data, options);  
 }
 
 generatePieCharts = function() {
+    var data1 = google.visualization.arrayToDataTable([
+       ['Data', 'Total Tests'],
+       ['Pass',  0],
+       ['Fail',  0],
+       ['Skip',  0]
+     ]);
 	
+    var i = 0;
+    jQuery('#tblChartData').find('tbody').find('tr').each(function() {
+    	data1.setCell(0, 1, jQuery(this).find('td[data-col="passedCount"]').text());
+    	data1.setCell(1, 1, jQuery(this).find('td[data-col="failedCount"]').text());
+    	data1.setCell(2, 1, jQuery(this).find('td[data-col="skippedCount"]').text());
+        var options1 = {
+    		title: jQuery(this).find('td[data-col="className"]').text() + '.' +jQuery(this).find('td[data-col="testName"]').text()
+	    };
+        
+        var pieDiv = jQuery('#divCharts');
+        pieDiv.append('<div class = "tb-chart" id = "c'+i+'"></div>');
+        var chart1 = new google.visualization.PieChart(document.getElementById("c"+i));
+        chart1.draw(data1, options1);
+        i++;
+    });
+
+
+
 }

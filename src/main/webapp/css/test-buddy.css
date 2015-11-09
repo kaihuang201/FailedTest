@@ -40,3 +40,7 @@
 	font-weight: bold;
 	padding-right: 10px;
 }
+
+.tb-chart {
+	display: inline-block;
+}
