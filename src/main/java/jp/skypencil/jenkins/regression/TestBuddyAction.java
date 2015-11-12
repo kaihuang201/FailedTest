@@ -146,7 +146,12 @@ public class TestBuddyAction extends Actionable implements Action {
 			return null;
 		}
 	}
-
+	/**
+	 * US09 implements the back-end of user story nine.
+	 * Takes a string and returns a List of tests that contain that string in their name
+	 * @param searchText is the search string entered by the user
+	 * @return any test containing that string in its name
+	 */
 	@JavaScriptMethod
 	public List<TestInfo> searchTests(String searchText) {
 		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
@@ -251,6 +256,10 @@ public class TestBuddyAction extends Actionable implements Action {
 		}
 	}
 
+	/**
+	 * 
+	 * @return a list of newly passed and newly failed tests.
+	 */
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getNewPassFail() {
 		AbstractBuild build = project.getLastBuild();
