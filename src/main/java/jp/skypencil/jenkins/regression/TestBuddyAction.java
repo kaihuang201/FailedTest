@@ -116,23 +116,35 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	public BuildInfo getBuildInfo(String number) {
-		if (all_builds.containsKey(Integer.valueOf(number))) {
-			// System.out.println("getting local copy");
-			return all_builds.get(Integer.valueOf(number));
+		try {
+			if (all_builds.containsKey(Integer.valueOf(number))) {
+				// System.out.println("getting local copy");
+				return all_builds.get(Integer.valueOf(number));
+			}
+	
+			// System.out.println("NOT nice, calling back up function");
+			return getBuildInfo_backup(number);
 		}
-
-		// System.out.println("NOT nice, calling back up function");
-		return getBuildInfo_backup(number);
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
 	public BuildInfo getBuildInfo_backup(String number) {
-		int buildNumber = Integer.parseInt(number);
-		Run run = project.getBuildByNumber(buildNumber);
-		List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
-		double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
-		return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(),
-				authors, rates[0], rates[1]);
+		try {
+			int buildNumber = Integer.parseInt(number);
+			Run run = project.getBuildByNumber(buildNumber);
+			List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
+			double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
+			return new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(), run.getResult().toString(),
+					authors, rates[0], rates[1]);
+		}
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@JavaScriptMethod
@@ -208,23 +220,35 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	public List<TestInfo> getTests(String number) {
-		if (all_builds.containsKey(Integer.valueOf(number))) {
-
-			return all_builds.get(Integer.valueOf(number)).getTests();
+		try {
+			if (all_builds.containsKey(Integer.valueOf(number))) {
+	
+				return all_builds.get(Integer.valueOf(number)).getTests();
+			}
+	
+			// System.out.println("NOT nice, calling back up function");
+	
+			return get_ini_Tests(number);
 		}
-
-		// System.out.println("NOT nice, calling back up function");
-
-		return get_ini_Tests(number);
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+			return new ArrayList<TestInfo>();
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> get_ini_Tests(String number) {
-		int buildNumber = Integer.parseInt(number);
-		AbstractBuild build = project.getBuildByNumber(buildNumber);
-		ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
-
-		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed", Integer.parseInt(number));
+		try {
+			int buildNumber = Integer.parseInt(number);
+			AbstractBuild build = project.getBuildByNumber(buildNumber);
+			ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
+	
+			return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed", Integer.parseInt(number));
+		}
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+			return new ArrayList<TestInfo>();
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -237,12 +261,18 @@ public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	@JavaScriptMethod
 	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2) {
-		int build1 = Integer.parseInt(buildNumber1);
-		int build2 = Integer.parseInt(buildNumber2);
-		AbstractBuild buildOne = project.getBuildByNumber(build1);
-		AbstractBuild buildTwo = project.getBuildByNumber(build2);
-
-		return getChangedTests(buildOne, buildTwo, "Status Changed", "Status Changed");
+		try {
+			int build1 = Integer.parseInt(buildNumber1);
+			int build2 = Integer.parseInt(buildNumber2);
+			AbstractBuild buildOne = project.getBuildByNumber(build1);
+			AbstractBuild buildTwo = project.getBuildByNumber(build2);
+	
+			return getChangedTests(buildOne, buildTwo, "Status Changed", "Status Changed");
+		}
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+			return new ArrayList<TestInfo>();
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
