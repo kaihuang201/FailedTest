@@ -5,7 +5,7 @@
 			
 			<div class="tb-filters">
 			<div class="tb-filter">
-				Compare Tests in Build:
+				Compare Tests in Older Build:
 				<select name = "build1" id="build1">
 					<option value=""></option>
 					<j:forEach var="build" items="${it.builds}">
@@ -14,7 +14,7 @@
 				</select>
 			</div>
 			<div class="tb-filter">
-				to Tests in Build:
+				to Tests in Newer Build:
 				<select name = "build2" id="build2">
 					<option value=""></option>
 					<j:forEach var="build" items="${it.builds}">
@@ -32,7 +32,8 @@
 			<tr>
 				<td class="pane-header">Class</td>
 				<td class="pane-header">Name</td>
-				<td class="pane-header">Status</td>
+				<td class="pane-header">Older Status</td>
+				<td class="pane-header">Newer Status</td>
 				<td class="pane-header">Package</td>
            	</tr>
 		</thead>
@@ -51,7 +52,7 @@
 				var tbody = jQuery('#table2').find('tbody');
 				tbody.empty();
 				results.forEach(function(entry) {
-					tbody.append('<tr><td>'+entry.className+'</td><td>'+entry.name+'</td><td>'+entry.status+'</td><td>'+entry.packageName+'</td></tr>');
+					tbody.append('<tr><td>'+entry.className+'</td><td>'+entry.name+'</td><td>'+entry.status+'</td><td>'+entry.otherStatus+'</td><td>'+entry.packageName+'</td></tr>');
 				});
 			}, this));
 		}; 

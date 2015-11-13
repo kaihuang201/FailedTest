@@ -242,7 +242,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		AbstractBuild buildOne = project.getBuildByNumber(build1);
 		AbstractBuild buildTwo = project.getBuildByNumber(build2);
 
-		return getChangedTests(buildOne, buildTwo, "Status Changed", "Status Changed");
+		return getChangedTests(buildOne, buildTwo, "Passed", "Failed");
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -363,6 +363,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		private String className;
 		private String packageName;
 		private String status;
+		private String otherStatus;
 		private int passedCount = 0;
 		private int failedCount = 0;
 		private int skippedCount = 0;
@@ -373,6 +374,10 @@ public class TestBuddyAction extends Actionable implements Action {
 			this.fullName = fullName;
 			this.status = status;
 			this.build_number = number;
+			if(status.equals("Passed"))
+				this.otherStatus = "Failed";
+			else
+				this.otherStatus = "Passed";
 			parseNames();
 		}
 
@@ -405,6 +410,10 @@ public class TestBuddyAction extends Actionable implements Action {
 
 		public String getStatus() {
 			return status;
+		}
+		
+		public String getOtherStatus() {
+			return otherStatus;
 		}
 
 		public int getPassedCount() {
