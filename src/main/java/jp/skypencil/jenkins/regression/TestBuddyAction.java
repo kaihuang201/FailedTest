@@ -187,6 +187,17 @@ public class TestBuddyAction extends Actionable implements Action {
         return ret;
     }
 	
+	public String getTestName(String testName){
+		String ret = "";
+        for (BuildInfo build: getBuilds()) {
+            TestInfo testInfo = build.getTest(testName);
+            if(testInfo != null){
+            	return testInfo.getPackageName()+" "+testInfo.getClassName()+" "+ testInfo.getName();
+            }
+        }
+		return ret;
+	}
+	
     public String[] getTestRates(String testName) {
     	List<TestInfo> testInfos = getAllTestInfosForTestName(testName);
     	String[] ret = new String[4];
