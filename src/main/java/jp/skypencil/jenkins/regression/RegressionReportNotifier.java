@@ -120,6 +120,10 @@ public final class RegressionReportNotifier extends Notifier {
         return sendToCulprits;
     }
 
+    /**
+     * 
+     * @return true if user has checked Attach Logs option else it will return false
+     */
     public boolean getAttachLogs(){
     	return attachLogs;
     }
@@ -159,7 +163,12 @@ public final class RegressionReportNotifier extends Notifier {
         return regressionedTests;
 	}
 
-	
+	/**
+	 * This method take a build and compares the tests in that build with the tests in the previous build
+	 * and determines whether there are any test that were failing and are now passing.
+	 * @param build is of type AbstractBuild 
+	 * @return is a List of Newly Passed tests of type CaseResult
+	 */
     public List<CaseResult> listNewlyPassed(AbstractBuild<?, ?> build) {
 		List<CaseResult> newlyPassedTests = new ArrayList<CaseResult>();
         if(build.getPreviousBuild() != null) {
@@ -293,7 +302,14 @@ public final class RegressionReportNotifier extends Notifier {
         return list;
     }
 
-    /* S08: Attach build log file to email, called from mailReport() */
+    /**
+     * US08: Attach build log file to email, called from mailReport()
+     * @param build is of type Abstract Build
+     * @param message is provided by mailReport()
+     * @param content is the email's body text provided by mailReport()
+     * @param logger allows attachLogFile() method to print to console logs
+     * @throws MessagingException
+     */
     private void attachLogFile(AbstractBuild<?, ?> build, MimeMessage message, String content, PrintStream logger) 
             throws MessagingException {
     	BodyPart emailAttachment = new MimeBodyPart();
