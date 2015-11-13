@@ -46,13 +46,13 @@
 			var build1 = jQuery('#build1').val();
 			var build2 = jQuery('#build2').val();
 			
-			remoteAction.getBuildCompare(build1, build2, jQuery.proxy(function(t) {
+			remoteAction.getDetailedBuildComparison(build1, build2, jQuery.proxy(function(t) {
 				var results = t.responseObject();
 
 				var tbody = jQuery('#table2').find('tbody');
 				tbody.empty();
-				results.forEach(function(entry) {
-					tbody.append('<tr><td>'+entry.className+'</td><td>'+entry.name+'</td><td>'+entry.status+'</td><td>'+entry.otherStatus+'</td><td>'+entry.packageName+'</td></tr>');
+				results.forEach(function(tuple) {
+					tbody.append('<tr><td>'+tuple.first.className+'</td><td>'+tuple.first.name+'</td><td>'+tuple.first.status+'</td><td>'+tuple.second.status+'</td><td>'+tuple.first.packageName+'</td></tr>');
 				});
 			}, this));
 		}; 
