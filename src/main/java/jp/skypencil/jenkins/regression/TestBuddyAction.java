@@ -26,6 +26,7 @@ import hudson.model.Actionable;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.util.RunList;
+import jp.skypencil.jenkins.regression.TestBuddyAction.TestInfo;
 import jp.skypencil.jenkins.regression.TestBuddyHelper;
 
 public class TestBuddyAction extends Actionable implements Action {
@@ -275,6 +276,20 @@ public class TestBuddyAction extends Actionable implements Action {
 
 		return getChangedTests(buildOne, buildTwo, "Passed", "Failed");
 	}
+	
+	@SuppressWarnings("rawtypes")
+	@JavaScriptMethod
+	public ArrayList<Tuple<TestInfo, TestInfo>> getDetailedBuildComparison(String buildNumber1, String buildNumber2) {
+		int build1 = Integer.parseInt(buildNumber1);
+		int build2 = Integer.parseInt(buildNumber2);
+		AbstractBuild buildOne = project.getBuildByNumber(build1);
+		AbstractBuild buildTwo = project.getBuildByNumber(build2);
+		
+		
+		ArrayList<Tuple<CaseResult, CaseResult>> myDifferences = TestBuddyHelper.matchTestsBetweenBuilds(buildOne, buildTwo);
+		ArrayList<Tuple<TestInfo, TestInfo>> allTestInfos = (ArrayList<Tuple<TestInfo, TestInfo>>) convertCaseResultsToTestInfosTwo(myDifferences, build1, build2); 
+		return allTestInfos;
+	}
 
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getChangedTests(AbstractBuild build1, AbstractBuild build2, String passedStatus,
@@ -282,19 +297,62 @@ public class TestBuddyAction extends Actionable implements Action {
 		ArrayList<CaseResult> changedTests = TestBuddyHelper.getChangedTestsBetweenBuilds(build1, build2);
 		return convertCaseResultsToTestInfos(changedTests, passedStatus, failedStatus, 0);
 	}
+	
 
 	public List<TestInfo> convertCaseResultsToTestInfos(List<CaseResult> caseResults, String passedStatus,
 			String failedStatus, int build_no) {
 		List<TestInfo> tests = new ArrayList<TestInfo>();
 
 		for (CaseResult caseResult : caseResults) {
-			if (caseResult.isFailed()) {
-				tests.add(new TestInfo(caseResult.getFullName(), failedStatus, build_no));
-			} else if (caseResult.isPassed()) {
-				tests.add(new TestInfo(caseResult.getFullName(), passedStatus, build_no));
-			} else if (caseResult.isSkipped()) {
-				tests.add(new TestInfo(caseResult.getFullName(), "Skipped", build_no));
+			if (caseResult != null) {
+				if (caseResult.isFailed()) {
+					tests.add(new TestInfo(caseResult.getFullName(), failedStatus, build_no));
+				} else if (caseResult.isPassed()) {
+					tests.add(new TestInfo(caseResult.getFullName(), passedStatus, build_no));
+				} else if (caseResult.isSkipped()) {
+					tests.add(new TestInfo(caseResult.getFullName(), "Skipped", build_no));
+				}
 			}
+		}
+
+		return tests;
+	}
+	
+	public List<Tuple<TestInfo, TestInfo>> convertCaseResultsToTestInfosTwo(List<Tuple<CaseResult, CaseResult>> caseResults, int build1, int build2) {
+		List<Tuple<TestInfo, TestInfo>> tests = new ArrayList<Tuple<TestInfo, TestInfo>>();
+
+		TestInfo tmp1;
+		TestInfo tmp2;
+		
+		for (Tuple<CaseResult, CaseResult> t : caseResults) {
+			CaseResult first = (CaseResult) t.first;
+			CaseResult second = (CaseResult) t.second;
+			
+			if (first != null) {
+				if (first.isFailed()) 
+					tmp1 = new TestInfo(first.getFullName(), "Failed", build1);
+				else if (first.isPassed())
+					tmp1 = new TestInfo(first.getFullName(), "Passed", build1);
+				else if (first.isSkipped())
+					tmp1 = new TestInfo(first.getFullName(), "Skipped", build1);
+				else
+					tmp1 = new TestInfo(first.getFullName(), "Unknown", build1);
+			}
+			else tmp1 = new TestInfo(second.getFullName(), "Did not exist", build1);
+			
+			if (second != null) {
+				if (second.isFailed()) 
+					tmp2 = new TestInfo(second.getFullName(), "Failed", build2);
+				else if (second.isPassed())
+					tmp2 = new TestInfo(second.getFullName(), "Passed", build2);
+				else if (second.isSkipped())
+					tmp2 = new TestInfo(second.getFullName(), "Skipped", build2);
+				else
+					tmp2 = new TestInfo(second.getFullName(), "Unknown", build2);
+			}
+			else tmp2 = new TestInfo(first.getFullName(), "Did not exist", build2);
+			
+			tests.add(new Tuple<TestInfo, TestInfo>(tmp1, tmp2));
 		}
 
 		return tests;
@@ -407,7 +465,7 @@ public class TestBuddyAction extends Actionable implements Action {
 			this.build_number = number;
 			if(status.equals("Passed"))
 				this.otherStatus = "Failed";
-			else
+			else if(status.equals("Failed"))
 				this.otherStatus = "Passed";
 			parseNames();
 		}
