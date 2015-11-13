@@ -158,6 +158,12 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new ArrayList<TestInfo>(testMap.values());
 	}
 
+    /**
+     * This method takes a test name and returns a list of TestInfos representing 
+     * all the tests across all builds with the given test name
+     * @param	testName is a String containing the name of test to search for
+     * @return	a List of TestInfos with the given testName, empty if no tests with the given testName was found.
+     */
 	public List<TestInfo> getAllTestInfosForTestName(String testName) {
         ArrayList<TestInfo> ret = new ArrayList<TestInfo>();
         for (BuildInfo build: getBuilds()) {
@@ -170,6 +176,13 @@ public class TestBuddyAction extends Actionable implements Action {
         return ret;
     }
 	
+    /**
+     * This method takes a test name and looks through all builds to find the test with the given name
+     * and returns a String concatenating its package name, class name, and test name.
+     * @param	testName is a String containing the name of test to search for
+     * @return	a String containing the package name, the class name and the test name. 
+     * 			An empty string if no test with the testName testName was found.
+     */
 	public String getTestName(String testName){
 		String ret = "";
         for (BuildInfo build: getBuilds()) {
@@ -181,6 +194,13 @@ public class TestBuddyAction extends Actionable implements Action {
 		return ret;
 	}
 	
+    /**
+     * This method takes a test name, looks through all builds to compute the number of passing tests, 
+     * failing tests, skipped tests, and passing rate, of the test with the given test name.
+     * @param	testName is a String containing the name of test to search for
+     * @return	an array of Strings containing the passing rate, the number of passing tests, 
+     * 			the number of failing tests, and the number of skipped tests, in that order.
+     */
     public String[] getTestRates(String testName) {
     	List<TestInfo> testInfos = getAllTestInfosForTestName(testName);
     	String[] ret = new String[4];
