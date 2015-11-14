@@ -88,6 +88,11 @@ public class TestBuddyAction extends Actionable implements Action {
 		return Stapler.getCurrentRequest().getParameter(parameterName);
 	}
 
+    /**
+     * This method loop through all the builds in the project, all the tests in each builds, and store them 
+     * in  local all_builds TreeMap. 
+     * @return	a List of BuildInfo which contains every build in the project. 
+     */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<BuildInfo> getBuilds() {
 		Set<Integer> missingBuildNumbers = new HashSet<Integer>(all_builds.keySet());
@@ -116,6 +121,12 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new ArrayList<BuildInfo>(all_builds.values());
 	}
 
+    /**
+     * This method takes a string representation of build number and returns the corresponding BuildInfo. If there 
+     * is no local copy of that build, getBuildInfo_backup will be called. 
+     * @param	number is a String representing the build number.
+     * @return	BuildInfo which contains a build's information.
+     */	
 	public BuildInfo getBuildInfo(String number) {
 		if (all_builds.containsKey(Integer.valueOf(number))) {
 			// System.out.println("getting local copy");
@@ -126,6 +137,12 @@ public class TestBuddyAction extends Actionable implements Action {
 		return getBuildInfo_backup(number);
 	}
 
+    /**
+     * This method takes a string representation of build number and returns the corresponding BuildInfo. It will
+     * loop through the project and try to find the corresponding build. 
+     * @param	number is a String representing the build number.
+     * @return	BuildInfo which contains a build's information.
+     */		
 	@SuppressWarnings("rawtypes")
 	public BuildInfo getBuildInfo_backup(String number) {
 		int buildNumber = Integer.parseInt(number);
@@ -231,6 +248,10 @@ public class TestBuddyAction extends Actionable implements Action {
 		return ret;
     }
 
+    /**
+     * This method loop through all the local builds and return all authors
+     * @return	A set of String which representing the name of author. 
+     */	
 	public Set<String> getAllAuthors() {
 		Set<String> authors = new HashSet<String>();
 		for (BuildInfo build : getBuilds()) {
@@ -239,6 +260,12 @@ public class TestBuddyAction extends Actionable implements Action {
 		return authors;
 	}
 
+    /**
+     * This method takes a string representation of build number and returns all the tests in that build. If no
+     * local copy of that build is find, get_ini_Tests will be called
+     * @param	number is a String representing the build number.
+     * @return	A List of TestInfo from corresponding build. 
+     */	
 	public List<TestInfo> getTests(String number) {
 		if (all_builds.containsKey(Integer.valueOf(number))) {
 
@@ -250,6 +277,12 @@ public class TestBuddyAction extends Actionable implements Action {
 		return get_ini_Tests(number);
 	}
 
+    /**
+     * This method takes a string representation of build number, loop through the project and returns all the 
+     * tests in that build.
+     * @param	number is a String representing the build number.
+     * @return	A List of TestInfo from corresponding build. 
+     */	
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> get_ini_Tests(String number) {
 		int buildNumber = Integer.parseInt(number);
