@@ -193,6 +193,26 @@ public class TestBuddyAction extends Actionable implements Action {
 
 		return new ArrayList<TestInfo>(testMap.values());
 	}
+	
+	public List<TestInfo> listTests() {
+		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
+
+		for (BuildInfo build : getBuilds()) {
+			for (TestInfo test : build.getTests()) {
+				TestInfo testInfo;
+				if (!testMap.containsKey(test.getFullName())) {
+					testInfo = new TestInfo(test.getFullName(), test.getStatus(), build.getNumber());
+					testMap.put(test.getFullName(), testInfo);
+				} else {
+					testInfo = testMap.get(test.getFullName());
+				}
+
+				testInfo.incrementCount(test.getStatus());
+			}
+		}
+
+		return new ArrayList<TestInfo>(testMap.values());
+	}
 
     /**
      * This method takes a test name and returns a list of TestInfos representing 
@@ -682,6 +702,21 @@ public class TestBuddyAction extends Actionable implements Action {
 		public int getBuildNumber(){
 			return build_number;
 		}
+		
+		public double getFailingRate(){
+			double total = failedCount + passedCount;
+			double failingRate = 0;
+			
+			if(total > 0){
+				failingRate = failedCount/total;
+				DecimalFormat df = new DecimalFormat("#.##");      
+				failingRate = Double.valueOf(df.format(failingRate));
+			}
+			
+			return failingRate;
+		}
 	}
+	
+	
 
 }

@@ -66,6 +66,45 @@ filterBuilds = function() {
 	});
 }
 
+filterTests = function() {
+	var className = jQuery('#className').val();
+	var testName = jQuery('#testName').val();
+	
+	var minFailingRate = jQuery('#minFailingRate').val();
+	if (minFailingRate != '') {
+		minFailingRate = parseFloat(minFailingRate);
+	}
+
+	jQuery('#tblTestList').find('tbody').find('tr').each(function() {
+		if (className != '') {
+			var colClass = jQuery(this).find('td[data-col="className"]').text();
+			if (colClass.toLowerCase().indexOf(className.toLowerCase()) == -1) {
+				jQuery(this).hide();
+				return;
+			}
+		}
+		
+		if (testName != '') {
+			var colTestName = jQuery(this).find('td[data-col="name"]').text();
+			if (colTestName.toLowerCase().indexOf(testName.toLowerCase()) == -1) {
+				jQuery(this).hide();
+				return;
+			}
+		}
+
+			
+		if (minFailingRate != '') {
+			var failingRate = parseFloat(jQuery(this).find('td[data-col="failingRate"]').text());
+			if (failingRate < minFailingRate) {
+				jQuery(this).hide();
+				return;
+			}
+		}
+
+		jQuery(this).show();
+	});
+}
+
 searchTests = function() {
 	var searchText = jQuery('#txtSearch').val();
 	remoteAction.searchTests(searchText, jQuery.proxy(function(t) {

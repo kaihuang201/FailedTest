@@ -19,6 +19,9 @@
 				<a href="${rootURL}/${it.url}?displayType=buildList" class="task-link">All Builds</a>
 			</div>
 			<div class="tb-nav">
+				<a href="${rootURL}/${it.url}?displayType=testList" class="task-link">All Tests</a>
+			</div>
+			<div class="tb-nav">
 				<a href="${rootURL}/${it.url}?displayType=compare" class="task-link">Test Compare</a>
 			</div>
 			<div class="tb-nav">
@@ -35,6 +38,9 @@
 				</j:when>
 				<j:when test="${displayType == 'buildList'}">
 					<st:include page="build-list.jelly" />
+				</j:when>
+				<j:when test="${displayType == 'testList'}">
+					<st:include page="test-list.jelly" />
 				</j:when>
 				<j:when test="${displayType == 'compare'}">
 					<st:include page="test-compare.jelly" />
