@@ -131,7 +131,7 @@ public class TestBuddyHelper {
      * (CaseResultFromThisBuild, CaseResultFromThatBuild)
      *
      * @param thisBuild an AbstractBuild.
-     * @param otherBuild another AbstractBuild, which is compared againt thisBuild
+     * @param otherBuild another AbstractBuild, which is compared against thisBuild
      * @return an ArrayList of Tuples of CaseResults.Each pair is of form 
      * (CaseResultFromThisBuild, CaseResultFromThatBuild)
      * if a matching case result is not found in the other build, a null is used

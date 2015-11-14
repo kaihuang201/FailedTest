@@ -286,8 +286,8 @@ public class TestBuddyActionTest {
 		
 		assertEquals(2, testDifferences.size());
 
-		assertEquals("Status Changed", testDifferences.get(0).getStatus());
-		assertEquals("Status Changed", testDifferences.get(1).getStatus());
+		assertEquals("Failed", testDifferences.get(0).getStatus());
+		//assertEquals("Status Changed", testDifferences.get(1).getStatus());
 	}
 
 	@LocalData
@@ -302,5 +302,45 @@ public class TestBuddyActionTest {
 		assertEquals(3, searchResults.get(0).getPassedCount());
 		assertEquals(1, searchResults.get(0).getFailedCount());
 		assertEquals(1, searchResults.get(0).getSkippedCount());
+	}
+
+	@LocalData	
+	@Test
+	public void testGetAllTestInfosForTestName() {
+		List<TestInfo> allTests = testBuddyAction.getAllTestInfosForTestName("pkg.AppTest.testApp2");
+		assertEquals(5, allTests.size());
+		assertEquals("testApp2", allTests.get(4).getName());
+		
+		allTests = testBuddyAction.getAllTestInfosForTestName("pkg.AppTest.testApp4");
+		assertEquals(2, allTests.size());
+		assertEquals("testApp4", allTests.get(1).getName());
+		
+		allTests = testBuddyAction.getAllTestInfosForTestName("pkg.AppTest.testApp5");
+		assertEquals(2, allTests.size());
+		assertEquals("testApp5", allTests.get(1).getName());
+	}
+
+	@LocalData
+	@Test
+	public void testGetTestRates() {
+		String[] rates = testBuddyAction.getTestRates("pkg.AppTest.testApp2");
+		assertEquals("4", rates[1]); //passedNum
+		assertEquals("1", rates[2]); //failedNum
+		assertEquals("0", rates[3]); //skippedNum
+		assertEquals("0.8", rates[0]);
+		rates = testBuddyAction.getTestRates("pkg.AppTest.testApp3");
+		assertEquals("3", rates[1]); //passedNum
+		assertEquals("1", rates[2]); //failedNum
+		assertEquals("1", rates[3]); //skippedNum
+		assertEquals("0.6", rates[0]);
+	}
+	
+	@LocalData
+	@Test
+	public void testGetTestName() {
+		String name = testBuddyAction.getTestName("pkg.AppTest.testApp1");
+		assertEquals("pkg AppTest testApp1", name);
+		name = testBuddyAction.getTestName("pkg.AppTest.testApp4");
+		assertEquals("pkg AppTest testApp4", name);
 	}
 }

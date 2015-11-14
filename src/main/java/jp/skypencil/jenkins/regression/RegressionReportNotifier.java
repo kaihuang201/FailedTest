@@ -156,6 +156,12 @@ public final class RegressionReportNotifier extends Notifier {
         return true;
     }
 
+	/**
+	 * This method takes a test result action, obtains the list of failed tests,
+	 * and filters that list of tests to keep only those that are newly failing (CaseResult.Status == REGRESSION).
+	 * @param	testResultAction an AbstractTestResultAction from which to find the regressioned tests
+	 * @return	a List of CaseResults representing the regression tests
+	 */
     public List<CaseResult> listRegressions(AbstractTestResultAction<?> testResultAction) {
         List<? extends TestResult> failedTest = testResultAction.getFailedTests();
         Iterable<? extends TestResult> filtered = Iterables.filter(failedTest, new RegressionPredicate());
@@ -164,10 +170,10 @@ public final class RegressionReportNotifier extends Notifier {
 	}
 
 	/**
-	 * This method take a build and compares the tests in that build with the tests in the previous build
-	 * and determines whether there are any test that were failing and are now passing.
-	 * @param build is of type AbstractBuild 
-	 * @return is a List of Newly Passed tests of type CaseResult
+	 * This method takes a build, compares it with the previous build,
+	 * and returns a list of tests that are passing in this build but were failing in the previous build (progressions).
+	 * @param	build an AbstractBuild from which to find the progressioned tests
+	 * @return	a List of CaseResults representing the progression tests
 	 */
     public List<CaseResult> listNewlyPassed(AbstractBuild<?, ?> build) {
 		List<CaseResult> newlyPassedTests = new ArrayList<CaseResult>();
@@ -197,6 +203,15 @@ public final class RegressionReportNotifier extends Notifier {
         }
     }
 
+    /**
+     * This method constructs the report and sends to the specified recipients
+     * @param	regressions is the list of CaseResults representing the regression tests
+     * @param	progressions is the list of CaseResults representing the progression tests
+     * @param	recipients is a String containing the list of addresses to mail the report to
+     * @param	listener is the BuildListener of this build
+     * @param	build is the AbstractBuild object
+     * @throws	MessagingException
+     */
     private void mailReport(List<CaseResult> regressions, List<CaseResult> newlyPassed, String recipients,
             BuildListener listener, AbstractBuild<?, ?> build)
             throws MessagingException {
@@ -304,11 +319,11 @@ public final class RegressionReportNotifier extends Notifier {
 
     /**
      * US08: Attach build log file to email, called from mailReport()
-     * @param build is of type Abstract Build
-     * @param message is provided by mailReport()
-     * @param content is the email's body text provided by mailReport()
-     * @param logger allows attachLogFile() method to print to console logs
-     * @throws MessagingException
+     * @param	build is an AbstractBuild object from which the log file is obtained
+     * @param	message is a MimeMessage for which to set the content to, provided by mailReport()
+     * @param	content is a String containing the email's body text, provided by mailReport()
+     * @param	logger allows the method to print messages to console log
+     * @throws	MessagingException
      */
     private void attachLogFile(AbstractBuild<?, ?> build, MimeMessage message, String content, PrintStream logger) 
             throws MessagingException {

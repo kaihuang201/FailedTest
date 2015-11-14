@@ -2,13 +2,14 @@
 	<j:set var="fullTestName" value="${it.getUrlParam('testName')}"/>
 	<j:set var="test" value="${it.getAllTestInfosForTestName(fullTestName)}"/>
 	<j:set var="testrates" value="${it.getTestRates(fullTestName)}"/>
+	<j:set var="testname" value="${it.getTestName(fullTestName)}"/>
 
 	
 	<h1>Test Details</h1>
 	<table>
 	<tr>
 	<td class="tb-label">Test Name:</td>
-	<td>${fullTestName}</td>
+	<td>${testname}</td>
 	</tr>
 	<tr>
 		<td class="tb-label">Passing Rate:</td>
