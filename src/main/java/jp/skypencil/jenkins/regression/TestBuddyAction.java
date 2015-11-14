@@ -257,7 +257,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	/**
-	 * 
+	 * User Story 1 wrapper called from the jelly file
 	 * @return a list of newly passed and newly failed tests.
 	 */
 	@SuppressWarnings("rawtypes")
