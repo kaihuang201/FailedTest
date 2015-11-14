@@ -5,6 +5,18 @@
   <f:entry field="sendToCulprits" title="${%SentToCulprits}">
     <f:checkbox />
   </f:entry>
+  <f:entry field="RegressionTests" title="${%RegressionTests}">
+    <f:checkbox />
+  </f:entry>
+    <f:entry field="ProgressionTests" title="${%ProgressionTests}">
+    <f:checkbox />
+  </f:entry>
+    <f:entry field="NewPassed" title="${%NewPassed}">
+    <f:checkbox />
+  </f:entry>
+    <f:entry field="NewFailed" title="${%NewFailed}">
+    <f:checkbox />
+  </f:entry>
   <f:entry field = "attachLogs" title ="${%AttachLogs}">
     <f:checkbox />
   </f:entry>
