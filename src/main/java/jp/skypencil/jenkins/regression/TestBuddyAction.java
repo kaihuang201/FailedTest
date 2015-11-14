@@ -35,55 +35,68 @@ public class TestBuddyAction extends Actionable implements Action {
 
 	public static TreeMap<Integer, BuildInfo> all_builds = new TreeMap<Integer, BuildInfo>(Collections.reverseOrder());
 
+    /** 
+     * Creates a new instance of TestBuddyAction.
+     * @param project an AbstractProject.
+     */
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project) {
 		this.project = project;
 	}
 
 	/**
-	 * The display name for the action.
-	 * 
-	 * @return the name as String
+	 * Returns the display name of the action page.
+	 * @return the display name as String
 	 */
 	public final String getDisplayName() {
 		return "Test Buddy";
 	}
 
 	/**
-	 * The icon for this action.
-	 * 
-	 * @return the icon file as String
+	 * Returns the file path of the action page icon.
+	 * @return the icon file path as String
 	 */
 	public final String getIconFileName() {
 		return "/images/jenkins.png";
 	}
 
 	/**
-	 * The url for this action.
-	 * 
-	 * @return the url as String
+	 * Returns the url name of the action page.
+	 * @return the url name as String
 	 */
 	public String getUrlName() {
 		return "test_buddy";
 	}
 
 	/**
-	 * Search url for this action.
-	 * 
-	 * @return the url as String
+	 * Returns the search url of the action page.
+	 * @return the search url as String
 	 */
 	public String getSearchUrl() {
 		return "test_buddy";
 	}
 
+	/**
+	 * Returns the project associated with the action page.
+	 * @return an AbstractProject
+	 */
 	@SuppressWarnings("rawtypes")
 	public AbstractProject getProject() {
 		return this.project;
 	}
 
+	/**
+	 * Returns the combination of project url and the action page url name.
+	 * @return the project url appended with the action page url name as String
+	 */
 	public String getUrl() {
 		return this.project.getUrl() + this.getUrlName();
 	}
 
+    /** 
+     * Returns the value of an url query string.
+     * @param parameterName query string parameter name.
+     * @return query string value as String
+     */
 	public String getUrlParam(String parameterName) {
 		return Stapler.getCurrentRequest().getParameter(parameterName);
 	}
@@ -153,6 +166,11 @@ public class TestBuddyAction extends Actionable implements Action {
 				authors, rates[0], rates[1]);
 	}
 
+    /** 
+     * Searches tests where the full name (package, class, and test name) contains the search text. The search is case insensitive.
+     * @param searchText text to search.
+     * @return a List of TestInfo.
+     */
 	@JavaScriptMethod
 	public List<TestInfo> searchTests(String searchText) {
 		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
@@ -324,6 +342,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		return allTestInfos;
 	}
 
+    /** 
+     * Returns a list of test differences between two builds.
+     * @param build1 an AbstractBuild.
+     * @param build2 another AbstractBuild to compare with build1.
+     * @param passedStatus a status String to be displayed when the CaseResult status is passing.
+     * @param failedStatus a status String to be displayed when the CaseResult status is failing.
+     * @return a List of TestInfo.
+     */
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getChangedTests(AbstractBuild build1, AbstractBuild build2, String passedStatus,
 			String failedStatus) {
@@ -331,7 +357,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		return convertCaseResultsToTestInfos(changedTests, passedStatus, failedStatus, 0);
 	}
 	
-
+    /** 
+     * Converts a list of CaseResult to a list of TestInfo.
+     * @param caseResults a List of CaseResult.
+     * @param passedStatus a status String to be displayed when the CaseResult status is passing.
+     * @param failedStatus a status String to be displayed when the CaseResult status is failing.
+     * @param build_no build number in int.
+     * @return a List of TestInfo.
+     */
 	public List<TestInfo> convertCaseResultsToTestInfos(List<CaseResult> caseResults, String passedStatus,
 			String failedStatus, int build_no) {
 		List<TestInfo> tests = new ArrayList<TestInfo>();
@@ -401,16 +434,26 @@ public class TestBuddyAction extends Actionable implements Action {
 		private double passing_rate;
 		private LinkedHashMap<String, TestInfo> tests;
 
+	    /** 
+	     * Creates a new instance of BuildInfo.
+	     * @param number build number as int.
+	     * @param timestamp timestamp the build was created as Calendar.
+	     * @param timestampString timestamp the build was created as String.
+	     * @param status build status as String.
+	     * @param authors a List of authors who contribute to the code changes.
+	     * @param passedTests number of passed tests as double.
+	     * @param passingRate tests passing rate (total passed tests divided by total tests) as double.
+	     */
 		@DataBoundConstructor
-		public BuildInfo(int number, Calendar timestamp, String timestampString, String s, List<String> a, double pt,
-				double pr) {
+		public BuildInfo(int number, Calendar timestamp, String timestampString, String status, List<String> authors, double passedTests,
+				double passingRate) {
 			this.number = number;
 			this.timestamp = timestamp;
 			this.timestampString = timestampString;
-			this.status = s;
-			this.authors = new ArrayList<String>(a);
-			this.passed_tests = (int) pt;
-			this.passing_rate = pr;
+			this.status = status;
+			this.authors = authors;
+			this.passed_tests = (int) passedTests;
+			this.passing_rate = passingRate;
 			this.tests = new LinkedHashMap<String, TestInfo>();
 		}
 
@@ -441,23 +484,43 @@ public class TestBuddyAction extends Actionable implements Action {
 			return number;
 		}
 
+		/**
+		 * Returns the timestamp the build was created.
+		 * @return the timestamp as String
+		 */
 		public String getTimestampString() {
 			return timestampString;
 		}
 
+		/**
+		 * Returns the timestamp the build was created in the following format: [3-character month] [date], [year] [hour]:[minute]:[second] [AM/PM]
+		 * @return the timestamp as String
+		 */
 		public String getReadableTimestamp() {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy h:mm:ss a");
 			return dateFormat.format(timestamp.getTime());
 		}
 
+		/**
+		 * Returns the test status.
+		 * @return the test status as String
+		 */
 		public String getStatus() {
 			return status;
 		}
 
+		/**
+		 * Returns a list of authors who contribute to the code changes.
+		 * @return a List of String
+		 */
 		public List<String> getAuthors() {
 			return authors;
 		}
 
+		/**
+		 * Returns a list of authors who contribute to the code changes as a comma separated string.
+		 * @return a comma separated list of authors
+		 */
 		public String getAuthorsString() {
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < authors.size(); i++) {
@@ -470,10 +533,18 @@ public class TestBuddyAction extends Actionable implements Action {
 			return builder.toString();
 		}
 
+		/**
+		 * Returns the number of passed tests in the build.
+		 * @return number of passed tests as int
+		 */
 		public int getPassedTests() {
 			return passed_tests;
 		}
 
+		/**
+		 * Returns the test passing rate (total passed tests divided by total tests) in the build.
+		 * @return tests passing rate as double
+		 */
 		public double getPassingRate() {
 			return passing_rate;
 		}
@@ -491,6 +562,12 @@ public class TestBuddyAction extends Actionable implements Action {
 		private int skippedCount = 0;
 		private int build_number;
 
+	    /** 
+	     * Creates a new instance of TestInfo.
+	     * @param fullName test full name as String.
+	     * @param status test status as String.
+	     * @param number build number as int.
+	     */
 		@DataBoundConstructor
 		public TestInfo(String fullName, String status, int number) {
 			this.fullName = fullName;
@@ -503,6 +580,9 @@ public class TestBuddyAction extends Actionable implements Action {
 			parseNames();
 		}
 
+	    /** 
+	     * Parses test name, class name, and package name from test full name.
+	     */
 		/* Parse name, className, and packageName from fullName */
 		private void parseNames() {
 			String[] fullNameArray = fullName.split("\\.");
@@ -514,22 +594,42 @@ public class TestBuddyAction extends Actionable implements Action {
 			}
 		}
 
+		/**
+		 * Returns test full name.
+		 * @return test full name as String
+		 */
 		public String getFullName() {
 			return fullName;
 		}
 
+		/**
+		 * Returns test name without package and class names.
+		 * @return test name as String
+		 */
 		public String getName() {
 			return name;
 		}
 
+		/**
+		 * Returns class name.
+		 * @return class name as String
+		 */
 		public String getClassName() {
 			return className;
 		}
 
+		/**
+		 * Returns package name.
+		 * @return package name as String
+		 */
 		public String getPackageName() {
 			return packageName;
 		}
 
+		/**
+		 * Returns test status.
+		 * @return test status as String
+		 */
 		public String getStatus() {
 			return status;
 		}
@@ -538,21 +638,37 @@ public class TestBuddyAction extends Actionable implements Action {
 			return otherStatus;
 		}
 
+		/**
+		 * Returns the number of builds the test passed.
+		 * @return passed count as int
+		 */
 		public int getPassedCount() {
 			return passedCount;
 
 		}
 
+		/**
+		 * Returns the number of builds the test failed.
+		 * @return failed count as int
+		 */
 		public int getFailedCount() {
 			return failedCount;
 
 		}
 
+		/**
+		 * Returns the number of builds the test was skipped.
+		 * @return skipped count as int
+		 */
 		public int getSkippedCount() {
 			return skippedCount;
 
 		}
 
+		/**
+		 * Increment passed count, failed count, or skipped count by 1.
+		 * @param statusToIncrement a String to determine which status count to increment. Choose among Passed, Failed, or Skipped.
+		 */
 		public void incrementCount(String statusToIncrement) {
 			if (statusToIncrement == "Passed") {
 				passedCount++;
