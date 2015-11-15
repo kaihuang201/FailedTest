@@ -12,8 +12,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
 
 import hudson.model.AbstractProject;
-import jp.skypencil.jenkins.regression.TestBuddyAction.BuildInfo;
-import jp.skypencil.jenkins.regression.TestBuddyAction.TestInfo;
 
 public class TestBuddyActionTest {
 	@Rule
