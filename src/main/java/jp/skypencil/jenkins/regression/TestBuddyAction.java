@@ -184,7 +184,11 @@ public class TestBuddyAction extends Actionable implements Action {
 
 		return new ArrayList<TestInfo>(testMap.values());
 	}
-	
+
+	/**
+	 * Returns a summary of all tests from all builds in the project.
+	 * @return a List of TestInfo
+	 */
 	public List<TestInfo> listTests() {
 		HashMap<String, TestInfo> testMap = new HashMap<String, TestInfo>();
 

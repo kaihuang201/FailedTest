@@ -138,7 +138,11 @@ public class TestInfo implements ExtensionPoint {
 	public int getBuildNumber() {
 		return buildNumber;
 	}
-	
+
+	/**
+	 * Calculates the failing rate of the test.
+	 * @return failing rate as double
+	 */
 	public double getFailingRate() {
 		double total = failedCount + passedCount;
 		double failingRate = 0;
