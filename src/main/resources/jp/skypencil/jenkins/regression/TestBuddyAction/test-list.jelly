@@ -1,0 +1,68 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+
+	<div class="tb-filters">
+		<form id="tblTestListFilters">
+			<div class="tb-filter">
+				Class Name:
+				<input type="text" id="className" />
+			</div>
+			<div class="tb-filter">
+				Test Name:
+				<input type="text" id="testName" />
+			</div>
+			
+			<div class="tb-filter">
+				Min Failing Rate:
+				<input type="number" id="minFailingRate" min="0" max="1" step="0.01" size="4" />
+			</div>
+			<div class="tb-filter">
+				<button type="submit" id="btnGo">Go</button>
+				<button type="button" id="btnClear" onclick="clearFilters('tblTestList');">Clear</button>
+			</div>
+		</form>
+	</div>
+
+	<table id="tblTestList" class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header">Class</td>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Passed Count</td>
+				<td class="pane-header">Failed Count</td>
+				<td class="pane-header">Skipped Count</td>
+				<td class="pane-header">Failing Rate</td>
+				<td class="pane-header">Package</td>
+			</tr>
+		</thead>
+		<tbody>
+			<j:forEach var="test" items="${it.listTests()}">
+				<tr>
+					<td class="pane" data="${test.className}" data-col="className">${test.className}</td>
+					<td class="pane" data="${test.name}" data-col="name">
+						<a href="${rootURL}/${it.url}?testName=${test.fullName}&amp;displayType=testDetails">
+								${test.name}
+						</a>
+					</td>
+					<td class="pane" data="${test.passedCount}" data-col="passedCount">${test.passedCount}</td>
+					<td class="pane" data="${test.failedCount}" data-col="failedCount">${test.failedCount}</td>
+					<td class="pane" data="${test.skippedCount}" data-col="skippedCount">${test.skippedCount}</td>
+					<td class="pane" data="${test.failingRate}" data-col="failingRate">${test.failingRate}</td>
+					<td class="pane" data="${test.packageName}" data-col="packageName">${test.packageName}</td>
+				</tr>
+			</j:forEach>
+		</tbody>
+	</table>
+	
+	<script type="text/javascript">
+		jQuery('#tblTestListFilters').submit(function(e){
+			e.preventDefault();
+			
+			if(this.checkValidity()) {
+				 filterTests();
+			}
+
+			return false;
+		});
+	</script>
+
+</j:jelly>
