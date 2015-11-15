@@ -301,6 +301,21 @@ public class TestBuddyActionTest {
 		assertEquals(1, searchResults.get(0).getFailedCount());
 		assertEquals(1, searchResults.get(0).getSkippedCount());
 	}
+	
+	@LocalData
+	@Test
+	public void testListTests() {
+		List<TestInfo> testList = testBuddyAction.listTests();
+		assertEquals(5, testList.size());
+
+		assertEquals("testApp1", testList.get(0).getName());
+		assertEquals("AppTest", testList.get(0).getClassName());
+		assertEquals("pkg", testList.get(0).getPackageName());
+		assertEquals(5, testList.get(0).getPassedCount());
+		assertEquals(3, testList.get(2).getPassedCount());
+		assertEquals(1, testList.get(2).getFailedCount());
+		assertEquals(1, testList.get(2).getSkippedCount());
+	}
 
 	@LocalData	
 	@Test
