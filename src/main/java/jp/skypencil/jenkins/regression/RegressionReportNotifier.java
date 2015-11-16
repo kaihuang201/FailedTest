@@ -88,10 +88,10 @@ public final class RegressionReportNotifier extends Notifier {
     private final String recipients;
     private final boolean sendToCulprits;
     private final boolean attachLogs;
-    private boolean whenRegression;
-    private boolean whenProgression;
-    private boolean whenNewFailed;
-    private boolean whenNewPassed;
+    private final boolean whenRegression;
+    private final boolean whenProgression;
+    private final boolean whenNewFailed;
+    private final boolean whenNewPassed;
 
     private MailSender mailSender = new RegressionReportNotifier.MailSender() {
         @Override
