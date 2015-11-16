@@ -99,11 +99,11 @@ public final class RegressionReportNotifier extends Notifier {
     public RegressionReportNotifier(
             String recipients,
             boolean sendToCulprits, 
-            boolean attachLogs, 
             boolean whenRegression,
             boolean whenProgression,
-            boolean whenNewPassed,
             boolean whenNewFailed,
+            boolean whenNewPassed,
+            boolean attachLogs, 
             ) {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
@@ -163,10 +163,14 @@ public final class RegressionReportNotifier extends Notifier {
             List<CaseResult> regressionedTests = listRegressions(testResultAction);
             writeToConsole(regressionedTests, newlyPassedTests, listener);
 
-            List<Tuple<CaseResult, CaseResult>> newTestTuples = Iterables.filter(testTuples, new NewTestPredicate);
+            List<Tuple<CaseResult, CaseResult>> newTestTuples = Iterables.filter(testTuples, new NewTestPredicate());
+            List<CaseResult> newTests = List.newArrayList(Iterable.transform(newTestTuples, new TupleToFirst());
+
+            List<CaseResult> newTestsPassed = Iterables.filter(newTests, new PassedPredicate());
+            List<CaseResult> newTestsFailed = Iterables.filter(newTests, new FailedPredicate());
 
             try {
-                mailReport(regressionedTests, newlyPassedTests, recipients, listener, build);
+                mailReport(regressionedTests, newlyPassedTests, newTestsFailed, newTestsPassed, recipients, listener, build);
             } catch (MessagingException e) {
                 e.printStackTrace(listener.error("failed to send mails."));
             }
@@ -261,7 +265,7 @@ public final class RegressionReportNotifier extends Notifier {
      * @param	build is the AbstractBuild object
      * @throws	MessagingException
      */
-    private void mailReport(List<CaseResult> regressions, List<CaseResult> newlyPassed, String recipients,
+    private void mailReport(List<CaseResult> regressions, List<CaseResult> newlyPassed, List<CaseResult> newTestsFailed, List<CaseResult> newTestsPassed, String recipients,
             BuildListener listener, AbstractBuild<?, ?> build)
             throws MessagingException {
 
