@@ -44,12 +44,20 @@ public class BuildInfo implements ExtensionPoint {
 		this.tests = new LinkedHashMap<String, TestInfo>();
 	}
 
+    /** 
+     * Add Tests into the build
+     * @param t a list of TestInfo
+     */
 	public void add_tests(List<TestInfo> t) {
 		for (TestInfo a : t) {
 			tests.put(a.getFullName(), a);
 		}
 	}
 
+    /** 
+     * Get all Tests from this build
+     * @return A list of TestInfo
+     */
 	public List<TestInfo> getTests() {
 		List<TestInfo> ret = new ArrayList<TestInfo>();
 		Iterator<TestInfo> it = tests.values().iterator();
@@ -60,13 +68,22 @@ public class BuildInfo implements ExtensionPoint {
 		return ret;
 	}
 
+    /** 
+     * Add a test by name
+     * @param name a test name
+     * @return A TestInfo corresponding to the input name, return null if the name does not exist
+     */
 	public TestInfo getTest(String name){
 		if(tests.containsKey(name)){
 			return tests.get(name);
 		}
 		return null;
 	}
-	
+
+    /** 
+     * Get the build number
+     * @return A build number
+     */
 	public int getNumber() {
 		return number;
 	}
