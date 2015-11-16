@@ -143,4 +143,15 @@ public class TestBuddyHelperTest {
 		assertEquals("developer1", authors.get(0));
 		assertEquals("developer2", authors.get(1));
 	}
+	
+	@SuppressWarnings("rawtypes")
+	@LocalData
+	@Test
+	public void testMatchTestsBetweenBuilds1() {
+		AbstractBuild b1 = project.getBuildByNumber(1);
+		AbstractBuild b2 = project.getBuildByNumber(2);
+		
+		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b1, b2);
+		assertEquals(3, myTuples.size());
+	}
 }
