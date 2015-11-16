@@ -260,11 +260,11 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         for (CaseResult result : newTestsPassed) {
-            oStream.printf("[NEW]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
+            oStream.printf("[NEW TEST PASSED]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
         }
 
         for (CaseResult result : newTestsFailed) {
-            oStream.printf("[NEW]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
+            oStream.printf("[NEW TEST FAILED]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
         }
     }
 
@@ -296,7 +296,6 @@ public final class RegressionReportNotifier extends Notifier {
             BuildListener listener, AbstractBuild<?, ?> build)
             throws MessagingException {
 
-        /*
         if (
             (regressions.isEmpty() || !whenRegression) &&
             (newlyPassed.isEmpty() || !whenProgression) &&
@@ -305,7 +304,6 @@ public final class RegressionReportNotifier extends Notifier {
             ) {
             return;
         }
-        //*/
 
         // TODO link to test result page
         StringBuilder builder = new StringBuilder();
