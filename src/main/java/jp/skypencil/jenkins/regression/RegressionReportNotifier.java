@@ -88,6 +88,11 @@ public final class RegressionReportNotifier extends Notifier {
     private final String recipients;
     private final boolean sendToCulprits;
     private final boolean attachLogs;
+    private boolean whenRegression;
+    private boolean whenProgression;
+    private boolean whenNewFailed;
+    private boolean whenNewPassed;
+
     private MailSender mailSender = new RegressionReportNotifier.MailSender() {
         @Override
         public void send(MimeMessage message) throws MessagingException {
@@ -99,12 +104,12 @@ public final class RegressionReportNotifier extends Notifier {
     public RegressionReportNotifier(
             String recipients,
             boolean sendToCulprits, 
+            boolean attachLogs,
             boolean whenRegression,
             boolean whenProgression,
             boolean whenNewFailed,
-            boolean whenNewPassed,
-            boolean attachLogs, 
-            ) {
+            boolean whenNewPassed
+        ) {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
         this.attachLogs = attachLogs;
@@ -139,6 +144,24 @@ public final class RegressionReportNotifier extends Notifier {
     public boolean getAttachLogs(){
     	return attachLogs;
     }
+
+    public boolean getWhenRegression() {
+        return whenRegression;
+    }
+
+    public boolean getWhenProgression() {
+        return whenProgression;
+    }
+
+    public boolean getWhenNewFailed() {
+        return whenNewFailed;
+    }
+
+    public boolean getWhenNewPassed() {
+        return whenNewPassed;
+    }
+
+
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException {
         PrintStream logger = listener.getLogger();
@@ -154,20 +177,21 @@ public final class RegressionReportNotifier extends Notifier {
         //List<CaseResult> tests = listAllTests(build, build.getId(), logger);
         List<CaseResult> tests = TestBuddyHelper.getAllCaseResultsForBuild(build);
         //for(CaseResult cr : tests) logger.println(cr.getFullName() + "is passing: " + cr.isPassed());
-        AbstractBuild<?, ?> prevPuild = build.getPreviousBuild();
-        if (prevPuild != null) {
+        AbstractBuild<?, ?> prevBuild = build.getPreviousBuild();
+        if (prevBuild != null) {
             List<Tuple<CaseResult, CaseResult>> testTuples = TestBuddyHelper.matchTestsBetweenBuilds(build, prevBuild);
 
             // TODO maybe don't getTestResults for prevBuild twice?
             List<CaseResult> newlyPassedTests = listNewlyPassed(build);
             List<CaseResult> regressionedTests = listRegressions(testResultAction);
-            writeToConsole(regressionedTests, newlyPassedTests, listener);
 
-            List<Tuple<CaseResult, CaseResult>> newTestTuples = Iterables.filter(testTuples, new NewTestPredicate());
-            List<CaseResult> newTests = List.newArrayList(Iterable.transform(newTestTuples, new TupleToFirst());
+            List<Tuple<CaseResult, CaseResult>> newTestTuples = Lists.newArrayList(Iterables.filter(testTuples, new NewTestPredicate()));
+            List<CaseResult> newTests = Lists.newArrayList(Iterables.transform(newTestTuples, new TupleToFirst()));
 
-            List<CaseResult> newTestsPassed = Iterables.filter(newTests, new PassedPredicate());
-            List<CaseResult> newTestsFailed = Iterables.filter(newTests, new FailedPredicate());
+            List<CaseResult> newTestsPassed = Lists.newArrayList(Iterables.filter(newTests, new PassedPredicate()));
+            List<CaseResult> newTestsFailed = Lists.newArrayList(Iterables.filter(newTests, new FailedPredicate()));
+
+            writeToConsole(regressionedTests, newlyPassedTests, newTestsFailed, newTestsPassed, listener);
 
             try {
                 mailReport(regressionedTests, newlyPassedTests, newTestsFailed, newTestsPassed, recipients, listener, build);
@@ -210,7 +234,7 @@ public final class RegressionReportNotifier extends Notifier {
         return newlyPassedTests;
     }
 
-    private void writeToConsole(List<CaseResult> regressions, List<CaseResult> progressions, List<CaseResult> newTestsPassed, List<CaseResult> newTestsFailed, BuildListener listener) {
+    private void writeToConsole(List<CaseResult> regressions, List<CaseResult> progressions, List<CaseResult> newTestsFailed, List<CaseResult> newTestsPassed, BuildListener listener) {
         if (regressions.isEmpty() &&
             progressions.isEmpty() &&
             newTestsPassed.isEmpty() &&
@@ -271,9 +295,9 @@ public final class RegressionReportNotifier extends Notifier {
 
         if (
             (regressions.isEmpty() || !whenRegression) &&
-            (progressions.isEmpty() || !whenProgression) &&
-            (newTestsPassed.isEmpty() || !whenNewPassed) &&
-            (newTestsFailed.isEmpty() || !whenNewFailed)
+            (newlyPassed.isEmpty() || !whenProgression) &&
+            (newTestsFailed.isEmpty() || !whenNewFailed) &&
+            (newTestsPassed.isEmpty() || !whenNewPassed)
             ) {
             return;
         }
