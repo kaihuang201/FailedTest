@@ -8,7 +8,7 @@
   <f:entry field = "attachLogs" title ="${%AttachLogs}">
     <f:checkbox />
   </f:entry>
-  <f:entry field="whenRegression" title="${%WhenRegressionTests}">
+  <f:entry field="whenRegression" title="${%WhenRegression}">
     <f:checkbox />
   </f:entry>
     <f:entry field="whenProgression" title="${%WhenProgression}">
