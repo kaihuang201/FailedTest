@@ -96,10 +96,22 @@ public final class RegressionReportNotifier extends Notifier {
     };
 
     @DataBoundConstructor
-    public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean attachLogs) {
+    public RegressionReportNotifier(
+            String recipients,
+            boolean sendToCulprits, 
+            boolean attachLogs, 
+            boolean whenRegression,
+            boolean whenProgression,
+            boolean whenNewPassed,
+            boolean whenNewFailed,
+            ) {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
         this.attachLogs = attachLogs;
+        this.regressionTests = regressionTests;
+        this.progressionTests = progressionTests;
+        this.newPassed = newPassed;
+        this.newFailed = newFailed;
     }
 
     @VisibleForTesting
@@ -142,14 +154,22 @@ public final class RegressionReportNotifier extends Notifier {
         //List<CaseResult> tests = listAllTests(build, build.getId(), logger);
         List<CaseResult> tests = TestBuddyHelper.getAllCaseResultsForBuild(build);
         //for(CaseResult cr : tests) logger.println(cr.getFullName() + "is passing: " + cr.isPassed());
-        List<CaseResult> newlyPassedTests = listNewlyPassed(build);
-        List<CaseResult> regressionedTests = listRegressions(testResultAction);
-        writeToConsole(regressionedTests, newlyPassedTests, listener);
+        AbstractBuild<?, ?> prevPuild = build.getPreviousBuild();
+        if (prevPuild != null) {
+            List<Tuple<CaseResult, CaseResult>> testTuples = TestBuddyHelper.matchTestsBetweenBuilds(build, prevBuild);
 
-        try {
-            mailReport(regressionedTests, newlyPassedTests, recipients, listener, build);
-        } catch (MessagingException e) {
-            e.printStackTrace(listener.error("failed to send mails."));
+            // TODO maybe don't getTestResults for prevBuild twice?
+            List<CaseResult> newlyPassedTests = listNewlyPassed(build);
+            List<CaseResult> regressionedTests = listRegressions(testResultAction);
+            writeToConsole(regressionedTests, newlyPassedTests, listener);
+
+            List<Tuple<CaseResult, CaseResult>> newTestTuples = Iterables.filter(testTuples, new NewTestPredicate);
+
+            try {
+                mailReport(regressionedTests, newlyPassedTests, recipients, listener, build);
+            } catch (MessagingException e) {
+                e.printStackTrace(listener.error("failed to send mails."));
+            }
         }
 
         logger.println("TestBuddy reporter ends.");
@@ -186,20 +206,49 @@ public final class RegressionReportNotifier extends Notifier {
         return newlyPassedTests;
     }
 
-    private void writeToConsole(List<CaseResult> regressions, List<CaseResult> progressions, BuildListener listener) {
-        if (regressions.isEmpty() && progressions.isEmpty()) {
+    private void writeToConsole(List<CaseResult> regressions, List<CaseResult> progressions, List<CaseResult> newTestsPassed, List<CaseResult> newTestsFailed, BuildListener listener) {
+        if (regressions.isEmpty() &&
+            progressions.isEmpty() &&
+            newTestsPassed.isEmpty() &&
+            newTestsFailed.isEmpty()
+            ) {
             return;
         }
 
         PrintStream oStream = listener.getLogger();
+
         // TODO link to test result page
         for (CaseResult result : regressions) {
             // listener.hyperlink(url, text)
             oStream.printf("[REGRESSION]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
         }
+
         for (CaseResult result : progressions) {
             // listener.hyperlink(url, text)
             oStream.printf("[PROGRESSION]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
+        }
+
+        for (CaseResult result : newTestsPassed) {
+            oStream.printf("[NEW]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
+        }
+
+        for (CaseResult result : newTestsFailed) {
+            oStream.printf("[NEW]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
+        }
+    }
+
+    private void appendTests(List<CaseResult> tests, StringBuilder builder) {
+        builder.append("\n");
+        for (int i = 0, max = Math.min(tests.size(), MAX_RESULTS_PER_MAIL); i < max; ++i) {
+            // to save heap to avoid OOME.
+            CaseResult result = tests.get(i);
+            builder.append("  ");
+            builder.append(result.getFullName());
+            builder.append("\n");
+        }
+        if (tests.size() > MAX_RESULTS_PER_MAIL) {
+            builder.append("  ...");
+            builder.append("\n");
         }
     }
 
@@ -215,7 +264,13 @@ public final class RegressionReportNotifier extends Notifier {
     private void mailReport(List<CaseResult> regressions, List<CaseResult> newlyPassed, String recipients,
             BuildListener listener, AbstractBuild<?, ?> build)
             throws MessagingException {
-        if (regressions.isEmpty() && newlyPassed.isEmpty()) {
+
+        if (
+            (regressions.isEmpty() || !whenRegression) &&
+            (progressions.isEmpty() || !whenProgression) &&
+            (newTestsPassed.isEmpty() || !whenNewPassed) &&
+            (newTestsFailed.isEmpty() || !whenNewFailed)
+            ) {
             return;
         }
 
@@ -232,39 +287,27 @@ public final class RegressionReportNotifier extends Notifier {
         builder.append(Util.encode(rootUrl));
         builder.append(Util.encode(build.getUrl()));
         builder.append("\n\n");
-        builder.append(regressions.size() + " regressions found.");
-        builder.append("\n");
-        for (int i = 0, max = Math
-                .min(regressions.size(), MAX_RESULTS_PER_MAIL); i < max; ++i) { // to
-                                                                                // save
-                                                                                // heap
-                                                                                // to
-                                                                                // avoid
-                                                                                // OOME.
-            CaseResult result = regressions.get(i);
-            builder.append("  ");
-            builder.append(result.getFullName());
-            builder.append("\n");
-        }
-        if (regressions.size() > MAX_RESULTS_PER_MAIL) {
-            builder.append("  ...");
-            builder.append("\n");
+
+        if (whenRegression) {
+            builder.append(regressions.size() + " regressions found.");
+            appendTests(regressions, builder);
         }
 
-        /* S08: Append newly passed tests */
-        builder.append(newlyPassed.size() + " newly passed tests found.");
-        builder.append("\n");
-        for (int i = 0, max = Math.min(newlyPassed.size(), MAX_RESULTS_PER_MAIL); i < max; ++i) { 
-            CaseResult result = newlyPassed.get(i);
-            builder.append("  ");
-            builder.append(result.getFullName());
-            builder.append("\n");
+        if (whenProgression) {
+            /* S08: Append newly passed tests */
+            builder.append(newlyPassed.size() + " newly passed tests found.");
+            appendTests(newlyPassed, builder);
         }
 
-    	if (newlyPassed.size() > MAX_RESULTS_PER_MAIL) {
-    	    builder.append("  ...");
-    	    builder.append("\n");
-    	}
+        if (whenNewPassed) {
+            builder.append(newTestsPassed.size() + " tests newly added and passing.");
+            appendTests(newTestsPassed, builder);
+        }
+
+        if (whenNewFailed) {
+            builder.append(newTestsFailed.size() + " tests newly added and failing.");
+            appendTests(newTestsFailed, builder);
+        }
 
 
         List<Address> recipentList = parse(recipients, listener);
