@@ -108,10 +108,10 @@ public final class RegressionReportNotifier extends Notifier {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
         this.attachLogs = attachLogs;
-        this.regressionTests = regressionTests;
-        this.progressionTests = progressionTests;
-        this.newPassed = newPassed;
-        this.newFailed = newFailed;
+        this.whenRegression = whenRegression;
+        this.whenProgression = whenProgression;
+        this.whenNewFailed = whenNewFailed;
+        this.whenNewPassed = whenNewPassed;
     }
 
     @VisibleForTesting
