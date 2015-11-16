@@ -177,27 +177,30 @@ public final class RegressionReportNotifier extends Notifier {
         //List<CaseResult> tests = listAllTests(build, build.getId(), logger);
         List<CaseResult> tests = TestBuddyHelper.getAllCaseResultsForBuild(build);
         //for(CaseResult cr : tests) logger.println(cr.getFullName() + "is passing: " + cr.isPassed());
+
+        List<Tuple<CaseResult, CaseResult>> testTuples = new ArrayList<Tuple<CaseResult, CaseResult>>();
+
         AbstractBuild<?, ?> prevBuild = build.getPreviousBuild();
         if (prevBuild != null) {
-            List<Tuple<CaseResult, CaseResult>> testTuples = TestBuddyHelper.matchTestsBetweenBuilds(build, prevBuild);
+            testTuples = TestBuddyHelper.matchTestsBetweenBuilds(build, prevBuild);
+        }
 
-            // TODO maybe don't getTestResults for prevBuild twice?
-            List<CaseResult> newlyPassedTests = listNewlyPassed(build);
-            List<CaseResult> regressionedTests = listRegressions(testResultAction);
+        // TODO maybe don't getTestResults for prevBuild twice?
+        List<CaseResult> newlyPassedTests = listNewlyPassed(build);
+        List<CaseResult> regressionedTests = listRegressions(testResultAction);
 
-            List<Tuple<CaseResult, CaseResult>> newTestTuples = Lists.newArrayList(Iterables.filter(testTuples, new NewTestPredicate()));
-            List<CaseResult> newTests = Lists.newArrayList(Iterables.transform(newTestTuples, new TupleToFirst()));
+        List<Tuple<CaseResult, CaseResult>> newTestTuples = Lists.newArrayList(Iterables.filter(testTuples, new NewTestPredicate()));
+        List<CaseResult> newTests = Lists.newArrayList(Iterables.transform(newTestTuples, new TupleToFirst()));
 
-            List<CaseResult> newTestsPassed = Lists.newArrayList(Iterables.filter(newTests, new PassedPredicate()));
-            List<CaseResult> newTestsFailed = Lists.newArrayList(Iterables.filter(newTests, new FailedPredicate()));
+        List<CaseResult> newTestsPassed = Lists.newArrayList(Iterables.filter(newTests, new PassedPredicate()));
+        List<CaseResult> newTestsFailed = Lists.newArrayList(Iterables.filter(newTests, new FailedPredicate()));
 
-            writeToConsole(regressionedTests, newlyPassedTests, newTestsFailed, newTestsPassed, listener);
+        writeToConsole(regressionedTests, newlyPassedTests, newTestsFailed, newTestsPassed, listener);
 
-            try {
-                mailReport(regressionedTests, newlyPassedTests, newTestsFailed, newTestsPassed, recipients, listener, build);
-            } catch (MessagingException e) {
-                e.printStackTrace(listener.error("failed to send mails."));
-            }
+        try {
+            mailReport(regressionedTests, newlyPassedTests, newTestsFailed, newTestsPassed, recipients, listener, build);
+        } catch (MessagingException e) {
+            e.printStackTrace(listener.error("failed to send mails."));
         }
 
         logger.println("TestBuddy reporter ends.");
@@ -293,6 +296,7 @@ public final class RegressionReportNotifier extends Notifier {
             BuildListener listener, AbstractBuild<?, ?> build)
             throws MessagingException {
 
+        /*
         if (
             (regressions.isEmpty() || !whenRegression) &&
             (newlyPassed.isEmpty() || !whenProgression) &&
@@ -301,6 +305,7 @@ public final class RegressionReportNotifier extends Notifier {
             ) {
             return;
         }
+        //*/
 
         // TODO link to test result page
         StringBuilder builder = new StringBuilder();

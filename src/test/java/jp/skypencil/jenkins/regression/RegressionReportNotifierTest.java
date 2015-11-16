@@ -71,7 +71,7 @@ public class RegressionReportNotifierTest {
     public void testCompileErrorOccured() throws InterruptedException,
             IOException {
         doReturn(null).when(build).getAction(AbstractTestResultAction.class);
-        RegressionReportNotifier notifier = new RegressionReportNotifier("", false, false);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("", false, false, true, true, false, false);
 
         assertThat(notifier.perform(build, launcher, listener), is(true));
     }
@@ -80,7 +80,7 @@ public class RegressionReportNotifierTest {
     public void testSend() throws InterruptedException, MessagingException {
         makeRegression();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, false);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, false, true, true, false, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -95,7 +95,7 @@ public class RegressionReportNotifierTest {
     public void testSendToCulprits() throws InterruptedException, MessagingException {
         makeRegression();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, false);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, false, true, true, false, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -119,7 +119,7 @@ public class RegressionReportNotifierTest {
         File f = new File("log");
         doReturn(f).when(build).getLogFile();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", false, true, true, true, false, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
@@ -150,7 +150,7 @@ public class RegressionReportNotifierTest {
         File f = new File("log");
         doReturn(f).when(build).getLogFile();
 
-        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, true);
+        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, true, true, true, false, false);
         MockedMailSender mailSender = new MockedMailSender();
         notifier.setMailSender(mailSender);
 
