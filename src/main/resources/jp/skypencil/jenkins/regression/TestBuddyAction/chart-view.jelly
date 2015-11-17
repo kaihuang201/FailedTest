@@ -1,0 +1,67 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+	<div class="tb-filters">
+		<div class="tb-filter">
+			Search Tests:
+			<input type="text" id="txtSearch" />
+		</div>
+		<div class="tb-filter">
+			<button type="button" onclick="searchTests();">Go</button>
+		</div>
+	</div>
+
+	<table id="tblSearchResults" class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header" width="1%">&amp;nbsp;</td>
+				<td class="pane-header">Class</td>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Passed Count</td>
+				<td class="pane-header">Failed Count</td>
+				<td class="pane-header">Skipped Count</td>
+				<td class="pane-header">Package</td>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+
+	<div class="tb-filters">
+		<div class="tb-filter">
+			Chart Type:
+			<input type="radio" id="rdbChartType_bar" name="rdbChartType" value="bar" checked="checked" class="first" />
+			<label for="rdbChartType_bar">Bar Chart</label>
+			<input type="radio" id="rdbChartType_stackedbar" name="rdbChartType" value="stackedbar" />
+			<label for="rdbChartType_stackedbar">Stacked Bar Chart</label>
+			<input type="radio" id="rdbChartType_pie" name="rdbChartType" value="pie" />
+			<label for="rdbChartType_pie">Pie Chart</label>
+		</div>
+		<div class="tb-filter">
+			<button type="button" onclick="generateTestCharts();">Generate</button>
+		</div>
+	</div>
+
+	<table id="tblChartData" class="pane sortable bigtable">
+		<thead>
+			<tr>
+				<td class="pane-header" width="1%">&amp;nbsp;</td>
+				<td class="pane-header">Class</td>
+				<td class="pane-header">Name</td>
+				<td class="pane-header">Passed Count</td>
+				<td class="pane-header">Failed Count</td>
+				<td class="pane-header">Skipped Count</td>
+				<td class="pane-header">Package</td>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+
+	<div id="divCharts"></div>
+
+	<script type="text/javascript">
+		google.load('visualization', '1', {packages: ['corechart']});
+		jQuery('#txtSearch').keyup(function(e){
+			if (e.keyCode == 13) {
+				searchTests();
+			}
+		});
+	</script>
+</j:jelly>

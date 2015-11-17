@@ -57,7 +57,7 @@ public class TestBuddyHelper {
      * @return an List of String.
      * **/
     @SuppressWarnings("rawtypes")
-    public static List<String> getChangeLogForBuild(AbstractBuild build) {
+    public static List<String> getAuthors(AbstractBuild build) {
     	List<String> ret = new ArrayList<String>();
     	ChangeLogSet change = build.getChangeSet();
     	if(!change.isEmptySet()){
@@ -122,6 +122,48 @@ public class TestBuddyHelper {
         }
 
         return tests;
+    }
+
+
+    /**
+     * Given two builds thisBuild and otherBuild, returns the a list of Tuples
+     * of matching CaseResult. Each pair is of form 
+     * (CaseResultFromThisBuild, CaseResultFromThatBuild)
+     *
+     * @param thisBuild an AbstractBuild.
+     * @param otherBuild another AbstractBuild, which is compared against thisBuild
+     * @return an ArrayList of Tuples of CaseResults.Each pair is of form 
+     * (CaseResultFromThisBuild, CaseResultFromThatBuild)
+     * if a matching case result is not found in the other build, a null is used
+     * instead.
+     */
+    public static ArrayList<Tuple<CaseResult, CaseResult>> matchTestsBetweenBuilds(AbstractBuild thisBuild, AbstractBuild otherBuild) {
+        ArrayList<CaseResult> thisResults = getAllCaseResultsForBuild(thisBuild);
+        ArrayList<CaseResult> otherResults = getAllCaseResultsForBuild(otherBuild);
+
+        HashMap<String, CaseResult> hmap = new HashMap<String, CaseResult>();
+        for (CaseResult otherCaseResult : otherResults) {
+            hmap.put(otherCaseResult.getFullName(), otherCaseResult); // add (test_name, CaseResult) to hmap
+        }
+
+        ArrayList<Tuple<CaseResult, CaseResult>> returnValue = new ArrayList<Tuple<CaseResult, CaseResult>>();
+        for (CaseResult thisCaseResult : thisResults) {
+            String currTestName = thisCaseResult.getFullName();
+            CaseResult otherCaseResult = null;
+            if (hmap.containsKey(currTestName)) {
+                otherCaseResult = hmap.get(currTestName);
+                hmap.remove(currTestName);
+            }
+            Tuple tuple = new Tuple<CaseResult, CaseResult>(thisCaseResult, otherCaseResult);
+            returnValue.add(tuple);
+        }
+
+        for (CaseResult otherCaseResultInMap : hmap.values()) {
+            Tuple tuple = new Tuple<CaseResult, CaseResult>(null, otherCaseResultInMap);
+            returnValue.add(tuple);
+        }
+
+        return returnValue;
     }
 
 

@@ -13,6 +13,10 @@
 	border-left: none;
 }
 
+.tb-container table {
+	margin-bottom: 40px;
+}
+
 .tb-filters {
 	margin-bottom: 10px;
 }
@@ -21,8 +25,22 @@
 	padding-right: 20px;
 	font-weight: bold;
 }
+.tb-filter input[type=radio] {
+	margin-left: 15px;
+}
+.tb-filter input[type=radio].first {
+	margin-left: 3px;
+}
+.tb-filter label {
+	font-weight: normal;
+}
+
 .tb-label {
 	text-align: right;
 	font-weight: bold;
 	padding-right: 10px;
+}
+
+.tb-chart {
+	display: inline-block;
 }
