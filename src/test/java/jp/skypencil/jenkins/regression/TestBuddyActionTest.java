@@ -12,7 +12,9 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
 
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.tasks.junit.CaseResult;
 
 public class TestBuddyActionTest {
 	@Rule
@@ -358,6 +360,22 @@ public class TestBuddyActionTest {
 		assertEquals("pkg AppTest testApp4", name);
 	}
 	
+	@SuppressWarnings("rawtypes")
+	@LocalData
+	@Test
+	public void testConvertCaseResultsToTestInfosTwo1() {
+		AbstractBuild b3 = project.getBuildByNumber(3);
+		AbstractBuild b4 = project.getBuildByNumber(4);
+		
+		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b3, b4);
+		assertEquals(5, myTuples.size());
+		
+		ArrayList<Tuple<TestInfo, TestInfo>> arr = (ArrayList<Tuple<TestInfo, TestInfo>>) testBuddyAction.convertCaseResultsToTestInfosTwo(myTuples, 3, 4);
+		assertEquals(5, arr.size());
+		
+		assertEquals("pkg.AppTest.testApp1", arr.get(0).first.getFullName());
+	}
+	
 	@LocalData
 	@Test
 	public void testGetDetailedBuildComparison1() {
@@ -366,5 +384,17 @@ public class TestBuddyActionTest {
 		
 		ArrayList<Tuple<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
 		assertEquals(5, myTestInfos.size());
+	}
+	
+	@LocalData
+	@Test
+	public void testGetDetailedBuildComparison2() {
+		String b4 = new String("4");
+		String b5 = new String("5");
+		
+		ArrayList<Tuple<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
+		assertEquals(5, myTestInfos.size());
+		Tuple<TestInfo, TestInfo> lastTuple = myTestInfos.get(4);
+		assertEquals("pkg.AppTest.testApp5", lastTuple.second.getFullName());
 	}
 }
