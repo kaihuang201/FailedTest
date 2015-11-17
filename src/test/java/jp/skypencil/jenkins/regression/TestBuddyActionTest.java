@@ -3,6 +3,7 @@ package jp.skypencil.jenkins.regression;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
@@ -355,5 +356,15 @@ public class TestBuddyActionTest {
 		assertEquals("pkg AppTest testApp1", name);
 		name = testBuddyAction.getTestName("pkg.AppTest.testApp4");
 		assertEquals("pkg AppTest testApp4", name);
+	}
+	
+	@LocalData
+	@Test
+	public void testGetDetailedBuildComparison1() {
+		String b4 = new String("4");
+		String b5 = new String("5");
+		
+		ArrayList<Tuple<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
+		assertEquals(5, myTestInfos.size());
 	}
 }

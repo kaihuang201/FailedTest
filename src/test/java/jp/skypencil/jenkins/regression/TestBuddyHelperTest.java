@@ -167,4 +167,36 @@ public class TestBuddyHelperTest {
 		Tuple<CaseResult, CaseResult> lastTuple = myTuples.get(3);
 		assertEquals(null, lastTuple.first);
 	}
+	
+	@SuppressWarnings("rawtypes")
+	@LocalData
+	@Test
+	public void testMatchTestsBetweenBuilds3() {
+		AbstractBuild b3 = project.getBuildByNumber(3);
+		AbstractBuild b4 = project.getBuildByNumber(4);
+		
+		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b3, b4);
+		assertEquals(5, myTuples.size());
+		Tuple<CaseResult, CaseResult> lastTuple = myTuples.get(4);
+		assertEquals(null, lastTuple.first);
+		assertEquals(true, lastTuple.second.isFailed());
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@LocalData
+	@Test
+	public void testMatchTestsBetweenBuilds4() {
+		AbstractBuild b4 = project.getBuildByNumber(4);
+		AbstractBuild b5 = project.getBuildByNumber(5);
+		
+		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b4, b5);
+		assertEquals(5, myTuples.size());
+		Tuple<CaseResult, CaseResult> fourthTuple = myTuples.get(3);
+		assertEquals(true, fourthTuple.first.isPassed());
+		assertEquals(null, fourthTuple.second);
+		
+		Tuple<CaseResult, CaseResult> lastTuple = myTuples.get(4);
+		assertEquals(false, lastTuple.first.isPassed());
+		assertEquals(true, lastTuple.second.isPassed());
+	}
 }
