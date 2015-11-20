@@ -102,7 +102,16 @@ public class TestBuddyHelper {
 		ret[1] = passing_rate;
 		return ret;
 	}
-    
+
+
+    	/** New Function **/
+	private int reverseInteger (int n) {
+		while(n!=0){
+			n /= 10;
+		}
+		return n;
+	}    
+
     /**
      * A helper fuction that returns a of CaseResult from a TestReult
      * object.
