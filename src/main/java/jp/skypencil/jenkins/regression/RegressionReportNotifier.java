@@ -33,6 +33,8 @@ import hudson.tasks.test.TestResult;
 
 import hudson.util.RunList;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,6 +60,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
@@ -87,7 +90,7 @@ public final class RegressionReportNotifier extends Notifier {
     private static final int MAX_RESULTS_PER_MAIL = 20;
     private final String recipients;
     private final boolean sendToCulprits;
-    private final boolean attachLogs;
+    private final boolean attachLog;
     private final boolean whenRegression;
     private final boolean whenProgression;
     private final boolean whenNewFailed;
@@ -112,7 +115,7 @@ public final class RegressionReportNotifier extends Notifier {
         ) {
         this.recipients = recipients;
         this.sendToCulprits = sendToCulprits;
-        this.attachLogs = attachLogs;
+        this.attachLog = attachLogs;
         this.whenRegression = whenRegression;
         this.whenProgression = whenProgression;
         this.whenNewFailed = whenNewFailed;
@@ -141,8 +144,8 @@ public final class RegressionReportNotifier extends Notifier {
      * 
      * @return true if user has checked Attach Logs option else it will return false
      */
-    public boolean getAttachLogs(){
-    	return attachLogs;
+    public boolean getAttachLog(){
+    	return attachLog;
     }
 
     public boolean getWhenRegression() {
@@ -347,22 +350,22 @@ public final class RegressionReportNotifier extends Notifier {
         }
 
         MimeMessage message = new MimeMessage(session);
-                
         message.setSubject(Messages.RegressionReportNotifier_MailSubject());
-        message.setRecipients(RecipientType.TO, recipentList.toArray(new Address[recipentList.size()]));
-        
-        
-        /* S08: If user has checked the attachment box the build logs will be attached to email */
-    	if (attachLogs){
-    	    attachLogFile(build, message, builder.toString(), listener.getLogger());
-        }
-    	else{
-    	    message.setContent("", "text/plain");
-    	    message.setText(builder.toString());
-    	}
-    	
-    	message.setFrom(adminAddress);
+        message.setRecipients(RecipientType.TO,
+                recipentList.toArray(new Address[recipentList.size()]));
+        message.setContent("", "text/plain");
+        message.setFrom(adminAddress);
+        message.setText(builder.toString());
         message.setSentDate(new Date());
+
+        if (attachLog) {
+            try {
+				attachLogFile(build, message, builder.toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
 
         mailSender.send(message);
     }
@@ -399,26 +402,25 @@ public final class RegressionReportNotifier extends Notifier {
      * @param	logger allows the method to print messages to console log
      * @throws	MessagingException
      */
-    private void attachLogFile(AbstractBuild<?, ?> build, MimeMessage message, String content, PrintStream logger) 
-            throws MessagingException {
-    	BodyPart emailAttachment = new MimeBodyPart();
-    	Multipart multipart = new MimeMultipart();
-                    
-    	//adding email body text
-    	BodyPart bodyText = new MimeBodyPart();
-    	bodyText.setText(content);
-    	multipart.addBodyPart(bodyText);
-                    
-    	//adding email attachment
-    	String file = build.getLogFile().getPath();
-    	String fileName = "log";
-    	DataSource source = new FileDataSource(file);
-    	emailAttachment.setDataHandler(new DataHandler(source));
-    	emailAttachment.setFileName(fileName);
-    	multipart.addBodyPart(emailAttachment);
-    	logger.println("Build log file " + file + " is attached to the email");
-    	
-    	message.setContent(multipart);  
+    private void attachLogFile(AbstractBuild<?, ?> build, MimeMessage message, String content)
+            throws MessagingException, IOException {
+
+        Multipart multipart = new MimeMultipart();
+
+        BodyPart bodyText = new MimeBodyPart();
+        bodyText.setText(content);
+        multipart.addBodyPart(bodyText);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        build.getLogText().writeLogTo(0, out);
+
+        BodyPart emailAttachment = new MimeBodyPart();
+        DataSource source = new ByteArrayDataSource(out.toByteArray(), "text/plain");
+        emailAttachment.setDataHandler(new DataHandler(source));
+        emailAttachment.setFileName("buildLog.txt");
+        multipart.addBodyPart(emailAttachment);
+
+        message.setContent(multipart);
     }
 
     @Extension

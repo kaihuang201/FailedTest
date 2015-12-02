@@ -5,7 +5,7 @@
   <f:entry field="sendToCulprits" title="${%SentToCulprits}">
     <f:checkbox />
   </f:entry>
-  <f:entry field = "attachLogs" title ="${%AttachLogs}">
+  <f:entry field = "attachLog" title ="${%AttachLog}">
     <f:checkbox />
   </f:entry>
   <f:entry field="whenRegression" title="${%WhenRegression}">
