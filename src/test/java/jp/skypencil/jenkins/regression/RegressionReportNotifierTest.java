@@ -139,43 +139,6 @@ public class RegressionReportNotifierTest {
         assertThat(((MimeBodyPart)multipartContent.getBodyPart(0)).getDisposition(), is(nullValue()));
     }
 
-//    @Test
-//    public void testAttachLogFile2() throws InterruptedException, MessagingException, IOException {
-//        makeRegression();
-//        
-//        Writer writer = null;
-//        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("log"), "utf-8"));
-//        writer.write("test");
-//        writer.close();
-//
-//        File f = new File("log");
-//        doReturn(f).when(build).getLogFile();
-//
-//        RegressionReportNotifier notifier = new RegressionReportNotifier("author@mail.com", true, true, true, true, false, false);
-//        MockedMailSender mailSender = new MockedMailSender();
-//        notifier.setMailSender(mailSender);
-//
-//        assertThat(build.getLogFile(), is(notNullValue()));
-//        assertThat(notifier.perform(build, launcher, listener), is(true)); 
-//        assertThat(mailSender.getSentMessage(), is(notNullValue()));
-//
-//        Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
-//        assertThat(to.length, is(2));
-//        assertThat(to[0].toString(), is(equalTo("author@mail.com")));
-//        assertThat(to[1].toString(), is(equalTo("culprit@mail.com")));
-//
-//        assertThat(notifier.getAttachLog(), is(true));
-//        assertThat(mailSender.getSentMessage().getContent() instanceof Multipart, is(true));
-//        
-//        Multipart multipartContent = (Multipart) mailSender.getSentMessage().getContent();
-//        assertThat(multipartContent.getCount(), is(2));
-//        assertThat(((MimeBodyPart)multipartContent.getBodyPart(1)).getDisposition(), is(equalTo(Part.ATTACHMENT)));
-//        assertThat(((MimeBodyPart)multipartContent.getBodyPart(0)).getDisposition(), is(nullValue()));
-//
-//        f.delete();
-//    }
-
-
     private void makeRegression() {
         AbstractTestResultAction<?> result = mock(AbstractTestResultAction.class);
         doReturn(result).when(build).getAction(AbstractTestResultAction.class);
@@ -189,7 +152,6 @@ public class RegressionReportNotifierTest {
         List<CaseResult> failedTests = Lists.newArrayList(failedTest);
         doReturn(failedTests).when(result).getFailedTests();
     }
-
 
     private static final class MockedMailSender implements
             RegressionReportNotifier.MailSender {
