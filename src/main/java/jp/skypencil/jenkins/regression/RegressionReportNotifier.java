@@ -51,7 +51,6 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
-//import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.TestResult;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
@@ -82,8 +81,14 @@ public final class RegressionReportNotifier extends Notifier {
 	};
 
 	@DataBoundConstructor
-	public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean attachLogs,
-			boolean whenRegression, boolean whenProgression, boolean whenNewFailed, boolean whenNewPassed) {
+	public RegressionReportNotifier(
+			String recipients,
+			boolean sendToCulprits,
+			boolean attachLogs,
+			boolean whenRegression,
+			boolean whenProgression,
+			boolean whenNewFailed,
+			boolean whenNewPassed) {
 		this.recipients = recipients;
 		this.sendToCulprits = sendToCulprits;
 		this.attachLog = attachLogs;
@@ -149,12 +154,10 @@ public final class RegressionReportNotifier extends Notifier {
 		}
 
 		logger.println("TestBuddy reporter starts now......");
-		// List<CaseResult> tests = listAllTests(build, build.getId(), logger);
 		List<CaseResult> tests = TestBuddyHelper.getAllCaseResultsForBuild(build);
-		// for(CaseResult cr : tests) logger.println(cr.getFullName() + "is
-		// passing: " + cr.isPassed());
 
-		List<Tuple<CaseResult, CaseResult>> testTuples = new ArrayList<Tuple<CaseResult, CaseResult>>();
+
+		List<Pair<CaseResult, CaseResult>> testTuples = new ArrayList<Pair<CaseResult, CaseResult>>();
 
 		AbstractBuild<?, ?> prevBuild = build.getPreviousBuild();
 		if (prevBuild != null) {
@@ -165,7 +168,7 @@ public final class RegressionReportNotifier extends Notifier {
 		List<CaseResult> newlyPassedTests = listNewlyPassed(build);
 		List<CaseResult> regressionedTests = listRegressions(testResultAction);
 
-		List<Tuple<CaseResult, CaseResult>> newTestTuples = Lists
+		List<Pair<CaseResult, CaseResult>> newTestTuples = Lists
 				.newArrayList(Iterables.filter(testTuples, new NewTestPredicate()));
 		List<CaseResult> newTests = Lists.newArrayList(Iterables.transform(newTestTuples, new TupleToFirst()));
 
@@ -235,7 +238,6 @@ public final class RegressionReportNotifier extends Notifier {
 
 		// TODO link to test result page
 		for (CaseResult result : regressions) {
-			// listener.hyperlink(url, text)
 			oStream.printf("[REGRESSION]%s - description: %s%n", result.getFullName(), result.getErrorDetails());
 		}
 

@@ -151,7 +151,7 @@ public class TestBuddyHelperTest {
 		AbstractBuild b1 = project.getBuildByNumber(1);
 		AbstractBuild b2 = project.getBuildByNumber(2);
 
-		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b1, b2);
+		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b1, b2);
 		assertEquals(3, myTuples.size());
 	}
 
@@ -162,9 +162,9 @@ public class TestBuddyHelperTest {
 		AbstractBuild b2 = project.getBuildByNumber(2);
 		AbstractBuild b3 = project.getBuildByNumber(3);
 
-		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b2, b3);
+		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b2, b3);
 		assertEquals(4, myTuples.size());
-		Tuple<CaseResult, CaseResult> lastTuple = myTuples.get(3);
+		Pair<CaseResult, CaseResult> lastTuple = myTuples.get(3);
 		assertEquals(null, lastTuple.first);
 	}
 
@@ -175,9 +175,9 @@ public class TestBuddyHelperTest {
 		AbstractBuild b3 = project.getBuildByNumber(3);
 		AbstractBuild b4 = project.getBuildByNumber(4);
 
-		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b3, b4);
+		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b3, b4);
 		assertEquals(5, myTuples.size());
-		Tuple<CaseResult, CaseResult> lastTuple = myTuples.get(4);
+		Pair<CaseResult, CaseResult> lastTuple = myTuples.get(4);
 		assertEquals(null, lastTuple.first);
 		assertEquals(true, lastTuple.second.isFailed());
 	}
@@ -189,13 +189,13 @@ public class TestBuddyHelperTest {
 		AbstractBuild b4 = project.getBuildByNumber(4);
 		AbstractBuild b5 = project.getBuildByNumber(5);
 
-		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b4, b5);
+		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b4, b5);
 		assertEquals(5, myTuples.size());
-		Tuple<CaseResult, CaseResult> fourthTuple = myTuples.get(3);
+		Pair<CaseResult, CaseResult> fourthTuple = myTuples.get(3);
 		assertEquals(true, fourthTuple.first.isPassed());
 		assertEquals(null, fourthTuple.second);
 
-		Tuple<CaseResult, CaseResult> lastTuple = myTuples.get(4);
+		Pair<CaseResult, CaseResult> lastTuple = myTuples.get(4);
 		assertEquals(false, lastTuple.first.isPassed());
 		assertEquals(true, lastTuple.second.isPassed());
 	}

@@ -44,13 +44,12 @@ public class TestBuddyHelper {
 					TestResult testResult = (TestResult) child_report.result;
 					ret.addAll(getTestsFromTestResult(testResult));
 				}
-			} else {
-				// TODO Unexpected?
 			}
 		}
 		return ret;
 	}
 
+	
 	/**
 	 * Returns a list of authors that make the change to the build
 	 * 
@@ -69,15 +68,12 @@ public class TestBuddyHelper {
 				if (!ret.contains(e.getAuthor().getDisplayName())) {
 					ret.add(e.getAuthor().getDisplayName());
 				}
-
-				// System.out.println(e.getAuthor().getDisplayName());
 			}
 		}
-
 		return ret;
-		// System.out.println(build.getChangeSet().getItems()[0].toString());
 	}
 
+	
 	/**
 	 * Returns a double array containing passed tests number, and passing rate
 	 * for a build
@@ -109,6 +105,7 @@ public class TestBuddyHelper {
 		return ret;
 	}
 
+	
 	/**
 	 * A helper fuction that returns a of CaseResult from a TestReult object.
 	 * 
@@ -131,6 +128,7 @@ public class TestBuddyHelper {
 		return tests;
 	}
 
+	
 	/**
 	 * Given two builds thisBuild and otherBuild, returns the a list of Tuples
 	 * of matching CaseResult. Each pair is of form (CaseResultFromThisBuild,
@@ -145,21 +143,17 @@ public class TestBuddyHelper {
 	 *         case result is not found in the other build, a null is used
 	 *         instead.
 	 */
-	public static ArrayList<Tuple<CaseResult, CaseResult>> matchTestsBetweenBuilds(AbstractBuild thisBuild,
+	public static ArrayList<Pair<CaseResult, CaseResult>> matchTestsBetweenBuilds(AbstractBuild thisBuild,
 			AbstractBuild otherBuild) {
 		ArrayList<CaseResult> thisResults = getAllCaseResultsForBuild(thisBuild);
 		ArrayList<CaseResult> otherResults = getAllCaseResultsForBuild(otherBuild);
 
 		HashMap<String, CaseResult> hmap = new HashMap<String, CaseResult>();
 		for (CaseResult otherCaseResult : otherResults) {
-			hmap.put(otherCaseResult.getFullName(), otherCaseResult); // add
-																		// (test_name,
-																		// CaseResult)
-																		// to
-																		// hmap
+			hmap.put(otherCaseResult.getFullName(), otherCaseResult);
 		}
-
-		ArrayList<Tuple<CaseResult, CaseResult>> returnValue = new ArrayList<Tuple<CaseResult, CaseResult>>();
+		
+		ArrayList<Pair<CaseResult, CaseResult>> returnValue = new ArrayList<Pair<CaseResult, CaseResult>>();
 		for (CaseResult thisCaseResult : thisResults) {
 			String currTestName = thisCaseResult.getFullName();
 			CaseResult otherCaseResult = null;
@@ -167,18 +161,19 @@ public class TestBuddyHelper {
 				otherCaseResult = hmap.get(currTestName);
 				hmap.remove(currTestName);
 			}
-			Tuple tuple = new Tuple<CaseResult, CaseResult>(thisCaseResult, otherCaseResult);
+			Pair tuple = new Pair<CaseResult, CaseResult>(thisCaseResult, otherCaseResult);
 			returnValue.add(tuple);
 		}
 
 		for (CaseResult otherCaseResultInMap : hmap.values()) {
-			Tuple tuple = new Tuple<CaseResult, CaseResult>(null, otherCaseResultInMap);
+			Pair tuple = new Pair<CaseResult, CaseResult>(null, otherCaseResultInMap);
 			returnValue.add(tuple);
 		}
 
 		return returnValue;
 	}
 
+	
 	/**
 	 * Given two builds thisBuild and otherBuild, returns the a list of
 	 * CaseResult that have different fail/pass results.
@@ -186,10 +181,10 @@ public class TestBuddyHelper {
 	 * @param thisBuild
 	 *            an AbstractBuild.
 	 * @param otherBuild
-	 *            another AbstractBuild, which is compared againt thisBuild
+	 *            another AbstractBuild, which is compared against thisBuild
 	 * @return an ArrayList of CaseResult in thisBuild that satisfies any of the
-	 *         folloing conditions: - fails in thisBuild, but passes in
-	 *         otherBuild - passes in thisBuild, but failes in otherBuild
+	 *         following conditions: - fails in thisBuild, but passes in
+	 *         otherBuild - passes in thisBuild, but fails in otherBuild
 	 */
 	public static ArrayList<CaseResult> getChangedTestsBetweenBuilds(AbstractBuild thisBuild,
 			AbstractBuild otherBuild) {
@@ -198,11 +193,7 @@ public class TestBuddyHelper {
 
 		HashMap<String, CaseResult> hmap = new HashMap<String, CaseResult>();
 		for (CaseResult otherCaseResult : otherResults) {
-			hmap.put(otherCaseResult.getFullName(), otherCaseResult); // add
-																		// (test_name,
-																		// CaseResult)
-																		// to
-																		// hmap
+			hmap.put(otherCaseResult.getFullName(), otherCaseResult);
 		}
 
 		ArrayList<CaseResult> returnValue = new ArrayList<CaseResult>();
@@ -214,7 +205,6 @@ public class TestBuddyHelper {
 						|| (thisCaseResult.isFailed() && otherCaseResult.isPassed())) {
 					returnValue.add(thisCaseResult);
 				}
-				// TODO Handle other possible cases here.
 			}
 		}
 		return returnValue;

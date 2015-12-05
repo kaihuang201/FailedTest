@@ -4,9 +4,9 @@ import com.google.common.base.Function;
 
 import hudson.tasks.junit.CaseResult;
 
-class TupleToFirst implements Function<Tuple<CaseResult, CaseResult>, CaseResult> {
+class TupleToFirst implements Function<Pair<CaseResult, CaseResult>, CaseResult> {
 	@Override
-	public CaseResult apply(Tuple<CaseResult, CaseResult> input) {
+	public CaseResult apply(Pair<CaseResult, CaseResult> input) {
 		return input.first;
 	}
 }

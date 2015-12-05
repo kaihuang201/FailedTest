@@ -23,89 +23,47 @@ import hudson.util.RunList;
 public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
-
+	
 	public static TreeMap<Integer, BuildInfo> all_builds = new TreeMap<Integer, BuildInfo>(Collections.reverseOrder());
 
-	/**
-	 * Creates a new instance of TestBuddyAction.
-	 * 
-	 * @param project
-	 *            an AbstractProject.
-	 */
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project) {
 		this.project = project;
 	}
 
-	/**
-	 * Returns the display name of the action page.
-	 * 
-	 * @return the display name as String
-	 */
 	@Override
 	public final String getDisplayName() {
 		return "Test Buddy";
 	}
 
-	/**
-	 * Returns the file path of the action page icon.
-	 * 
-	 * @return the icon file path as String
-	 */
 	@Override
 	public final String getIconFileName() {
 		return "/images/jenkins.png";
 	}
 
-	/**
-	 * Returns the url name of the action page.
-	 * 
-	 * @return the url name as String
-	 */
 	@Override
 	public String getUrlName() {
 		return "test_buddy";
 	}
 
-	/**
-	 * Returns the search url of the action page.
-	 * 
-	 * @return the search url as String
-	 */
 	@Override
 	public String getSearchUrl() {
 		return "test_buddy";
 	}
 
-	/**
-	 * Returns the project associated with the action page.
-	 * 
-	 * @return an AbstractProject
-	 */
 	@SuppressWarnings("rawtypes")
 	public AbstractProject getProject() {
 		return this.project;
 	}
 
-	/**
-	 * Returns the combination of project url and the action page url name.
-	 * 
-	 * @return the project url appended with the action page url name as String
-	 */
 	public String getUrl() {
 		return this.project.getUrl() + this.getUrlName();
 	}
 
-	/**
-	 * Returns the value of an url query string.
-	 * 
-	 * @param parameterName
-	 *            query string parameter name.
-	 * @return query string value as String
-	 */
 	public String getUrlParam(String parameterName) {
 		return Stapler.getCurrentRequest().getParameter(parameterName);
 	}
 
+	
 	/**
 	 * This method loop through all the builds in the project, all the tests in
 	 * each builds, and store them in local all_builds TreeMap.
@@ -128,7 +86,7 @@ public class TestBuddyAction extends Actionable implements Action {
 				double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
 				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(),
 						run.getResult().toString(), authors, rates[0], rates[1]);
-				build.add_tests(get_ini_Tests(String.valueOf(build.getNumber())));
+				build.add_tests(getInitTests(String.valueOf(build.getNumber())));
 				all_builds.put(num, build);
 			}
 		}
@@ -140,6 +98,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new ArrayList<BuildInfo>(all_builds.values());
 	}
 
+	
 	/**
 	 * This method takes a string representation of build number and returns the
 	 * corresponding BuildInfo. If there is no local copy of that build,
@@ -151,14 +110,13 @@ public class TestBuddyAction extends Actionable implements Action {
 	 */
 	public BuildInfo getBuildInfo(String number) {
 		if (all_builds.containsKey(Integer.valueOf(number))) {
-			// System.out.println("getting local copy");
 			return all_builds.get(Integer.valueOf(number));
 		}
 
-		// System.out.println("NOT nice, calling back up function");
-		return getBuildInfo_backup(number);
+		return getFreshBuildInfo(number);
 	}
 
+	
 	/**
 	 * This method takes a string representation of build number and returns the
 	 * corresponding BuildInfo. It will loop through the project and try to find
@@ -169,7 +127,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	 * @return BuildInfo which contains a build's information.
 	 */
 	@SuppressWarnings("rawtypes")
-	public BuildInfo getBuildInfo_backup(String number) {
+	public BuildInfo getFreshBuildInfo(String number) {
 		int buildNumber = Integer.parseInt(number);
 		Run run = project.getBuildByNumber(buildNumber);
 		List<String> authors = TestBuddyHelper.getAuthors((AbstractBuild) run);
@@ -178,6 +136,7 @@ public class TestBuddyAction extends Actionable implements Action {
 				authors, rates[0], rates[1]);
 	}
 
+	
 	/**
 	 * Searches tests where the full name (package, class, and test name)
 	 * contains the search text. The search is case insensitive.
@@ -209,6 +168,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new ArrayList<TestInfo>(testMap.values());
 	}
 
+	
 	/**
 	 * Returns a summary of all tests from all builds in the project.
 	 * 
@@ -218,6 +178,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return searchTests("");
 	}
 
+	
 	/**
 	 * This method takes a test name and returns a list of TestInfos
 	 * representing all the tests across all builds with the given test name
@@ -239,6 +200,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return ret;
 	}
 
+	
 	/**
 	 * This method takes a test name and looks through all builds to find the
 	 * test with the given name and returns a String concatenating its package
@@ -261,6 +223,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return ret;
 	}
 
+	
 	/**
 	 * This method takes a test name, looks through all builds to compute the
 	 * number of passing tests, failing tests, skipped tests, and passing rate,
@@ -276,7 +239,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		List<TestInfo> testInfos = getAllTestInfosForTestName(testName);
 		String[] ret = new String[4];
 		double totalNum = testInfos.size();
-		// System.out.println(totalNum);
 		int passedNum = 0;
 		int failed = 0;
 		int skipped = 0;
@@ -302,6 +264,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return ret;
 	}
 
+	
 	/**
 	 * This method loop through all the local builds and return all authors
 	 * 
@@ -315,6 +278,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return authors;
 	}
 
+	
 	/**
 	 * This method takes a string representation of build number and returns all
 	 * the tests in that build. If no local copy of that build is find,
@@ -326,15 +290,12 @@ public class TestBuddyAction extends Actionable implements Action {
 	 */
 	public List<TestInfo> getTests(String number) {
 		if (all_builds.containsKey(Integer.valueOf(number))) {
-
 			return all_builds.get(Integer.valueOf(number)).getTests();
 		}
-
-		// System.out.println("NOT nice, calling back up function");
-
-		return get_ini_Tests(number);
+		return getInitTests(number);
 	}
 
+	
 	/**
 	 * This method takes a string representation of build number, loop through
 	 * the project and returns all the tests in that build.
@@ -344,7 +305,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	 * @return A List of TestInfo from corresponding build.
 	 */
 	@SuppressWarnings("rawtypes")
-	public List<TestInfo> get_ini_Tests(String number) {
+	public List<TestInfo> getInitTests(String number) {
 		int buildNumber = Integer.parseInt(number);
 		AbstractBuild build = project.getBuildByNumber(buildNumber);
 		ArrayList<CaseResult> caseResults = TestBuddyHelper.getAllCaseResultsForBuild(build);
@@ -352,12 +313,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed", Integer.parseInt(number));
 	}
 
+	
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getNewPassFail() {
 		AbstractBuild build = project.getLastBuild();
 		return getChangedTests(build, build.getPreviousBuild(), "Newly Passed", "Newly Failed");
 	}
 
+	
 	// compare two builds
 	@SuppressWarnings("rawtypes")
 	@JavaScriptMethod
@@ -370,21 +333,23 @@ public class TestBuddyAction extends Actionable implements Action {
 		return getChangedTests(buildOne, buildTwo, "Passed", "Failed");
 	}
 
+	
 	@SuppressWarnings("rawtypes")
 	@JavaScriptMethod
-	public ArrayList<Tuple<TestInfo, TestInfo>> getDetailedBuildComparison(String buildNumber1, String buildNumber2) {
+	public ArrayList<Pair<TestInfo, TestInfo>> getDetailedBuildComparison(String buildNumber1, String buildNumber2) {
 		int build1 = Integer.parseInt(buildNumber1);
 		int build2 = Integer.parseInt(buildNumber2);
 		AbstractBuild buildOne = project.getBuildByNumber(build1);
 		AbstractBuild buildTwo = project.getBuildByNumber(build2);
 
-		ArrayList<Tuple<CaseResult, CaseResult>> myDifferences = TestBuddyHelper.matchTestsBetweenBuilds(buildOne,
+		ArrayList<Pair<CaseResult, CaseResult>> myDifferences = TestBuddyHelper.matchTestsBetweenBuilds(buildOne,
 				buildTwo);
-		ArrayList<Tuple<TestInfo, TestInfo>> allTestInfos = (ArrayList<Tuple<TestInfo, TestInfo>>) convertCaseResultsToTestInfosTwo(
+		ArrayList<Pair<TestInfo, TestInfo>> allTestInfos = (ArrayList<Pair<TestInfo, TestInfo>>) convertCaseResultsToTestInfosTwo(
 				myDifferences, build1, build2);
 		return allTestInfos;
 	}
 
+	
 	/**
 	 * Returns a list of test differences between two builds.
 	 * 
@@ -407,6 +372,7 @@ public class TestBuddyAction extends Actionable implements Action {
 		return convertCaseResultsToTestInfos(changedTests, passedStatus, failedStatus, 0);
 	}
 
+	
 	/**
 	 * Converts a list of CaseResult to a list of TestInfo.
 	 * 
@@ -424,61 +390,45 @@ public class TestBuddyAction extends Actionable implements Action {
 	 */
 	public List<TestInfo> convertCaseResultsToTestInfos(List<CaseResult> caseResults, String passedStatus,
 			String failedStatus, int build_no) {
+		
 		List<TestInfo> tests = new ArrayList<TestInfo>();
 
 		for (CaseResult caseResult : caseResults) {
-			if (caseResult != null) {
-				if (caseResult.isFailed()) {
-					tests.add(new TestInfo(caseResult.getFullName(), failedStatus, build_no));
-				} else if (caseResult.isPassed()) {
-					tests.add(new TestInfo(caseResult.getFullName(), passedStatus, build_no));
-				} else if (caseResult.isSkipped()) {
-					tests.add(new TestInfo(caseResult.getFullName(), "Skipped", build_no));
-				}
-			}
+			tests.add(convertAid(caseResult, null, passedStatus, failedStatus, build_no));
 		}
-
 		return tests;
 	}
 
-	public List<Tuple<TestInfo, TestInfo>> convertCaseResultsToTestInfosTwo(
-			List<Tuple<CaseResult, CaseResult>> caseResults, int build1, int build2) {
-		List<Tuple<TestInfo, TestInfo>> tests = new ArrayList<Tuple<TestInfo, TestInfo>>();
+	
+	public List<Pair<TestInfo, TestInfo>> convertCaseResultsToTestInfosTwo(
+			List<Pair<CaseResult, CaseResult>> caseResults, int build1, int build2) {
+		List<Pair<TestInfo, TestInfo>> tests = new ArrayList<Pair<TestInfo, TestInfo>>();
 
-		TestInfo tmp1;
-		TestInfo tmp2;
-
-		for (Tuple<CaseResult, CaseResult> t : caseResults) {
-			CaseResult first = t.first;
-			CaseResult second = t.second;
-
-			if (first != null) {
-				if (first.isFailed())
-					tmp1 = new TestInfo(first.getFullName(), "Failed", build1);
-				else if (first.isPassed())
-					tmp1 = new TestInfo(first.getFullName(), "Passed", build1);
-				else if (first.isSkipped())
-					tmp1 = new TestInfo(first.getFullName(), "Skipped", build1);
-				else
-					tmp1 = new TestInfo(first.getFullName(), "Unknown", build1);
-			} else
-				tmp1 = new TestInfo(second.getFullName(), "Did not exist", build1);
-
-			if (second != null) {
-				if (second.isFailed())
-					tmp2 = new TestInfo(second.getFullName(), "Failed", build2);
-				else if (second.isPassed())
-					tmp2 = new TestInfo(second.getFullName(), "Passed", build2);
-				else if (second.isSkipped())
-					tmp2 = new TestInfo(second.getFullName(), "Skipped", build2);
-				else
-					tmp2 = new TestInfo(second.getFullName(), "Unknown", build2);
-			} else
-				tmp2 = new TestInfo(first.getFullName(), "Did not exist", build2);
-
-			tests.add(new Tuple<TestInfo, TestInfo>(tmp1, tmp2));
+		for (Pair<CaseResult, CaseResult> t : caseResults) {
+			TestInfo tmp1 = convertAid(t.first, t.second, "Passed", "Failed", build1);
+			TestInfo tmp2 = convertAid(t.second, t.first, "Passed", "Failed", build2);
+			tests.add(new Pair<TestInfo, TestInfo>(tmp1, tmp2));
 		}
-
 		return tests;
+	}
+	
+	
+	public TestInfo convertAid(CaseResult caseResult1, CaseResult caseResult2, String passedStatus,
+			String failedStatus, int build){
+		TestInfo testInfo = null;
+		if (caseResult1 != null) {
+			if (caseResult1.isFailed()) {
+				testInfo = new TestInfo(caseResult1.getFullName(), failedStatus, build);
+			} else if (caseResult1.isPassed()) {
+				testInfo = new TestInfo(caseResult1.getFullName(), passedStatus, build);
+			} else if (caseResult1.isSkipped()) {
+				testInfo = new TestInfo(caseResult1.getFullName(), "Skipped", build);
+			} else {
+				testInfo = new TestInfo(caseResult1.getFullName(), "Unknown", build);
+			}
+		} else{
+			new TestInfo(caseResult2.getFullName(), "Did not exist", build);
+		}
+		return testInfo;		
 	}
 }

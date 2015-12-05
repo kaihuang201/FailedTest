@@ -4,9 +4,9 @@ import com.google.common.base.Predicate;
 
 import hudson.tasks.junit.CaseResult;
 
-class NewTestPredicate implements Predicate<Tuple<CaseResult, CaseResult>> {
+class NewTestPredicate implements Predicate<Pair<CaseResult, CaseResult>> {
 	@Override
-	public boolean apply(Tuple<CaseResult, CaseResult> input) {
+	public boolean apply(Pair<CaseResult, CaseResult> input) {
 		return input.second == null;
 	}
 }

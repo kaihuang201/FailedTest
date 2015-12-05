@@ -288,7 +288,6 @@ public class TestBuddyActionTest {
 		assertEquals(2, testDifferences.size());
 
 		assertEquals("Failed", testDifferences.get(0).getStatus());
-		// assertEquals("Status Changed", testDifferences.get(1).getStatus());
 	}
 
 	@LocalData
@@ -367,10 +366,10 @@ public class TestBuddyActionTest {
 		AbstractBuild b3 = project.getBuildByNumber(3);
 		AbstractBuild b4 = project.getBuildByNumber(4);
 
-		ArrayList<Tuple<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b3, b4);
+		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b3, b4);
 		assertEquals(5, myTuples.size());
 
-		ArrayList<Tuple<TestInfo, TestInfo>> arr = (ArrayList<Tuple<TestInfo, TestInfo>>) testBuddyAction
+		ArrayList<Pair<TestInfo, TestInfo>> arr = (ArrayList<Pair<TestInfo, TestInfo>>) testBuddyAction
 				.convertCaseResultsToTestInfosTwo(myTuples, 3, 4);
 		assertEquals(5, arr.size());
 
@@ -383,7 +382,7 @@ public class TestBuddyActionTest {
 		String b4 = new String("4");
 		String b5 = new String("5");
 
-		ArrayList<Tuple<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
+		ArrayList<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
 		assertEquals(5, myTestInfos.size());
 	}
 
@@ -393,9 +392,9 @@ public class TestBuddyActionTest {
 		String b4 = new String("4");
 		String b5 = new String("5");
 
-		ArrayList<Tuple<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
+		ArrayList<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
 		assertEquals(5, myTestInfos.size());
-		Tuple<TestInfo, TestInfo> lastTuple = myTestInfos.get(4);
+		Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(4);
 		assertEquals("pkg.AppTest.testApp5", lastTuple.second.getFullName());
 	}
 }
