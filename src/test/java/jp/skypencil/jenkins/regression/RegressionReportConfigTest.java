@@ -2,8 +2,6 @@ package jp.skypencil.jenkins.regression;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import hudson.model.Descriptor.FormException;
-import hudson.model.FreeStyleProject;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,6 +18,9 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
+import hudson.model.FreeStyleProject;
+import hudson.model.Descriptor.FormException;
 
 public class RegressionReportConfigTest {
 	@Rule

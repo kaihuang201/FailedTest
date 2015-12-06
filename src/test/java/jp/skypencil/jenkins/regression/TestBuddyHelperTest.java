@@ -1,6 +1,7 @@
 package jp.skypencil.jenkins.regression;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +12,9 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
 
-import jp.skypencil.jenkins.regression.TestBuddyHelper;
-
-import hudson.tasks.junit.CaseResult;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.tasks.junit.CaseResult;
 
 public class TestBuddyHelperTest {
 	@Rule

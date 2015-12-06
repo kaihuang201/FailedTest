@@ -7,26 +7,20 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import hudson.Launcher;
-import hudson.console.AnnotatedLargeText;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.User;
-import hudson.tasks.junit.CaseResult;
-import hudson.tasks.junit.CaseResult.Status;
-import hudson.tasks.test.AbstractTestResultAction;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.Part;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,22 +30,28 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.collect.Lists;
 
-import java.nio.charset.Charset;
-import java.io.File;
+import hudson.Launcher;
+import hudson.console.AnnotatedLargeText;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.User;
+import hudson.tasks.junit.CaseResult;
+import hudson.tasks.junit.CaseResult.Status;
+import hudson.tasks.test.AbstractTestResultAction;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CaseResult.class)
 public class RegressionReportNotifierTest {
 	private BuildListener listener;
 	private Launcher launcher;
-	private AbstractBuild<?, ?> build, build2;
+	private AbstractBuild<?, ?> build;
 
 	@Before
 	public void setUp() throws Exception {
 		listener = mock(BuildListener.class);
 		launcher = mock(Launcher.class);
 		build = mock(AbstractBuild.class);
-		build2 = mock(AbstractBuild.class);
 		PrintStream logger = mock(PrintStream.class);
 		doReturn("").when(build).getUrl();
 		doReturn(logger).when(listener).getLogger();
@@ -98,6 +98,7 @@ public class RegressionReportNotifierTest {
 		assertThat(to[1].toString(), is(equalTo("culprit@mail.com")));
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testAttachLogFile() throws InterruptedException, MessagingException, IOException {
 		makeRegression();

@@ -1,6 +1,6 @@
 package jp.skypencil.jenkins.regression;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -370,7 +370,7 @@ public class TestBuddyActionTest {
 		assertEquals(5, myTuples.size());
 
 		ArrayList<Pair<TestInfo, TestInfo>> arr = (ArrayList<Pair<TestInfo, TestInfo>>) testBuddyAction
-				.convertCaseResultsToTestInfosTwo(myTuples, 3, 4);
+				.convertCaseResultsToTestInfos(myTuples, 3, 4);
 		assertEquals(5, arr.size());
 
 		assertEquals("pkg.AppTest.testApp1", arr.get(0).first.getFullName());

@@ -1,13 +1,17 @@
 package jp.skypencil.jenkins.regression;
 
 import java.text.DecimalFormat;
-import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.ExtensionPoint;
-import hudson.tasks.junit.CaseResult;
 
+/**
+ * 
+ * @author Team FailedTest
+ * This class implements the structure that describes test information.
+ *
+ */
 public class TestInfo implements ExtensionPoint {
 	private String fullName;
 	private String name;
@@ -42,11 +46,10 @@ public class TestInfo implements ExtensionPoint {
 		parseNames();
 	}
 
-
+	
 	/**
 	 * Parses test name, class name, and package name from test full name.
 	 */
-	/* Parse name, className, and packageName from fullName */
 	private void parseNames() {
 		String[] fullNameArray = fullName.split("\\.");
 		name = fullNameArray[fullNameArray.length - 1];

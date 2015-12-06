@@ -16,6 +16,12 @@ import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
 
+/**
+ * 
+ * @author Team FailedTest This class contains all the helper functions that are
+ *         used by TestBuddyAction.java
+ *
+ */
 public class TestBuddyHelper {
 
 	/**
@@ -49,7 +55,6 @@ public class TestBuddyHelper {
 		return ret;
 	}
 
-	
 	/**
 	 * Returns a list of authors that make the change to the build
 	 * 
@@ -73,7 +78,6 @@ public class TestBuddyHelper {
 		return ret;
 	}
 
-	
 	/**
 	 * Returns a double array containing passed tests number, and passing rate
 	 * for a build
@@ -105,9 +109,8 @@ public class TestBuddyHelper {
 		return ret;
 	}
 
-	
 	/**
-	 * A helper fuction that returns a of CaseResult from a TestReult object.
+	 * A helper function that returns a of CaseResult from a TestReult object.
 	 * 
 	 * @param testResult
 	 *            a TestResult object that contains PackageResult as its
@@ -128,7 +131,6 @@ public class TestBuddyHelper {
 		return tests;
 	}
 
-	
 	/**
 	 * Given two builds thisBuild and otherBuild, returns the a list of Tuples
 	 * of matching CaseResult. Each pair is of form (CaseResultFromThisBuild,
@@ -143,6 +145,7 @@ public class TestBuddyHelper {
 	 *         case result is not found in the other build, a null is used
 	 *         instead.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static ArrayList<Pair<CaseResult, CaseResult>> matchTestsBetweenBuilds(AbstractBuild thisBuild,
 			AbstractBuild otherBuild) {
 		ArrayList<CaseResult> thisResults = getAllCaseResultsForBuild(thisBuild);
@@ -152,7 +155,7 @@ public class TestBuddyHelper {
 		for (CaseResult otherCaseResult : otherResults) {
 			hmap.put(otherCaseResult.getFullName(), otherCaseResult);
 		}
-		
+
 		ArrayList<Pair<CaseResult, CaseResult>> returnValue = new ArrayList<Pair<CaseResult, CaseResult>>();
 		for (CaseResult thisCaseResult : thisResults) {
 			String currTestName = thisCaseResult.getFullName();
@@ -173,7 +176,6 @@ public class TestBuddyHelper {
 		return returnValue;
 	}
 
-	
 	/**
 	 * Given two builds thisBuild and otherBuild, returns the a list of
 	 * CaseResult that have different fail/pass results.
@@ -186,6 +188,7 @@ public class TestBuddyHelper {
 	 *         following conditions: - fails in thisBuild, but passes in
 	 *         otherBuild - passes in thisBuild, but fails in otherBuild
 	 */
+	@SuppressWarnings("rawtypes")
 	public static ArrayList<CaseResult> getChangedTestsBetweenBuilds(AbstractBuild thisBuild,
 			AbstractBuild otherBuild) {
 		ArrayList<CaseResult> thisResults = getAllCaseResultsForBuild(thisBuild);

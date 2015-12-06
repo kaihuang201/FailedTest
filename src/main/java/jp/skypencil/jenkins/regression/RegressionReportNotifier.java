@@ -59,6 +59,8 @@ import jenkins.model.JenkinsLocationConfiguration;
  * @version 1.0
  * @author eller86 (Kengo TODA)
  */
+
+@SuppressWarnings("unchecked")
 public final class RegressionReportNotifier extends Notifier {
 	static interface MailSender {
 		void send(MimeMessage message) throws MessagingException;
@@ -81,14 +83,8 @@ public final class RegressionReportNotifier extends Notifier {
 	};
 
 	@DataBoundConstructor
-	public RegressionReportNotifier(
-			String recipients,
-			boolean sendToCulprits,
-			boolean attachLogs,
-			boolean whenRegression,
-			boolean whenProgression,
-			boolean whenNewFailed,
-			boolean whenNewPassed) {
+	public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean attachLogs,
+			boolean whenRegression, boolean whenProgression, boolean whenNewFailed, boolean whenNewPassed) {
 		this.recipients = recipients;
 		this.sendToCulprits = sendToCulprits;
 		this.attachLog = attachLogs;
@@ -154,8 +150,6 @@ public final class RegressionReportNotifier extends Notifier {
 		}
 
 		logger.println("TestBuddy reporter starts now......");
-		List<CaseResult> tests = TestBuddyHelper.getAllCaseResultsForBuild(build);
-
 
 		List<Pair<CaseResult, CaseResult>> testTuples = new ArrayList<Pair<CaseResult, CaseResult>>();
 

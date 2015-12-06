@@ -20,10 +20,17 @@ import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.util.RunList;
 
+/**
+ * 
+ * @author Team FailedTest 
+ * This class includes most of the methods that provide
+ * Jenkins build/test data to the front end.
+ *
+ */
 public class TestBuddyAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	AbstractProject project;
-	
+
 	public static TreeMap<Integer, BuildInfo> all_builds = new TreeMap<Integer, BuildInfo>(Collections.reverseOrder());
 
 	public TestBuddyAction(@SuppressWarnings("rawtypes") AbstractProject project) {
@@ -63,7 +70,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return Stapler.getCurrentRequest().getParameter(parameterName);
 	}
 
-	
 	/**
 	 * This method loop through all the builds in the project, all the tests in
 	 * each builds, and store them in local all_builds TreeMap.
@@ -98,7 +104,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new ArrayList<BuildInfo>(all_builds.values());
 	}
 
-	
 	/**
 	 * This method takes a string representation of build number and returns the
 	 * corresponding BuildInfo. If there is no local copy of that build,
@@ -116,7 +121,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return getFreshBuildInfo(number);
 	}
 
-	
 	/**
 	 * This method takes a string representation of build number and returns the
 	 * corresponding BuildInfo. It will loop through the project and try to find
@@ -136,7 +140,6 @@ public class TestBuddyAction extends Actionable implements Action {
 				authors, rates[0], rates[1]);
 	}
 
-	
 	/**
 	 * Searches tests where the full name (package, class, and test name)
 	 * contains the search text. The search is case insensitive.
@@ -168,7 +171,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return new ArrayList<TestInfo>(testMap.values());
 	}
 
-	
 	/**
 	 * Returns a summary of all tests from all builds in the project.
 	 * 
@@ -178,7 +180,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return searchTests("");
 	}
 
-	
 	/**
 	 * This method takes a test name and returns a list of TestInfos
 	 * representing all the tests across all builds with the given test name
@@ -200,7 +201,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return ret;
 	}
 
-	
 	/**
 	 * This method takes a test name and looks through all builds to find the
 	 * test with the given name and returns a String concatenating its package
@@ -223,7 +223,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return ret;
 	}
 
-	
 	/**
 	 * This method takes a test name, looks through all builds to compute the
 	 * number of passing tests, failing tests, skipped tests, and passing rate,
@@ -264,7 +263,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return ret;
 	}
 
-	
 	/**
 	 * This method loop through all the local builds and return all authors
 	 * 
@@ -278,7 +276,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return authors;
 	}
 
-	
 	/**
 	 * This method takes a string representation of build number and returns all
 	 * the tests in that build. If no local copy of that build is find,
@@ -295,7 +292,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return getInitTests(number);
 	}
 
-	
 	/**
 	 * This method takes a string representation of build number, loop through
 	 * the project and returns all the tests in that build.
@@ -313,7 +309,14 @@ public class TestBuddyAction extends Actionable implements Action {
 		return convertCaseResultsToTestInfos(caseResults, "Passed", "Failed", Integer.parseInt(number));
 	}
 
-	
+	/**
+	 * 
+	 * This Method returns the regressed and progressed tests between the latest
+	 * build and the one before it.
+	 * 
+	 * @return The method returns a list of TestInfo objects.
+	 * 
+	 */
 	@SuppressWarnings("rawtypes")
 	public List<TestInfo> getNewPassFail() {
 		AbstractBuild build = project.getLastBuild();
@@ -321,7 +324,14 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	
-	// compare two builds
+	/**
+	 * This method returns a list of tests that exist in both builds 
+	 * specified in the parameter list and have different results. 
+	 * 
+	 * @param buildNumber1
+	 * @param buildNumber2
+	 * @return This method returns a list of TestInfo objects.
+	 */
 	@SuppressWarnings("rawtypes")
 	@JavaScriptMethod
 	public List<TestInfo> getBuildCompare(String buildNumber1, String buildNumber2) {
@@ -334,6 +344,13 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	
+	/**
+	 * This method exhaustively returns the state of all tests in both builds.
+	 * 
+	 * @param buildNumber1
+	 * @param buildNumber2
+	 * @return Array List of TestInfo Tuples
+	 */
 	@SuppressWarnings("rawtypes")
 	@JavaScriptMethod
 	public ArrayList<Pair<TestInfo, TestInfo>> getDetailedBuildComparison(String buildNumber1, String buildNumber2) {
@@ -344,7 +361,7 @@ public class TestBuddyAction extends Actionable implements Action {
 
 		ArrayList<Pair<CaseResult, CaseResult>> myDifferences = TestBuddyHelper.matchTestsBetweenBuilds(buildOne,
 				buildTwo);
-		ArrayList<Pair<TestInfo, TestInfo>> allTestInfos = (ArrayList<Pair<TestInfo, TestInfo>>) convertCaseResultsToTestInfosTwo(
+		ArrayList<Pair<TestInfo, TestInfo>> allTestInfos = (ArrayList<Pair<TestInfo, TestInfo>>) convertCaseResultsToTestInfos(
 				myDifferences, build1, build2);
 		return allTestInfos;
 	}
@@ -390,7 +407,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	 */
 	public List<TestInfo> convertCaseResultsToTestInfos(List<CaseResult> caseResults, String passedStatus,
 			String failedStatus, int build_no) {
-		
+
 		List<TestInfo> tests = new ArrayList<TestInfo>();
 
 		for (CaseResult caseResult : caseResults) {
@@ -400,7 +417,15 @@ public class TestBuddyAction extends Actionable implements Action {
 	}
 
 	
-	public List<Pair<TestInfo, TestInfo>> convertCaseResultsToTestInfosTwo(
+	/**
+	 * This method converts CaseResults tuples to TestInfo Tuples.
+	 * 
+	 * @param caseResults
+	 * @param build1
+	 * @param build2
+	 * @return a list of TestInfo Tuples
+	 */
+	public List<Pair<TestInfo, TestInfo>> convertCaseResultsToTestInfos(
 			List<Pair<CaseResult, CaseResult>> caseResults, int build1, int build2) {
 		List<Pair<TestInfo, TestInfo>> tests = new ArrayList<Pair<TestInfo, TestInfo>>();
 
@@ -411,10 +436,20 @@ public class TestBuddyAction extends Actionable implements Action {
 		}
 		return tests;
 	}
+
 	
-	
-	public TestInfo convertAid(CaseResult caseResult1, CaseResult caseResult2, String passedStatus,
-			String failedStatus, int build){
+	/**
+	 * This method is used by both convertCaseResultsToTestInfo methods to perform the actual conversion.
+	 * 
+	 * @param caseResult1
+	 * @param caseResult2
+	 * @param passedStatus
+	 * @param failedStatus
+	 * @param build
+	 * @return a TestInfo object
+	 */
+	public TestInfo convertAid(CaseResult caseResult1, CaseResult caseResult2, String passedStatus, String failedStatus,
+			int build) {
 		TestInfo testInfo = null;
 		if (caseResult1 != null) {
 			if (caseResult1.isFailed()) {
@@ -426,9 +461,9 @@ public class TestBuddyAction extends Actionable implements Action {
 			} else {
 				testInfo = new TestInfo(caseResult1.getFullName(), "Unknown", build);
 			}
-		} else{
+		} else {
 			new TestInfo(caseResult2.getFullName(), "Did not exist", build);
 		}
-		return testInfo;		
+		return testInfo;
 	}
 }
