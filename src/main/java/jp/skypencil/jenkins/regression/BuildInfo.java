@@ -11,6 +11,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.ExtensionPoint;
 
+/**
+ * 
+ * @author Team FailedTest
+ * This class implements the structure that describes build information.
+ *
+ */
 public class BuildInfo implements ExtensionPoint {
 	private int number;
 	private Calendar timestamp;
