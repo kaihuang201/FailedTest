@@ -1,10 +1,7 @@
 package jp.skypencil.jenkins.regression;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
@@ -62,7 +59,7 @@ public class RegressionReportNotifierTest {
 		doReturn(null).when(build).getAction(AbstractTestResultAction.class);
 		RegressionReportNotifier notifier = new RegressionReportNotifier("", false, false, true, true, false, false);
 
-		assertThat(notifier.perform(build, launcher, listener), is(true));
+		assertTrue(notifier.perform(build, launcher, listener));
 	}
 
 	@Test
@@ -74,11 +71,11 @@ public class RegressionReportNotifierTest {
 		MockedMailSender mailSender = new MockedMailSender();
 		notifier.setMailSender(mailSender);
 
-		assertThat(notifier.perform(build, launcher, listener), is(true));
-		assertThat(mailSender.getSentMessage(), is(notNullValue()));
+		assertTrue(notifier.perform(build, launcher, listener));
+		assertNotNull(mailSender.getSentMessage());
 		Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
-		assertThat(to.length, is(1));
-		assertThat(to[0].toString(), is(equalTo("author@mail.com")));
+		assertEquals(1, to.length);
+		assertEquals("author@mail.com", to[0].toString());
 	}
 
 	@Test
@@ -90,12 +87,12 @@ public class RegressionReportNotifierTest {
 		MockedMailSender mailSender = new MockedMailSender();
 		notifier.setMailSender(mailSender);
 
-		assertThat(notifier.perform(build, launcher, listener), is(true));
-		assertThat(mailSender.getSentMessage(), is(notNullValue()));
+		assertTrue(notifier.perform(build, launcher, listener));
+		assertNotNull(mailSender.getSentMessage());
 		Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
 		assertThat(to.length, is(2));
-		assertThat(to[0].toString(), is(equalTo("author@mail.com")));
-		assertThat(to[1].toString(), is(equalTo("culprit@mail.com")));
+		assertEquals("author@mail.com", to[0].toString());
+		assertEquals("culprit@mail.com", to[1].toString());
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -113,21 +110,21 @@ public class RegressionReportNotifierTest {
 		MockedMailSender mailSender = new MockedMailSender();
 		notifier.setMailSender(mailSender);
 
-		assertThat(build.getLogText(), is(notNullValue()));
-		assertThat(notifier.perform(build, launcher, listener), is(true));
-		assertThat(mailSender.getSentMessage(), is(notNullValue()));
+		assertNotNull(build.getLogText());
+		assertTrue(notifier.perform(build, launcher, listener));
+		assertNotNull(mailSender.getSentMessage());
 
 		Address[] to = mailSender.getSentMessage().getRecipients(RecipientType.TO);
-		assertThat(to.length, is(1));
-		assertThat(to[0].toString(), is(equalTo("author@mail.com")));
+		assertEquals(1, to.length);
+		assertEquals("author@mail.com", to[0].toString());
 
-		assertThat(notifier.getAttachLog(), is(true));
-		assertThat(mailSender.getSentMessage().getContent() instanceof Multipart, is(true));
+		assertTrue(notifier.getAttachLog());
+		assertTrue(mailSender.getSentMessage().getContent() instanceof Multipart);
 
 		Multipart multipartContent = (Multipart) mailSender.getSentMessage().getContent();
-		assertThat(multipartContent.getCount(), is(2));
-		assertThat(((MimeBodyPart) multipartContent.getBodyPart(1)).getDisposition(), is(equalTo(Part.ATTACHMENT)));
-		assertThat(((MimeBodyPart) multipartContent.getBodyPart(0)).getDisposition(), is(nullValue()));
+		assertEquals(2, multipartContent.getCount());
+		assertEquals(Part.ATTACHMENT, ((MimeBodyPart) multipartContent.getBodyPart(1)).getDisposition());
+		assertNull(((MimeBodyPart) multipartContent.getBodyPart(0)).getDisposition());
 	}
 
 	private void makeRegression() {

@@ -1,7 +1,6 @@
 package jp.skypencil.jenkins.regression;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,7 +163,7 @@ public class TestBuddyHelperTest {
 		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b2, b3);
 		assertEquals(4, myTuples.size());
 		Pair<CaseResult, CaseResult> lastTuple = myTuples.get(3);
-		assertEquals(null, lastTuple.first);
+		assertNull(lastTuple.first);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -177,8 +176,8 @@ public class TestBuddyHelperTest {
 		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b3, b4);
 		assertEquals(5, myTuples.size());
 		Pair<CaseResult, CaseResult> lastTuple = myTuples.get(4);
-		assertEquals(null, lastTuple.first);
-		assertEquals(true, lastTuple.second.isFailed());
+		assertNull(lastTuple.first);
+		assertTrue(lastTuple.second.isFailed());
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -191,11 +190,11 @@ public class TestBuddyHelperTest {
 		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b4, b5);
 		assertEquals(5, myTuples.size());
 		Pair<CaseResult, CaseResult> fourthTuple = myTuples.get(3);
-		assertEquals(true, fourthTuple.first.isPassed());
-		assertEquals(null, fourthTuple.second);
+		assertTrue(fourthTuple.first.isPassed());
+		assertNull(fourthTuple.second);
 
 		Pair<CaseResult, CaseResult> lastTuple = myTuples.get(4);
-		assertEquals(false, lastTuple.first.isPassed());
-		assertEquals(true, lastTuple.second.isPassed());
+		assertFalse(lastTuple.first.isPassed());
+		assertTrue(lastTuple.second.isPassed());
 	}
 }
