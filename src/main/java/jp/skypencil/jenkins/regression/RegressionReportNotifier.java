@@ -6,7 +6,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -40,9 +39,7 @@ import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Action;
 import hudson.model.BuildListener;
-import hudson.model.TransientProjectActionFactory;
 import hudson.model.User;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -57,8 +54,8 @@ import jenkins.model.JenkinsLocationConfiguration;
 
 /**
  * @version 2.0
- * @author eller86 (Kengo TODA) and Team FailedTest
- * This class generates the regression report and optionally sends it to the developers.
+ * @author eller86 (Kengo TODA) and Team FailedTest This class generates the
+ *         regression report and optionally sends it to the developers.
  */
 
 @SuppressWarnings("unchecked")
@@ -133,13 +130,14 @@ public final class RegressionReportNotifier extends Notifier {
 		return whenNewPassed;
 	}
 
-	
 	/**
-	 * This method is the core method for the generating the report calling all other methods
-	 * implementing a specific part of the report
+	 * This method is the core method for the generating the report calling all
+	 * other methods implementing a specific part of the report
 	 * 
-	 * @param build is the latest Abstract Build which includes all the tests
-	 * @param listener is used to create a PrintStream for writing to console
+	 * @param build
+	 *            is the latest Abstract Build which includes all the tests
+	 * @param listener
+	 *            is used to create a PrintStream for writing to console
 	 * 
 	 * @returns true if the report was generated successfully
 	 * 
@@ -189,15 +187,14 @@ public final class RegressionReportNotifier extends Notifier {
 		return true;
 	}
 
-	
 	/**
 	 * This method takes a test result action, obtains the list of failed tests,
 	 * and filters that list of tests to keep only those that are newly failing
 	 * (CaseResult.Status == REGRESSION).
 	 * 
 	 * @param testResultAction
-	 *            an AbstractTestResultAction from which to find the
-	 *            regressed tests
+	 *            an AbstractTestResultAction from which to find the regressed
+	 *            tests
 	 * @return a List of CaseResults representing the regression tests
 	 */
 	public List<CaseResult> listRegressions(AbstractTestResultAction<?> testResultAction) {
@@ -208,7 +205,6 @@ public final class RegressionReportNotifier extends Notifier {
 		return regressionedTests;
 	}
 
-	
 	/**
 	 * This method takes a build, compares it with the previous build, and
 	 * returns a list of tests that are passing in this build but were failing
@@ -231,15 +227,19 @@ public final class RegressionReportNotifier extends Notifier {
 		return newlyPassedTests;
 	}
 
-	
 	/**
 	 * This method is responsible to write the changed test results to console
 	 * 
-	 * @param regressions list of regressed CaseResults
-	 * @param progressions list of progressed CaseResults
-	 * @param newTestsFailed list of new test that failed 
-	 * @param newTestsPassed list of new tests that passed  
-	 * @param listener used to write messages to console
+	 * @param regressions
+	 *            list of regressed CaseResults
+	 * @param progressions
+	 *            list of progressed CaseResults
+	 * @param newTestsFailed
+	 *            list of new test that failed
+	 * @param newTestsPassed
+	 *            list of new tests that passed
+	 * @param listener
+	 *            used to write messages to console
 	 * 
 	 * @return void
 	 * 
@@ -269,12 +269,14 @@ public final class RegressionReportNotifier extends Notifier {
 		}
 	}
 
-	
 	/**
-	 * This method is used by the mailReport method to append any new tests that have changed status.
+	 * This method is used by the mailReport method to append any new tests that
+	 * have changed status.
 	 * 
-	 * @param tests to be appended
-	 * @param builder is a string builder to which the test will be appended.
+	 * @param tests
+	 *            to be appended
+	 * @param builder
+	 *            is a string builder to which the test will be appended.
 	 * 
 	 * @return void
 	 * 
@@ -293,7 +295,6 @@ public final class RegressionReportNotifier extends Notifier {
 		}
 	}
 
-	
 	/**
 	 * This method constructs the report and sends to the specified recipients
 	 * 
@@ -376,12 +377,14 @@ public final class RegressionReportNotifier extends Notifier {
 		mailSender.send(message);
 	}
 
-	
 	/**
-	 * This method provides a list of culprit email address to the mailReport method
+	 * This method provides a list of culprit email address to the mailReport
+	 * method
 	 * 
-	 * @param build project's latest AbstractBuild
-	 * @param listener used to convert users to email address
+	 * @param build
+	 *            project's latest AbstractBuild
+	 * @param listener
+	 *            used to convert users to email address
 	 * @return Set of culprit email addresses
 	 */
 	private Set<Address> loadAddrOfCulprits(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -390,14 +393,15 @@ public final class RegressionReportNotifier extends Notifier {
 		return addressSet;
 	}
 
-	
 	/**
-	 * This method provide the mailReport method a list of recipient email address in java mail Address
-	 * format who wish to receive the report.
+	 * This method provide the mailReport method a list of recipient email
+	 * address in java mail Address format who wish to receive the report.
 	 * 
-	 * @param recipients email address in string format
-	 * @param listener used by the try/catch
-	 * @return a list of email Addresses in java mail address format. 
+	 * @param recipients
+	 *            email address in string format
+	 * @param listener
+	 *            used by the try/catch
+	 * @return a list of email Addresses in java mail address format.
 	 */
 	private List<Address> parse(String recipients, BuildListener listener) {
 		List<Address> list = Lists.newArrayList();
@@ -414,7 +418,6 @@ public final class RegressionReportNotifier extends Notifier {
 		return list;
 	}
 
-	
 	/**
 	 * This method attaches build log file to email, called from mailReport()
 	 * 
@@ -451,7 +454,6 @@ public final class RegressionReportNotifier extends Notifier {
 		message.setContent(multipart);
 	}
 
-	
 	@Extension
 	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 		@Override
@@ -462,25 +464,6 @@ public final class RegressionReportNotifier extends Notifier {
 		@Override
 		public String getDisplayName() {
 			return Messages.RegressionReportNotifier_DisplayName();
-		}
-	}
-
-	
-	@Extension
-	public static final class TestBuddyExtension extends TransientProjectActionFactory {
-
-		@Override
-		public Collection<? extends Action> createFor(@SuppressWarnings("rawtypes") AbstractProject target) {
-
-			final List<TestBuddyAction> projectActions = target.getActions(TestBuddyAction.class);
-			final ArrayList<Action> actions = new ArrayList<Action>();
-			if (projectActions.isEmpty()) {
-				final TestBuddyAction newAction = new TestBuddyAction(target);
-				actions.add(newAction);
-				return actions;
-			} else {
-				return projectActions;
-			}
 		}
 	}
 }

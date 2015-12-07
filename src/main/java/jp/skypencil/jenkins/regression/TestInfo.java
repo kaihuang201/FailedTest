@@ -8,8 +8,8 @@ import hudson.ExtensionPoint;
 
 /**
  * 
- * @author Team FailedTest
- * This class implements the structure that describes test information.
+ * @author Team FailedTest This class implements the structure that describes
+ *         test information.
  *
  */
 public class TestInfo implements ExtensionPoint {
@@ -46,7 +46,6 @@ public class TestInfo implements ExtensionPoint {
 		parseNames();
 	}
 
-	
 	/**
 	 * Parses test name, class name, and package name from test full name.
 	 */

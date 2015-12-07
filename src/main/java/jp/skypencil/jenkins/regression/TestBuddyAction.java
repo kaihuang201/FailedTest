@@ -2,6 +2,7 @@ package jp.skypencil.jenkins.regression;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,19 +13,20 @@ import java.util.TreeMap;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Actionable;
 import hudson.model.Run;
+import hudson.model.TransientProjectActionFactory;
 import hudson.tasks.junit.CaseResult;
 import hudson.util.RunList;
 
 /**
  * 
- * @author Team FailedTest 
- * This class includes most of the methods that provide
- * Jenkins build/test data to the front end.
+ * @author Team FailedTest This class includes most of the methods that provide
+ *         Jenkins build/test data to the front end.
  *
  */
 public class TestBuddyAction extends Actionable implements Action {
@@ -323,10 +325,9 @@ public class TestBuddyAction extends Actionable implements Action {
 		return getChangedTests(build, build.getPreviousBuild(), "Newly Passed", "Newly Failed");
 	}
 
-	
 	/**
-	 * This method returns a list of tests that exist in both builds 
-	 * specified in the parameter list and have different results. 
+	 * This method returns a list of tests that exist in both builds specified
+	 * in the parameter list and have different results.
 	 * 
 	 * @param buildNumber1
 	 * @param buildNumber2
@@ -343,7 +344,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return getChangedTests(buildOne, buildTwo, "Passed", "Failed");
 	}
 
-	
 	/**
 	 * This method exhaustively returns the state of all tests in both builds.
 	 * 
@@ -366,7 +366,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return allTestInfos;
 	}
 
-	
 	/**
 	 * Returns a list of test differences between two builds.
 	 * 
@@ -389,7 +388,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return convertCaseResultsToTestInfos(changedTests, passedStatus, failedStatus, 0);
 	}
 
-	
 	/**
 	 * Converts a list of CaseResult to a list of TestInfo.
 	 * 
@@ -416,7 +414,6 @@ public class TestBuddyAction extends Actionable implements Action {
 		return tests;
 	}
 
-	
 	/**
 	 * This method converts CaseResults tuples to TestInfo Tuples.
 	 * 
@@ -425,8 +422,8 @@ public class TestBuddyAction extends Actionable implements Action {
 	 * @param build2
 	 * @return a list of TestInfo Tuples
 	 */
-	public List<Pair<TestInfo, TestInfo>> convertCaseResultsToTestInfos(
-			List<Pair<CaseResult, CaseResult>> caseResults, int build1, int build2) {
+	public List<Pair<TestInfo, TestInfo>> convertCaseResultsToTestInfos(List<Pair<CaseResult, CaseResult>> caseResults,
+			int build1, int build2) {
 		List<Pair<TestInfo, TestInfo>> tests = new ArrayList<Pair<TestInfo, TestInfo>>();
 
 		for (Pair<CaseResult, CaseResult> t : caseResults) {
@@ -437,9 +434,9 @@ public class TestBuddyAction extends Actionable implements Action {
 		return tests;
 	}
 
-	
 	/**
-	 * This method is used by both convertCaseResultsToTestInfo methods to perform the actual conversion.
+	 * This method is used by both convertCaseResultsToTestInfo methods to
+	 * perform the actual conversion.
 	 * 
 	 * @param caseResult1
 	 * @param caseResult2
@@ -465,5 +462,23 @@ public class TestBuddyAction extends Actionable implements Action {
 			new TestInfo(caseResult2.getFullName(), "Did not exist", build);
 		}
 		return testInfo;
+	}
+
+	@Extension
+	public static final class TestBuddyExtension extends TransientProjectActionFactory {
+
+		@Override
+		public Collection<? extends Action> createFor(@SuppressWarnings("rawtypes") AbstractProject target) {
+
+			final List<TestBuddyAction> projectActions = target.getActions(TestBuddyAction.class);
+			final ArrayList<Action> actions = new ArrayList<Action>();
+			if (projectActions.isEmpty()) {
+				final TestBuddyAction newAction = new TestBuddyAction(target);
+				actions.add(newAction);
+				return actions;
+			} else {
+				return projectActions;
+			}
+		}
 	}
 }
