@@ -459,7 +459,7 @@ public class TestBuddyAction extends Actionable implements Action {
 				testInfo = new TestInfo(caseResult1.getFullName(), "Unknown", build);
 			}
 		} else {
-			new TestInfo(caseResult2.getFullName(), "Did not exist", build);
+			testInfo = new TestInfo(caseResult2.getFullName(), "Did not exist", build);
 		}
 		return testInfo;
 	}
