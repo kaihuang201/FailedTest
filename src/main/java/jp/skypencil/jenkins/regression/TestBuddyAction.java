@@ -399,17 +399,17 @@ public class TestBuddyAction extends Actionable implements Action {
 	 * @param failedStatus
 	 *            a status String to be displayed when the CaseResult status is
 	 *            failing.
-	 * @param build_no
+	 * @param buildNum
 	 *            build number in int.
 	 * @return a List of TestInfo.
 	 */
 	public List<TestInfo> convertCaseResultsToTestInfos(List<CaseResult> caseResults, String passedStatus,
-			String failedStatus, int build_no) {
+			String failedStatus, int buildNum) {
 
 		List<TestInfo> tests = new ArrayList<TestInfo>();
 
 		for (CaseResult caseResult : caseResults) {
-			tests.add(convertAid(caseResult, null, passedStatus, failedStatus, build_no));
+			tests.add(convertAid(caseResult, null, passedStatus, failedStatus, buildNum));
 		}
 		return tests;
 	}

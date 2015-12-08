@@ -149,12 +149,7 @@ public class TestBuddyHelper {
 	public static ArrayList<Pair<CaseResult, CaseResult>> matchTestsBetweenBuilds(AbstractBuild thisBuild,
 			AbstractBuild otherBuild) {
 		ArrayList<CaseResult> thisResults = getAllCaseResultsForBuild(thisBuild);
-		ArrayList<CaseResult> otherResults = getAllCaseResultsForBuild(otherBuild);
-
-		HashMap<String, CaseResult> hmap = new HashMap<String, CaseResult>();
-		for (CaseResult otherCaseResult : otherResults) {
-			hmap.put(otherCaseResult.getFullName(), otherCaseResult);
-		}
+		HashMap<String, CaseResult> hmap = hashAid(otherBuild);
 
 		ArrayList<Pair<CaseResult, CaseResult>> returnValue = new ArrayList<Pair<CaseResult, CaseResult>>();
 		for (CaseResult thisCaseResult : thisResults) {
@@ -176,6 +171,16 @@ public class TestBuddyHelper {
 		return returnValue;
 	}
 
+	private static HashMap<String, CaseResult> hashAid(AbstractBuild otherBuild) {
+		ArrayList<CaseResult> otherResults = getAllCaseResultsForBuild(otherBuild);
+
+		HashMap<String, CaseResult> hmap = new HashMap<String, CaseResult>();
+		for (CaseResult otherCaseResult : otherResults) {
+			hmap.put(otherCaseResult.getFullName(), otherCaseResult);
+		}
+		return hmap;
+	}
+
 	/**
 	 * Given two builds thisBuild and otherBuild, returns the a list of
 	 * CaseResult that have different fail/pass results.
@@ -192,12 +197,7 @@ public class TestBuddyHelper {
 	public static ArrayList<CaseResult> getChangedTestsBetweenBuilds(AbstractBuild thisBuild,
 			AbstractBuild otherBuild) {
 		ArrayList<CaseResult> thisResults = getAllCaseResultsForBuild(thisBuild);
-		ArrayList<CaseResult> otherResults = getAllCaseResultsForBuild(otherBuild);
-
-		HashMap<String, CaseResult> hmap = new HashMap<String, CaseResult>();
-		for (CaseResult otherCaseResult : otherResults) {
-			hmap.put(otherCaseResult.getFullName(), otherCaseResult);
-		}
+		HashMap<String, CaseResult> hmap = hashAid(otherBuild);
 
 		ArrayList<CaseResult> returnValue = new ArrayList<CaseResult>();
 		for (CaseResult thisCaseResult : thisResults) {
