@@ -37,15 +37,16 @@
 	<table class="pane sortable bigtable">
 		<thead>
 			<tr>
+				<td class="pane-header">Package</td>
 				<td class="pane-header">Class</td>
 				<td class="pane-header">Name</td>
 				<td class="pane-header">Status</td>
-				<td class="pane-header">Package</td>
 			</tr>
 		</thead>
 		<tbody>
 			<j:forEach var="test" items="${it.getTests(buildNumber)}">
 				<tr>
+					<td class="pane" data="${test.packageName}">${test.packageName}</td>
 					<td class="pane" data="${test.className}">${test.className}</td>
 					<td class="pane" data="${test.name}"><!--${test.name}-->
 							<a href="${rootURL}/${it.url}?testName=${test.fullName}&amp;displayType=testDetails">
@@ -55,7 +56,6 @@
 					</td>
 					
 					<td class="pane" data="${test.status}">${test.status}</td>
-					<td class="pane" data="${test.packageName}">${test.packageName}</td>
 				</tr>
 			</j:forEach>
 		</tbody>

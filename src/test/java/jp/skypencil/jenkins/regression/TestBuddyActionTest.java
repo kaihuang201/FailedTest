@@ -1,8 +1,10 @@
 package jp.skypencil.jenkins.regression;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
@@ -11,16 +13,18 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
 
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.tasks.junit.CaseResult;
 
 public class TestBuddyActionTest {
 	@Rule
 	public JenkinsRule j = new JenkinsRule();
-	
+
 	@SuppressWarnings("rawtypes")
 	private AbstractProject project;
 	private TestBuddyAction testBuddyAction;
-	
+
 	@Before
 	public void init() {
 		project = j.jenkins.getItemByFullName("project1", AbstractProject.class);
@@ -52,7 +56,7 @@ public class TestBuddyActionTest {
 		assertEquals(2, builds.get(3).getNumber());
 		assertEquals(1, builds.get(4).getNumber());
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@LocalData
 	@Test
@@ -89,7 +93,7 @@ public class TestBuddyActionTest {
 		assertEquals(1, buildInfo.getAuthors().size());
 		assertEquals("developer2", buildInfo.getAuthors().get(0));
 	}
-	
+
 	@LocalData
 	@Test
 	public void testGetBuildInfo3() {
@@ -102,7 +106,7 @@ public class TestBuddyActionTest {
 		assertEquals("developer1", buildInfo.getAuthors().get(0));
 		assertEquals("developer2", buildInfo.getAuthors().get(1));
 	}
-	
+
 	@LocalData
 	@Test
 	public void testGetBuildInfo4() {
@@ -114,7 +118,7 @@ public class TestBuddyActionTest {
 		assertEquals(1, buildInfo.getAuthors().size());
 		assertEquals("developer2", buildInfo.getAuthors().get(0));
 	}
-	
+
 	@LocalData
 	@Test
 	public void testGetBuildInfo5() {
@@ -148,7 +152,7 @@ public class TestBuddyActionTest {
 		assertEquals("pkg", tests.get(2).getPackageName());
 		assertEquals("Skipped", tests.get(2).getStatus());
 	}
-	
+
 	@LocalData
 	@Test
 	public void testGetTests2() {
@@ -229,7 +233,7 @@ public class TestBuddyActionTest {
 		assertEquals("pkg", tests.get(4).getPackageName());
 		assertEquals("Failed", tests.get(4).getStatus());
 	}
-	
+
 	@LocalData
 	@Test
 	public void testGetTests5() {
@@ -256,24 +260,24 @@ public class TestBuddyActionTest {
 		assertEquals("pkg", tests.get(3).getPackageName());
 		assertEquals("Passed", tests.get(3).getStatus());
 	}
-	
+
 	@LocalData
 	@Test
 	public void testGetNewPassFail() {
 		List<TestInfo> newFailPass = testBuddyAction.getNewPassFail();
-		
+
 		assertEquals(3, newFailPass.size());
 
 		assertEquals("Newly Failed", newFailPass.get(0).getStatus());
 		assertEquals("Newly Failed", newFailPass.get(1).getStatus());
 		assertEquals("Newly Passed", newFailPass.get(2).getStatus());
 	}
-	
+
 	@LocalData
 	@Test
 	public void testGetBuildCompare1() {
 		List<TestInfo> testDifferences = testBuddyAction.getBuildCompare("4", "1");
-		
+
 		assertEquals(0, testDifferences.size());
 	}
 
@@ -281,11 +285,10 @@ public class TestBuddyActionTest {
 	@Test
 	public void testGetBuildCompare2() {
 		List<TestInfo> testDifferences = testBuddyAction.getBuildCompare("5", "3");
-		
+
 		assertEquals(2, testDifferences.size());
 
 		assertEquals("Failed", testDifferences.get(0).getStatus());
-		//assertEquals("Status Changed", testDifferences.get(1).getStatus());
 	}
 
 	@LocalData
@@ -301,7 +304,7 @@ public class TestBuddyActionTest {
 		assertEquals(1, searchResults.get(0).getFailedCount());
 		assertEquals(1, searchResults.get(0).getSkippedCount());
 	}
-	
+
 	@LocalData
 	@Test
 	public void testListTests() {
@@ -317,17 +320,17 @@ public class TestBuddyActionTest {
 		assertEquals(1, testList.get(2).getSkippedCount());
 	}
 
-	@LocalData	
+	@LocalData
 	@Test
 	public void testGetAllTestInfosForTestName() {
 		List<TestInfo> allTests = testBuddyAction.getAllTestInfosForTestName("pkg.AppTest.testApp2");
 		assertEquals(5, allTests.size());
 		assertEquals("testApp2", allTests.get(4).getName());
-		
+
 		allTests = testBuddyAction.getAllTestInfosForTestName("pkg.AppTest.testApp4");
 		assertEquals(2, allTests.size());
 		assertEquals("testApp4", allTests.get(1).getName());
-		
+
 		allTests = testBuddyAction.getAllTestInfosForTestName("pkg.AppTest.testApp5");
 		assertEquals(2, allTests.size());
 		assertEquals("testApp5", allTests.get(1).getName());
@@ -337,17 +340,17 @@ public class TestBuddyActionTest {
 	@Test
 	public void testGetTestRates() {
 		String[] rates = testBuddyAction.getTestRates("pkg.AppTest.testApp2");
-		assertEquals("4", rates[1]); //passedNum
-		assertEquals("1", rates[2]); //failedNum
-		assertEquals("0", rates[3]); //skippedNum
+		assertEquals("4", rates[1]); // passedNum
+		assertEquals("1", rates[2]); // failedNum
+		assertEquals("0", rates[3]); // skippedNum
 		assertEquals("0.8", rates[0]);
 		rates = testBuddyAction.getTestRates("pkg.AppTest.testApp3");
-		assertEquals("3", rates[1]); //passedNum
-		assertEquals("1", rates[2]); //failedNum
-		assertEquals("1", rates[3]); //skippedNum
+		assertEquals("3", rates[1]); // passedNum
+		assertEquals("1", rates[2]); // failedNum
+		assertEquals("1", rates[3]); // skippedNum
 		assertEquals("0.6", rates[0]);
 	}
-	
+
 	@LocalData
 	@Test
 	public void testGetTestName() {
@@ -356,4 +359,64 @@ public class TestBuddyActionTest {
 		name = testBuddyAction.getTestName("pkg.AppTest.testApp4");
 		assertEquals("pkg AppTest testApp4", name);
 	}
+
+	@SuppressWarnings("rawtypes")
+	@LocalData
+	@Test
+	public void testConvertCaseResultsToTestInfosTwo1() {
+		AbstractBuild b3 = project.getBuildByNumber(3);
+		AbstractBuild b4 = project.getBuildByNumber(4);
+
+		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b3, b4);
+		assertEquals(5, myTuples.size());
+
+		ArrayList<Pair<TestInfo, TestInfo>> arr = (ArrayList<Pair<TestInfo, TestInfo>>) testBuddyAction
+				.convertCaseResultsToTestInfos(myTuples, 3, 4);
+		assertEquals(5, arr.size());
+
+		assertEquals("pkg.AppTest.testApp1", arr.get(0).first.getFullName());
+	}
+
+	@SuppressWarnings("rawtypes")
+	@LocalData
+	@Test
+	public void testConvertAid1() {
+		AbstractBuild b2 = project.getBuildByNumber(2);
+		AbstractBuild b4 = project.getBuildByNumber(4);
+
+		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b2, b4);
+		assertEquals(5, myTuples.size());
+
+		Pair<CaseResult, CaseResult> lastPair = myTuples.get(4);
+		TestInfo myTestInfo1 = testBuddyAction.convertAid(lastPair.first, lastPair.second, "Passed", "Failed", 2);
+		TestInfo myTestInfo2 = testBuddyAction.convertAid(lastPair.second, lastPair.first, "Passed", "Passed", 4);
+		assertTrue(myTestInfo1.getFullName().equals(myTestInfo2.getFullName()));
+		assertTrue(myTestInfo1.getStatus().equals(new String("Did not exist")));
+	}
+	
+   @LocalData
+   @Test
+   public void testGetDetailedDifferentBuildComparison1() {
+        String b2 = new String("2");
+        String b4 = new String("4");
+    
+        List<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedDifferentBuildComparison(b2, b4);
+        assertEquals(2, myTestInfos.size());
+        Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(myTestInfos.size()-1);
+        assertTrue(!lastTuple.first.getStatus().equals(lastTuple.second.getStatus()));
+    }
+   
+   @LocalData
+   @Test
+   public void testGetDetailedDifferentBuildComparison2() {
+        String b3 = new String("3");
+        String b5 = new String("5");
+    
+        List<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedDifferentBuildComparison(b3, b5);
+        assertEquals(4, myTestInfos.size());
+        Pair<TestInfo, TestInfo> firstTuple = myTestInfos.get(0);
+        assertTrue(firstTuple.first.getStatus().equals(new String("Passed")));
+        assertTrue(firstTuple.second.getStatus().equals(new String("Failed")));
+        assertTrue(firstTuple.first.getFullName().equals(new String("pkg.AppTest.testApp2")));
+    }
 }

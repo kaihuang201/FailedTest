@@ -13,12 +13,12 @@
 		<thead>
 			<tr>
 				<td class="pane-header" width="1%">&amp;nbsp;</td>
+				<td class="pane-header">Package</td>
 				<td class="pane-header">Class</td>
 				<td class="pane-header">Name</td>
 				<td class="pane-header">Passed Count</td>
 				<td class="pane-header">Failed Count</td>
 				<td class="pane-header">Skipped Count</td>
-				<td class="pane-header">Package</td>
 			</tr>
 		</thead>
 		<tbody></tbody>
@@ -43,12 +43,12 @@
 		<thead>
 			<tr>
 				<td class="pane-header" width="1%">&amp;nbsp;</td>
+				<td class="pane-header">Package</td>
 				<td class="pane-header">Class</td>
 				<td class="pane-header">Name</td>
 				<td class="pane-header">Passed Count</td>
 				<td class="pane-header">Failed Count</td>
 				<td class="pane-header">Skipped Count</td>
-				<td class="pane-header">Package</td>
 			</tr>
 		</thead>
 		<tbody></tbody>

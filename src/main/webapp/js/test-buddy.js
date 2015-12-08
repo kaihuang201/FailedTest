@@ -120,12 +120,12 @@ searchTests = function() {
 
 			var tr = jQuery('<tr></tr>');
 			tr.append(tdAction);
+			tr.append('<td>' + test.packageName + '</td>');
 			tr.append('<td data-col="className">' + test.className + '</td>');
 			tr.append('<td data-col="testName">' + test.name + '</td>');
 			tr.append('<td data-col="passedCount">' + test.passedCount + '</td>');
 			tr.append('<td data-col="failedCount">' + test.failedCount + '</td>');
 			tr.append('<td data-col="skippedCount">' + test.skippedCount + '</td>');
-			tr.append('<td>' + test.packageName + '</td>');
 
 			tbody.append(tr);
 		});

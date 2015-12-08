@@ -13,39 +13,41 @@ import hudson.scm.ChangeLogSet;
 
 public class ChangeLogSetMock extends ChangeLogSet<ChangeLogSet.Entry> {
 
-    protected ChangeLogSetMock(AbstractBuild<?, ?> build) {
-        super(build, null);
-    }
+	protected ChangeLogSetMock(AbstractBuild<?, ?> build) {
+		super(build, null);
+	}
 
-    private final Set<Entry> set = Sets.newHashSet();
+	private final Set<Entry> set = Sets.newHashSet();
 
-    ChangeLogSetMock withChangeBy(final User user) {
-        ChangeLogSet.Entry change = new ChangeLogSet.Entry() {
-            @Override
-            public String getMsg() {
-                return "";
-            }
-            @Override
-            public User getAuthor() {
-                return user;
-            }
-            @Override
-            public Collection<String> getAffectedPaths() {
-                return Collections.emptyList();
-            }
-        };
-        set.add(change);
-        return this;
-    }
+	ChangeLogSetMock withChangeBy(final User user) {
+		ChangeLogSet.Entry change = new ChangeLogSet.Entry() {
+			@Override
+			public String getMsg() {
+				return "";
+			}
 
-    @Override
-    public Iterator<Entry> iterator() {
-        return set.iterator();
-    }
+			@Override
+			public User getAuthor() {
+				return user;
+			}
 
-    @Override
-    public boolean isEmptySet() {
-        return set.isEmpty();
-    }
+			@Override
+			public Collection<String> getAffectedPaths() {
+				return Collections.emptyList();
+			}
+		};
+		set.add(change);
+		return this;
+	}
+
+	@Override
+	public Iterator<Entry> iterator() {
+		return set.iterator();
+	}
+
+	@Override
+	public boolean isEmptySet() {
+		return set.isEmpty();
+	}
 
 }

@@ -6,6 +6,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.ExtensionPoint;
 
+/**
+ * 
+ * @author Team FailedTest This class implements the structure that describes
+ *         test information.
+ *
+ */
 public class TestInfo implements ExtensionPoint {
 	private String fullName;
 	private String name;
@@ -18,28 +24,31 @@ public class TestInfo implements ExtensionPoint {
 	private int skippedCount = 0;
 	private int buildNumber;
 
-    /** 
-     * Creates a new instance of TestInfo.
-     * @param fullName test full name as String.
-     * @param status test status as String.
-     * @param buildNumber build number as int.
-     */
+	/**
+	 * Creates a new instance of TestInfo.
+	 * 
+	 * @param fullName
+	 *            test full name as String.
+	 * @param status
+	 *            test status as String.
+	 * @param buildNumber
+	 *            build number as int.
+	 */
 	@DataBoundConstructor
 	public TestInfo(String fullName, String status, int buildNumber) {
 		this.fullName = fullName;
 		this.status = status;
 		this.buildNumber = buildNumber;
-		if(status.equals("Passed"))
+		if (status.equals("Passed"))
 			this.otherStatus = "Failed";
-		else if(status.equals("Failed"))
+		else if (status.equals("Failed"))
 			this.otherStatus = "Passed";
 		parseNames();
 	}
 
-    /** 
-     * Parses test name, class name, and package name from test full name.
-     */
-	/* Parse name, className, and packageName from fullName */
+	/**
+	 * Parses test name, class name, and package name from test full name.
+	 */
 	private void parseNames() {
 		String[] fullNameArray = fullName.split("\\.");
 		name = fullNameArray[fullNameArray.length - 1];
@@ -52,6 +61,7 @@ public class TestInfo implements ExtensionPoint {
 
 	/**
 	 * Returns test full name.
+	 * 
 	 * @return test full name as String
 	 */
 	public String getFullName() {
@@ -60,6 +70,7 @@ public class TestInfo implements ExtensionPoint {
 
 	/**
 	 * Returns test name without package and class names.
+	 * 
 	 * @return test name as String
 	 */
 	public String getName() {
@@ -68,6 +79,7 @@ public class TestInfo implements ExtensionPoint {
 
 	/**
 	 * Returns class name.
+	 * 
 	 * @return class name as String
 	 */
 	public String getClassName() {
@@ -76,6 +88,7 @@ public class TestInfo implements ExtensionPoint {
 
 	/**
 	 * Returns package name.
+	 * 
 	 * @return package name as String
 	 */
 	public String getPackageName() {
@@ -84,18 +97,20 @@ public class TestInfo implements ExtensionPoint {
 
 	/**
 	 * Returns test status.
+	 * 
 	 * @return test status as String
 	 */
 	public String getStatus() {
 		return status;
 	}
-	
+
 	public String getOtherStatus() {
 		return otherStatus;
 	}
 
 	/**
 	 * Returns the number of builds the test passed.
+	 * 
 	 * @return passed count as int
 	 */
 	public int getPassedCount() {
@@ -105,6 +120,7 @@ public class TestInfo implements ExtensionPoint {
 
 	/**
 	 * Returns the number of builds the test failed.
+	 * 
 	 * @return failed count as int
 	 */
 	public int getFailedCount() {
@@ -114,6 +130,7 @@ public class TestInfo implements ExtensionPoint {
 
 	/**
 	 * Returns the number of builds the test was skipped.
+	 * 
 	 * @return skipped count as int
 	 */
 	public int getSkippedCount() {
@@ -123,7 +140,10 @@ public class TestInfo implements ExtensionPoint {
 
 	/**
 	 * Increment passed count, failed count, or skipped count by 1.
-	 * @param statusToIncrement a String to determine which status count to increment. Choose among Passed, Failed, or Skipped.
+	 * 
+	 * @param statusToIncrement
+	 *            a String to determine which status count to increment. Choose
+	 *            among Passed, Failed, or Skipped.
 	 */
 	public void incrementCount(String statusToIncrement) {
 		if (statusToIncrement == "Passed") {
@@ -134,25 +154,26 @@ public class TestInfo implements ExtensionPoint {
 			skippedCount++;
 		}
 	}
-	
+
 	public int getBuildNumber() {
 		return buildNumber;
 	}
 
 	/**
 	 * Calculates the failing rate of the test.
+	 * 
 	 * @return failing rate as double
 	 */
 	public double getFailingRate() {
 		double total = failedCount + passedCount;
 		double failingRate = 0;
-		
-		if(total > 0){
-			failingRate = failedCount/total;
+
+		if (total > 0) {
+			failingRate = failedCount / total;
 			DecimalFormat df = new DecimalFormat("#.##");
 			failingRate = Double.valueOf(df.format(failingRate));
 		}
-		
+
 		return failingRate;
 	}
 }

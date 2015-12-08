@@ -25,18 +25,19 @@
 	<table id="tblTestList" class="pane sortable bigtable">
 		<thead>
 			<tr>
+				<td class="pane-header">Package</td>
 				<td class="pane-header">Class</td>
 				<td class="pane-header">Name</td>
 				<td class="pane-header">Passed Count</td>
 				<td class="pane-header">Failed Count</td>
 				<td class="pane-header">Skipped Count</td>
 				<td class="pane-header">Failing Rate</td>
-				<td class="pane-header">Package</td>
 			</tr>
 		</thead>
 		<tbody>
 			<j:forEach var="test" items="${it.listTests()}">
 				<tr>
+					<td class="pane" data="${test.packageName}" data-col="packageName">${test.packageName}</td>
 					<td class="pane" data="${test.className}" data-col="className">${test.className}</td>
 					<td class="pane" data="${test.name}" data-col="name">
 						<a href="${rootURL}/${it.url}?testName=${test.fullName}&amp;displayType=testDetails">
@@ -47,7 +48,6 @@
 					<td class="pane" data="${test.failedCount}" data-col="failedCount">${test.failedCount}</td>
 					<td class="pane" data="${test.skippedCount}" data-col="skippedCount">${test.skippedCount}</td>
 					<td class="pane" data="${test.failingRate}" data-col="failingRate">${test.failingRate}</td>
-					<td class="pane" data="${test.packageName}" data-col="packageName">${test.packageName}</td>
 				</tr>
 			</j:forEach>
 		</tbody>

@@ -5,7 +5,7 @@
 			
 			<div class="tb-filters">
 			<div class="tb-filter">
-				Compare Tests in Older Build:
+				Compare Tests in Build A:
 				<select name = "build1" id="build1">
 					<option value=""></option>
 					<j:forEach var="build" items="${it.builds}">
@@ -14,7 +14,7 @@
 				</select>
 			</div>
 			<div class="tb-filter">
-				to Tests in Newer Build:
+				to Tests in Build B:
 				<select name = "build2" id="build2">
 					<option value=""></option>
 					<j:forEach var="build" items="${it.builds}">
@@ -30,11 +30,11 @@
 	<table class="pane sortable bigtable" id="table2">
 		<thead>
 			<tr>
+				<td class="pane-header">Package</td>
 				<td class="pane-header">Class</td>
 				<td class="pane-header">Name</td>
-				<td class="pane-header">Older Status</td>
-				<td class="pane-header">Newer Status</td>
-				<td class="pane-header">Package</td>
+				<td class="pane-header">Status A</td>
+				<td class="pane-header">Status B</td>
            	</tr>
 		</thead>
 		<tbody>
@@ -46,13 +46,13 @@
 			var build1 = jQuery('#build1').val();
 			var build2 = jQuery('#build2').val();
 			
-			remoteAction.getDetailedBuildComparison(build1, build2, jQuery.proxy(function(t) {
+			remoteAction.getDetailedDifferentBuildComparison(build1, build2, jQuery.proxy(function(t) {
 				var results = t.responseObject();
 
 				var tbody = jQuery('#table2').find('tbody');
 				tbody.empty();
 				results.forEach(function(tuple) {
-					tbody.append('<tr><td>'+tuple.first.className+'</td><td>'+tuple.first.name+'</td><td>'+tuple.first.status+'</td><td>'+tuple.second.status+'</td><td>'+tuple.first.packageName+'</td></tr>');
+					tbody.append('<tr><td>'+tuple.first.packageName+'</td><td>'+tuple.first.className+'</td><td>'+tuple.first.name+'</td><td>'+tuple.first.status+'</td><td>'+tuple.second.status+'</td></tr>');
 				});
 			}, this));
 		}; 
