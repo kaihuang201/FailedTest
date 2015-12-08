@@ -13,8 +13,8 @@ import hudson.ExtensionPoint;
 
 /**
  * 
- * @author Team FailedTest
- * This class implements the structure that describes build information.
+ * @author Team FailedTest This class implements the structure that describes
+ *         build information.
  *
  */
 public class BuildInfo implements ExtensionPoint {
@@ -65,7 +65,7 @@ public class BuildInfo implements ExtensionPoint {
 	 * @param t
 	 *            a list of TestInfo
 	 */
-	public void add_tests(List<TestInfo> t) {
+	public void addTests(List<TestInfo> t) {
 		for (TestInfo a : t) {
 			tests.put(a.getFullName(), a);
 		}

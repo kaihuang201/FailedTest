@@ -398,33 +398,33 @@ public class TestBuddyActionTest {
 		Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(4);
 		assertEquals("pkg.AppTest.testApp5", lastTuple.second.getFullName());
 	}
-	
-   @LocalData
-    @Test
-    public void testGetDetailedBuildComparison3() {
-        String b2 = new String("2");
-        String b4 = new String("4");
 
-        ArrayList<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b2, b4);
-        assertEquals(5, myTestInfos.size());
-        Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(4);
-        assertEquals("Passed", lastTuple.second.getStatus());
-    }
-   
-   @SuppressWarnings("rawtypes")
-   @LocalData
-   @Test
-   public void testConvertAid1() {
-       AbstractBuild b2 = project.getBuildByNumber(2);
-       AbstractBuild b4 = project.getBuildByNumber(4);
+	@LocalData
+	@Test
+	public void testGetDetailedBuildComparison3() {
+		String b2 = new String("2");
+		String b4 = new String("4");
 
-       ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b2, b4);
-       assertEquals(5, myTuples.size());
-       
-       Pair<CaseResult, CaseResult> lastPair = myTuples.get(4);
-       TestInfo myTestInfo1 = testBuddyAction.convertAid(lastPair.first, lastPair.second, "Passed", "Failed", 2);
-       TestInfo myTestInfo2 = testBuddyAction.convertAid(lastPair.second, lastPair.first, "Passed", "Passed", 4);
-       assertTrue(myTestInfo1.getFullName().equals(myTestInfo2.getFullName()));
-       assertTrue(myTestInfo1.getStatus().equals(new String("Did not exist")));
-   }
+		ArrayList<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b2, b4);
+		assertEquals(5, myTestInfos.size());
+		Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(4);
+		assertEquals("Passed", lastTuple.second.getStatus());
+	}
+
+	@SuppressWarnings("rawtypes")
+	@LocalData
+	@Test
+	public void testConvertAid1() {
+		AbstractBuild b2 = project.getBuildByNumber(2);
+		AbstractBuild b4 = project.getBuildByNumber(4);
+
+		ArrayList<Pair<CaseResult, CaseResult>> myTuples = TestBuddyHelper.matchTestsBetweenBuilds(b2, b4);
+		assertEquals(5, myTuples.size());
+
+		Pair<CaseResult, CaseResult> lastPair = myTuples.get(4);
+		TestInfo myTestInfo1 = testBuddyAction.convertAid(lastPair.first, lastPair.second, "Passed", "Failed", 2);
+		TestInfo myTestInfo2 = testBuddyAction.convertAid(lastPair.second, lastPair.first, "Passed", "Passed", 4);
+		assertTrue(myTestInfo1.getFullName().equals(myTestInfo2.getFullName()));
+		assertTrue(myTestInfo1.getStatus().equals(new String("Did not exist")));
+	}
 }

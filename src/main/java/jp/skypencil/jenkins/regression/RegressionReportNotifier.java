@@ -57,7 +57,6 @@ import jenkins.model.JenkinsLocationConfiguration;
  * @author eller86 (Kengo TODA) and Team FailedTest This class generates the
  *         regression report and optionally sends it to the developers.
  */
-
 @SuppressWarnings("unchecked")
 public final class RegressionReportNotifier extends Notifier {
 	static interface MailSender {
@@ -149,7 +148,6 @@ public final class RegressionReportNotifier extends Notifier {
 
 		AbstractTestResultAction<?> testResultAction = build.getAction(AbstractTestResultAction.class);
 		if (testResultAction == null) {
-			// maybe compile error occurred
 			logger.println("TestBuddy reporter doesn't run because test doesn\'t run.");
 			return true;
 		}
@@ -163,7 +161,6 @@ public final class RegressionReportNotifier extends Notifier {
 			testTuples = TestBuddyHelper.matchTestsBetweenBuilds(build, prevBuild);
 		}
 
-		// TODO maybe don't getTestResults for prevBuild twice?
 		List<CaseResult> newlyPassedTests = listNewlyPassed(build);
 		List<CaseResult> regressionedTests = listRegressions(testResultAction);
 
