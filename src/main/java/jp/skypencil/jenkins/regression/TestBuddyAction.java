@@ -475,7 +475,7 @@ public class TestBuddyAction extends Actionable implements Action {
 	    for (int i=0; i<allTestPairs.size(); i++) {
 	        Pair<TestInfo,TestInfo> tmp = allTestPairs.get(i);
 	        
-	        if(!tmp.first.getStatus().equals(tmp.second.getStatus()) && tmp.first.getFullName().equals(tmp.second.getFullName()))
+	        if( !tmp.first.getStatus().equals(tmp.second.getStatus()) && tmp.first.getFullName().equals(tmp.second.getFullName()) )
 	                myFilteredList.add(tmp);
 	    }
 	    return myFilteredList;
