@@ -346,30 +346,6 @@ public class TestBuddyAction extends Actionable implements Action {
 
 		return getChangedTests(buildOne, buildTwo, "Passed", "Failed");
 	}
-
-	/**
-	 * This method exhaustively returns the state of all tests in both builds.
-	 * 
-	 * @param buildNumber1
-	 *            build number in string format
-	 * @param buildNumber2
-	 *            build number in string format
-	 * @return Array List of TestInfo Tuples
-	 */
-	@SuppressWarnings("rawtypes")
-	@JavaScriptMethod
-	public ArrayList<Pair<TestInfo, TestInfo>> getDetailedBuildComparison(String buildNumber1, String buildNumber2) {
-		int build1 = Integer.parseInt(buildNumber1);
-		int build2 = Integer.parseInt(buildNumber2);
-		AbstractBuild buildOne = project.getBuildByNumber(build1);
-		AbstractBuild buildTwo = project.getBuildByNumber(build2);
-
-		ArrayList<Pair<CaseResult, CaseResult>> myDifferences = TestBuddyHelper.matchTestsBetweenBuilds(buildOne,
-				buildTwo);
-		ArrayList<Pair<TestInfo, TestInfo>> allTestInfos = (ArrayList<Pair<TestInfo, TestInfo>>) convertCaseResultsToTestInfos(
-				myDifferences, build1, build2);
-		return allTestInfos;
-	}
 	
 	   /**
      * This method exhaustively returns the state of all tests in both builds.

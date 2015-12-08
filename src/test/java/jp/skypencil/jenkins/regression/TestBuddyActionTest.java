@@ -377,40 +377,6 @@ public class TestBuddyActionTest {
 		assertEquals("pkg.AppTest.testApp1", arr.get(0).first.getFullName());
 	}
 
-	@LocalData
-	@Test
-	public void testGetDetailedBuildComparison1() {
-		String b4 = new String("4");
-		String b5 = new String("5");
-
-		ArrayList<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
-		assertEquals(5, myTestInfos.size());
-	}
-
-	@LocalData
-	@Test
-	public void testGetDetailedBuildComparison2() {
-		String b4 = new String("4");
-		String b5 = new String("5");
-
-		ArrayList<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b4, b5);
-		assertEquals(5, myTestInfos.size());
-		Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(4);
-		assertEquals("pkg.AppTest.testApp5", lastTuple.second.getFullName());
-	}
-
-	@LocalData
-	@Test
-	public void testGetDetailedBuildComparison3() {
-		String b2 = new String("2");
-		String b4 = new String("4");
-
-		ArrayList<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedBuildComparison(b2, b4);
-		assertEquals(5, myTestInfos.size());
-		Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(4);
-		assertEquals("Passed", lastTuple.second.getStatus());
-	}
-
 	@SuppressWarnings("rawtypes")
 	@LocalData
 	@Test
