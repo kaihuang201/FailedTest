@@ -25,11 +25,18 @@ final class UserIdToAddr implements Function<String, Address> {
 		if (Jenkins.getInstance() != null) {
 			defaultSuffix = Mailer.descriptor().getDefaultSuffix();
 		} else {
-			// for debug
 			defaultSuffix = "@mail.com";
 		}
 	}
 
+	/**
+	 * Convert user id to email address. Returned value can be null.
+	 * 
+	 * @param userId
+	 *            user Id in string format
+	 * 
+	 * @return email address
+	 */
 	@Override
 	public Address apply(String userId) {
 		if (defaultSuffix != null && defaultSuffix.contains("@")) {

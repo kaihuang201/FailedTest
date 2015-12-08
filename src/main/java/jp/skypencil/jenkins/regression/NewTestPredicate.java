@@ -5,7 +5,7 @@ import com.google.common.base.Predicate;
 import hudson.tasks.junit.CaseResult;
 
 /**
- * Filter for filtering out Pairs that has a null second element.
+ * Filter for filtering out Pairs that have a null second element.
  */
 class NewTestPredicate implements Predicate<Pair<CaseResult, CaseResult>> {
 	@Override

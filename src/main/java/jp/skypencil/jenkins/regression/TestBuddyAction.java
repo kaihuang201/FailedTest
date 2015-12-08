@@ -24,9 +24,10 @@ import hudson.tasks.junit.CaseResult;
 import hudson.util.RunList;
 
 /**
+ * This class includes most of the methods that provide Jenkins build/test data
+ * to the front end.
  * 
- * @author Team FailedTest This class includes most of the methods that provide
- *         Jenkins build/test data to the front end.
+ * @author Team FailedTest
  *
  */
 public class TestBuddyAction extends Actionable implements Action {
@@ -94,7 +95,7 @@ public class TestBuddyAction extends Actionable implements Action {
 				double rates[] = TestBuddyHelper.getRatesforBuild((AbstractBuild) run);
 				BuildInfo build = new BuildInfo(run.getNumber(), run.getTimestamp(), run.getTimestampString2(),
 						run.getResult().toString(), authors, rates[0], rates[1]);
-				build.add_tests(getInitTests(String.valueOf(build.getNumber())));
+				build.addTests(getInitTests(String.valueOf(build.getNumber())));
 				all_builds.put(num, build);
 			}
 		}
@@ -330,7 +331,9 @@ public class TestBuddyAction extends Actionable implements Action {
 	 * in the parameter list and have different results.
 	 * 
 	 * @param buildNumber1
+	 *            build number in string format
 	 * @param buildNumber2
+	 *            build number in string format
 	 * @return This method returns a list of TestInfo objects.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -348,7 +351,9 @@ public class TestBuddyAction extends Actionable implements Action {
 	 * This method exhaustively returns the state of all tests in both builds.
 	 * 
 	 * @param buildNumber1
+	 *            build number in string format
 	 * @param buildNumber2
+	 *            build number in string format
 	 * @return Array List of TestInfo Tuples
 	 */
 	@SuppressWarnings("rawtypes")
@@ -419,7 +424,9 @@ public class TestBuddyAction extends Actionable implements Action {
 	 * 
 	 * @param caseResults
 	 * @param build1
+	 *            build number in integer format
 	 * @param build2
+	 *            build number in integer format
 	 * @return a list of TestInfo Tuples
 	 */
 	public List<Pair<TestInfo, TestInfo>> convertCaseResultsToTestInfos(List<Pair<CaseResult, CaseResult>> caseResults,
@@ -439,10 +446,15 @@ public class TestBuddyAction extends Actionable implements Action {
 	 * perform the actual conversion.
 	 * 
 	 * @param caseResult1
+	 *            test data as CaseResult data type
 	 * @param caseResult2
+	 *            test data as CaseResult data type
 	 * @param passedStatus
+	 *            string indicating pass status
 	 * @param failedStatus
+	 *            string indicating fail status
 	 * @param build
+	 *            build number in integer format
 	 * @return a TestInfo object
 	 */
 	public TestInfo convertAid(CaseResult caseResult1, CaseResult caseResult2, String passedStatus, String failedStatus,

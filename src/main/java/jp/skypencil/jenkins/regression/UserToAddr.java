@@ -24,6 +24,13 @@ final class UserToAddr implements Function<User, Address> {
 		this.idToAddr = new UserIdToAddr(logger);
 	}
 
+	/**
+	 * Convert User to its email address. Returned value can be null.
+	 * 
+	 * @param user
+	 *            in User format
+	 * @return Email address
+	 */
 	@Override
 	public Address apply(User user) {
 		Mailer.UserProperty mailProperty = user.getProperty(Mailer.UserProperty.class);
