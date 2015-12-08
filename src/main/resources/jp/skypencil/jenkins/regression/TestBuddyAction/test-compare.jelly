@@ -46,7 +46,7 @@
 			var build1 = jQuery('#build1').val();
 			var build2 = jQuery('#build2').val();
 			
-			remoteAction.getDetailedBuildComparison(build1, build2, jQuery.proxy(function(t) {
+			remoteAction.getDetailedDifferentBuildComparison(build1, build2, jQuery.proxy(function(t) {
 				var results = t.responseObject();
 
 				var tbody = jQuery('#table2').find('tbody');
