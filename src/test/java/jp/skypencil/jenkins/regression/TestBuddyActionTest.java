@@ -393,30 +393,30 @@ public class TestBuddyActionTest {
 		assertTrue(myTestInfo1.getFullName().equals(myTestInfo2.getFullName()));
 		assertTrue(myTestInfo1.getStatus().equals(new String("Did not exist")));
 	}
-	
-   @LocalData
-   @Test
-   public void testGetDetailedDifferentBuildComparison1() {
-        String b2 = new String("2");
-        String b4 = new String("4");
-    
-        List<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedDifferentBuildComparison(b2, b4);
-        assertEquals(2, myTestInfos.size());
-        Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(myTestInfos.size()-1);
-        assertTrue(!lastTuple.first.getStatus().equals(lastTuple.second.getStatus()));
-    }
-   
-   @LocalData
-   @Test
-   public void testGetDetailedDifferentBuildComparison2() {
-        String b3 = new String("3");
-        String b5 = new String("5");
-    
-        List<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedDifferentBuildComparison(b3, b5);
-        assertEquals(4, myTestInfos.size());
-        Pair<TestInfo, TestInfo> firstTuple = myTestInfos.get(0);
-        assertTrue(firstTuple.first.getStatus().equals(new String("Passed")));
-        assertTrue(firstTuple.second.getStatus().equals(new String("Failed")));
-        assertTrue(firstTuple.first.getFullName().equals(new String("pkg.AppTest.testApp2")));
-    }
+
+	@LocalData
+	@Test
+	public void testGetDetailedDifferentBuildComparison1() {
+		String b2 = new String("2");
+		String b4 = new String("4");
+
+		List<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedDifferentBuildComparison(b2, b4);
+		assertEquals(2, myTestInfos.size());
+		Pair<TestInfo, TestInfo> lastTuple = myTestInfos.get(myTestInfos.size() - 1);
+		assertTrue(!lastTuple.first.getStatus().equals(lastTuple.second.getStatus()));
+	}
+
+	@LocalData
+	@Test
+	public void testGetDetailedDifferentBuildComparison2() {
+		String b3 = new String("3");
+		String b5 = new String("5");
+
+		List<Pair<TestInfo, TestInfo>> myTestInfos = testBuddyAction.getDetailedDifferentBuildComparison(b3, b5);
+		assertEquals(4, myTestInfos.size());
+		Pair<TestInfo, TestInfo> firstTuple = myTestInfos.get(0);
+		assertTrue(firstTuple.first.getStatus().equals(new String("Passed")));
+		assertTrue(firstTuple.second.getStatus().equals(new String("Failed")));
+		assertTrue(firstTuple.first.getFullName().equals(new String("pkg.AppTest.testApp2")));
+	}
 }

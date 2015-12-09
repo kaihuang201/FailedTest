@@ -346,28 +346,29 @@ public class TestBuddyAction extends Actionable implements Action {
 
 		return getChangedTests(buildOne, buildTwo, "Passed", "Failed");
 	}
-	
-	   /**
-     * This method exhaustively returns the state of all tests in both builds.
-     * 
-     * @param buildNumber1
-     * @param buildNumber2
-     * @return Array List of TestInfo Tuples which are different
-     */
-    @SuppressWarnings("rawtypes")
-    @JavaScriptMethod
-    public List<Pair<TestInfo, TestInfo>> getDetailedDifferentBuildComparison(String buildNumber1, String buildNumber2) {
-        int build1 = Integer.parseInt(buildNumber1);
-        int build2 = Integer.parseInt(buildNumber2);
-        AbstractBuild buildOne = project.getBuildByNumber(build1);
-        AbstractBuild buildTwo = project.getBuildByNumber(build2);
 
-        ArrayList<Pair<CaseResult, CaseResult>> myDifferences = TestBuddyHelper.matchTestsBetweenBuilds(buildOne,
-                buildTwo);
-        ArrayList<Pair<TestInfo, TestInfo>> allTestInfos = (ArrayList<Pair<TestInfo, TestInfo>>) convertCaseResultsToTestInfos(
-                myDifferences, build1, build2);
-        return getOnlyDifferentTestInfos(allTestInfos);
-    }
+	/**
+	 * This method exhaustively returns the state of all tests in both builds.
+	 * 
+	 * @param buildNumber1
+	 * @param buildNumber2
+	 * @return Array List of TestInfo Tuples which are different
+	 */
+	@SuppressWarnings("rawtypes")
+	@JavaScriptMethod
+	public List<Pair<TestInfo, TestInfo>> getDetailedDifferentBuildComparison(String buildNumber1,
+			String buildNumber2) {
+		int build1 = Integer.parseInt(buildNumber1);
+		int build2 = Integer.parseInt(buildNumber2);
+		AbstractBuild buildOne = project.getBuildByNumber(build1);
+		AbstractBuild buildTwo = project.getBuildByNumber(build2);
+
+		ArrayList<Pair<CaseResult, CaseResult>> myDifferences = TestBuddyHelper.matchTestsBetweenBuilds(buildOne,
+				buildTwo);
+		ArrayList<Pair<TestInfo, TestInfo>> allTestInfos = (ArrayList<Pair<TestInfo, TestInfo>>) convertCaseResultsToTestInfos(
+				myDifferences, build1, build2);
+		return getOnlyDifferentTestInfos(allTestInfos);
+	}
 
 	/**
 	 * Returns a list of test differences between two builds.
@@ -439,25 +440,24 @@ public class TestBuddyAction extends Actionable implements Action {
 		return tests;
 	}
 
-	
-	 /**
-     * This method returns tuples which contain different test results 
-     * 
-     * @param allTestPairs
-     * @return a filtered list of TestInfo Tuples
-     */
-	public List<Pair<TestInfo, TestInfo>> getOnlyDifferentTestInfos (List<Pair<TestInfo, TestInfo>> allTestPairs) {
-	    List<Pair<TestInfo, TestInfo>> myFilteredList = new ArrayList<Pair<TestInfo, TestInfo>>(); 
-	    for (int i=0; i<allTestPairs.size(); i++) {
-	        Pair<TestInfo,TestInfo> tmp = allTestPairs.get(i);
-	        
-	        if( !tmp.first.getStatus().equals(tmp.second.getStatus()) && tmp.first.getFullName().equals(tmp.second.getFullName()) )
-	                myFilteredList.add(tmp);
-	    }
-	    return myFilteredList;
+	/**
+	 * This method returns tuples which contain different test results
+	 * 
+	 * @param allTestPairs
+	 * @return a filtered list of TestInfo Tuples
+	 */
+	public List<Pair<TestInfo, TestInfo>> getOnlyDifferentTestInfos(List<Pair<TestInfo, TestInfo>> allTestPairs) {
+		List<Pair<TestInfo, TestInfo>> myFilteredList = new ArrayList<Pair<TestInfo, TestInfo>>();
+		for (int i = 0; i < allTestPairs.size(); i++) {
+			Pair<TestInfo, TestInfo> tmp = allTestPairs.get(i);
+
+			if (!tmp.first.getStatus().equals(tmp.second.getStatus())
+					&& tmp.first.getFullName().equals(tmp.second.getFullName()))
+				myFilteredList.add(tmp);
+		}
+		return myFilteredList;
 	}
-	
-	
+
 	/**
 	 * This method is used by both convertCaseResultsToTestInfo methods to
 	 * perform the actual conversion.
