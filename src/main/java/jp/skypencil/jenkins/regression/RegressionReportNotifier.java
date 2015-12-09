@@ -80,11 +80,11 @@ public final class RegressionReportNotifier extends Notifier {
 	};
 
 	@DataBoundConstructor
-	public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean attachLogs,
+	public RegressionReportNotifier(String recipients, boolean sendToCulprits, boolean attachLog,
 			boolean whenRegression, boolean whenProgression, boolean whenNewFailed, boolean whenNewPassed) {
 		this.recipients = recipients;
 		this.sendToCulprits = sendToCulprits;
-		this.attachLog = attachLogs;
+		this.attachLog = attachLog;
 		this.whenRegression = whenRegression;
 		this.whenProgression = whenProgression;
 		this.whenNewFailed = whenNewFailed;
