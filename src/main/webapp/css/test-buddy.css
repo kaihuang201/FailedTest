@@ -1,6 +1,7 @@
 .tb-navbar {
 	margin-bottom: 20px;
 }
+
 .tb-nav {
 	display: inline-block;
 	padding: 0 20px;
@@ -8,6 +9,7 @@
 	text-decoration: none;
 	font-size: 1.1em;
 }
+
 .tb-nav.first {
 	padding-left: 0;
 	border-left: none;
@@ -20,17 +22,21 @@
 .tb-filters {
 	margin-bottom: 10px;
 }
+
 .tb-filter {
 	display: inline-block;
 	padding-right: 20px;
 	font-weight: bold;
 }
+
 .tb-filter input[type=radio] {
 	margin-left: 15px;
 }
+
 .tb-filter input[type=radio].first {
 	margin-left: 3px;
 }
+
 .tb-filter label {
 	font-weight: normal;
 }
